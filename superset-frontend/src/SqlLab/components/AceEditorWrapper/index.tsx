@@ -154,12 +154,7 @@ const AceEditorWrapper = ({
 
     editor.selection.on('changeCursor', () => {
       const cursor = editor.getCursorPosition();
-      const { row, column } = cursorPosition;
-      // Prevent a maximum update depth exceeded error
-      // by skipping repeated updates to the same cursor position
-      if (cursor.row !== row && cursor.column !== column) {
-        onCursorPositionChange(cursor);
-      }
+      onCursorPositionChange(cursor);
     });
 
     const { row, column } = cursorPosition;
