@@ -94,6 +94,7 @@ import {
   transformTimeseriesAnnotation,
 } from './transformers';
 import {
+  OpacityEnum,
   StackControlsValue,
   TIMEGRAIN_TO_TIMESTAMP,
   TIMESERIES_CONSTANTS,
@@ -166,6 +167,7 @@ export default function transformProps(
     sortSeriesAscending,
     timeGrainSqla,
     timeCompare,
+    timeShiftColor,
     stack,
     tooltipTimeFormat,
     tooltipSortByMetric,
@@ -276,7 +278,7 @@ export default function transformProps(
   const array = ensureIsArray(chartProps.rawFormData?.time_compare);
   const inverted = invert(verboseMap);
 
-  const offsetLineWidths = {};
+  const offsetLineWidths: { [key: string]: number } = {};
 
   rawSeries.forEach(entry => {
     const derivedSeries = isDerivedSeries(entry, chartProps.rawFormData);
@@ -291,6 +293,7 @@ export default function transformProps(
       }
       lineStyle.type = 'dashed';
       lineStyle.width = offsetLineWidths[offset];
+      lineStyle.opacity = OpacityEnum.DerivedSeries;
     }
 
     const entryName = String(entry.name || '');
@@ -329,6 +332,7 @@ export default function transformProps(
         isHorizontal,
         lineStyle,
         timeCompare: array,
+        timeShiftColor,
       },
     );
     if (transformedSeries) {
