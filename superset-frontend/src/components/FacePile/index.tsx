@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import type Owner from 'src/types/Owner';
 import {
   getCategoricalSchemeRegistry,
   styled,
