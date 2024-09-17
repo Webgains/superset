@@ -576,7 +576,7 @@ class Header extends PureComponent {
                           title={t('Undo the action')}
                         >
                           <StyledUndoRedoButton
-                            type="text"
+                            buttonStyle="link"
                             disabled={undoLength < 1}
                             onClick={undoLength && onUndo}
                           >
@@ -596,7 +596,7 @@ class Header extends PureComponent {
                           title={t('Redo the action')}
                         >
                           <StyledUndoRedoButton
-                            type="text"
+                            buttonStyle="link"
                             disabled={redoLength < 1}
                             onClick={redoLength && onRedo}
                           >
