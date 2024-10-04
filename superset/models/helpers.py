@@ -63,7 +63,6 @@ from superset.exceptions import (
     ColumnNotFoundException,
     QueryClauseValidationException,
     QueryObjectValidationError,
-    SupersetParseError,
     SupersetSecurityException,
 )
 from superset.extensions import feature_flag_manager
