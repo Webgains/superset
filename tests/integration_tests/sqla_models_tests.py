@@ -85,12 +85,12 @@ class TestDatabaseModel(SupersetTestCase):
         database = Database(database_name="druid_db", sqlalchemy_uri="druid://db")
         tbl = SqlaTable(table_name="druid_tbl", database=database)
         col = TableColumn(column_name="__time", type="INTEGER", table=tbl)
-        self.assertEqual(col.is_dttm, None)
+        assert col.is_dttm is None
         DruidEngineSpec.alter_new_orm_column(col)
-        self.assertEqual(col.is_dttm, True)
+        assert col.is_dttm is True
 
         col = TableColumn(column_name="__not_time", type="INTEGER", table=tbl)
-        self.assertEqual(col.is_temporal, False)
+        assert col.is_temporal is False
 
     def test_temporal_varchar(self):
         """Ensure a column with is_dttm set to true evaluates to is_temporal == True"""
@@ -127,13 +127,81 @@ class TestDatabaseModel(SupersetTestCase):
         tbl = SqlaTable(table_name="col_type_test_tbl", database=get_example_database())
         for str_type, db_col_type in test_cases.items():
             col = TableColumn(column_name="foo", type=str_type, table=tbl)
-            self.assertEqual(col.is_temporal, db_col_type == GenericDataType.TEMPORAL)
-            self.assertEqual(col.is_numeric, db_col_type == GenericDataType.NUMERIC)
-            self.assertEqual(col.is_string, db_col_type == GenericDataType.STRING)
+            assert col.is_temporal == (db_col_type == GenericDataType.TEMPORAL)
+            assert col.is_numeric == (db_col_type == GenericDataType.NUMERIC)
+            assert col.is_string == (db_col_type == GenericDataType.STRING)
 
         for str_type, db_col_type in test_cases.items():
             col = TableColumn(column_name="foo", type=str_type, table=tbl, is_dttm=True)
-            self.assertTrue(col.is_temporal)
+            assert col.is_temporal
+
+    @patch("superset.jinja_context.get_user_id", return_value=1)
+    @patch("superset.jinja_context.get_username", return_value="abc")
+    @patch("superset.jinja_context.get_user_email", return_value="abc@test.com")
+    def test_extra_cache_keys(self, mock_user_email, mock_username, mock_user_id):
+        base_query_obj = {
+            "granularity": None,
+            "from_dttm": None,
+            "to_dttm": None,
+            "groupby": ["id", "username", "email"],
+            "metrics": [],
+            "is_timeseries": False,
+            "filter": [],
+        }
+
+        # Table with Jinja callable.
+        table1 = SqlaTable(
+            table_name="test_has_extra_cache_keys_table",
+            sql="""
+            SELECT
+              '{{ current_user_id() }}' as id,
+              '{{ current_username() }}' as username,
+              '{{ current_user_email() }}' as email
+            """,
+            database=get_example_database(),
+        )
+
+        query_obj = dict(**base_query_obj, extras={})
+        extra_cache_keys = table1.get_extra_cache_keys(query_obj)
+        assert table1.has_extra_cache_key_calls(query_obj)
+        assert set(extra_cache_keys) == {1, "abc", "abc@test.com"}
+
+        # Table with Jinja callable disabled.
+        table2 = SqlaTable(
+            table_name="test_has_extra_cache_keys_disabled_table",
+            sql="""
+            SELECT
+              '{{ current_user_id(False) }}' as id,
+              '{{ current_username(False) }}' as username,
+              '{{ current_user_email(False) }}' as email,
+            """,
+            database=get_example_database(),
+        )
+        query_obj = dict(**base_query_obj, extras={})
+        extra_cache_keys = table2.get_extra_cache_keys(query_obj)
+        assert table2.has_extra_cache_key_calls(query_obj)
+        self.assertListEqual(extra_cache_keys, [])  # noqa: PT009
+
+        # Table with no Jinja callable.
+        query = "SELECT 'abc' as user"
+        table3 = SqlaTable(
+            table_name="test_has_no_extra_cache_keys_table",
+            sql=query,
+            database=get_example_database(),
+        )
+
+        query_obj = dict(**base_query_obj, extras={"where": "(user != 'abc')"})
+        extra_cache_keys = table3.get_extra_cache_keys(query_obj)
+        assert not table3.has_extra_cache_key_calls(query_obj)
+        self.assertListEqual(extra_cache_keys, [])  # noqa: PT009
+
+        # With Jinja callable in SQL expression.
+        query_obj = dict(
+            **base_query_obj, extras={"where": "(user != '{{ current_username() }}')"}
+        )
+        extra_cache_keys = table3.get_extra_cache_keys(query_obj)
+        assert table3.has_extra_cache_key_calls(query_obj)
+        assert extra_cache_keys == ["abc"]
 
     @patch("superset.jinja_context.get_username", return_value="abc")
     def test_jinja_metrics_and_calc_columns(self, mock_username):
@@ -327,11 +395,9 @@ class TestDatabaseModel(SupersetTestCase):
             sqla_query = table.get_sqla_query(**query_obj)
             sql = table.database.compile_sqla_query(sqla_query.sqla_query)
             if isinstance(filter_.expected, list):
-                self.assertTrue(
-                    any([candidate in sql for candidate in filter_.expected])
-                )
+                assert any([candidate in sql for candidate in filter_.expected])
             else:
-                self.assertIn(filter_.expected, sql)
+                assert filter_.expected in sql
 
     @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
     def test_boolean_type_where_operators(self):
@@ -368,7 +434,7 @@ class TestDatabaseModel(SupersetTestCase):
         # https://github.com/sqlalchemy/sqlalchemy/blob/master/lib/sqlalchemy/dialects/mysql/base.py
         if not dialect.supports_native_boolean and dialect.name != "mysql":
             operand = "(1, 0)"
-        self.assertIn(f"IN {operand}", sql)
+        assert f"IN {operand}" in sql
 
     def test_incorrect_jinja_syntax_raises_correct_exception(self):
         query_obj = {
