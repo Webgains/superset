@@ -28,6 +28,8 @@ from typing import Any, Generic, TypeVar
 import sqlglot
 import sqlparse
 from deprecation import deprecated
+import sqlparse
+from deprecation import deprecated
 from sqlglot import exp
 from sqlglot.dialects.dialect import Dialect, Dialects
 from sqlglot.errors import ParseError
@@ -140,6 +142,9 @@ class BaseSQLStatement(Generic[InternalRepresentation]):
     """
     Base class for SQL statements.
 
+    The class should be instantiated with a string representation of the script and, for
+    efficiency reasons, optionally with a pre-parsed AST. This is useful with
+    `sqlglot.parse`, which will split a script in multiple already parsed statements.
     The class should be instantiated with a string representation of the script and, for
     efficiency reasons, optionally with a pre-parsed AST. This is useful with
     `sqlglot.parse`, which will split a script in multiple already parsed statements.
@@ -276,7 +281,7 @@ class SQLStatement(BaseSQLStatement[exp.Expression]):
         script: str,
         engine: str,
     ) -> list[SQLStatement]:
-        if dialect := SQLGLOT_DIALECTS.get(engine):
+        if engine in SQLGLOT_DIALECTS:
             try:
                 return [
                     cls(ast.sql(), engine, ast)
@@ -297,7 +302,7 @@ class SQLStatement(BaseSQLStatement[exp.Expression]):
         remainder = script
 
         try:
-            tokens = sqlglot.tokenize(script, dialect)
+            tokens = sqlglot.tokenize(script)
         except sqlglot.errors.TokenError as ex:
             raise SupersetParseError(
                 script,
@@ -386,6 +391,34 @@ class SQLStatement(BaseSQLStatement[exp.Expression]):
         """
         Pretty-format the SQL statement.
         """
+        if self._dialect:
+            try:
+                write = Dialect.get_or_raise(self._dialect)
+                return write.generate(
+                    self._parsed,
+                    copy=False,
+                    comments=comments,
+                    pretty=True,
+                )
+            except ValueError:
+                pass
+
+        return self._fallback_formatting()
+
+    @deprecated(deprecated_in="4.0", removed_in="5.0")
+    def _fallback_formatting(self) -> str:
+        """
+        Format SQL without a specific dialect.
+
+        Reformatting SQL using the generic sqlglot dialect is known to break queries.
+        For example, it will change `foo NOT IN (1, 2)` to `NOT foo IN (1,2)`, which
+        breaks the query for Firebolt. To avoid this, we use sqlparse for formatting
+        when the dialect is not known.
+
+        In 5.0 we should remove `sqlparse`, and the method should return the query
+        unmodified.
+        """
+        return sqlparse.format(self._sql, reindent=True, keyword_case="upper")
         if self._dialect:
             try:
                 write = Dialect.get_or_raise(self._dialect)
@@ -522,6 +555,9 @@ class KustoKQLStatement(BaseSQLStatement[str]):
         return [
             cls(statement, engine, statement.strip()) for statement in split_kql(script)
         ]
+        return [
+            cls(statement, engine, statement.strip()) for statement in split_kql(script)
+        ]
 
     @classmethod
     def _parse_statement(
@@ -563,6 +599,7 @@ class KustoKQLStatement(BaseSQLStatement[str]):
         """
         Pretty-format the SQL statement.
         """
+        return self._sql.strip()
         return self._sql.strip()
 
     def get_settings(self) -> dict[str, str | bool]:
@@ -613,6 +650,9 @@ class SQLScript:
     def format(self, comments: bool = True) -> str:
         """
         Pretty-format the SQL script.
+
+        Note that even though KQL is very different from SQL, multiple statements are
+        still separated by semi-colons.
 
         Note that even though KQL is very different from SQL, multiple statements are
         still separated by semi-colons.
