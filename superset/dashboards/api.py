@@ -1131,9 +1131,11 @@ class DashboardRestApi(BaseSupersetModelRestApi):
             logger.info("Triggering screenshot ASYNC")
             cache_dashboard_screenshot.delay(
                 username=get_current_user(),
-                guest_token=g.user.guest_token
-                if get_current_user() and isinstance(g.user, GuestUser)
-                else None,
+                guest_token=(
+                    g.user.guest_token
+                    if get_current_user() and isinstance(g.user, GuestUser)
+                    else None
+                ),
                 dashboard_id=dashboard.id,
                 dashboard_url=dashboard_url,
                 cache_key=cache_key,
