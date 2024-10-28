@@ -26,12 +26,26 @@ FROM --platform=${BUILDPLATFORM} node:18-bullseye-slim AS superset-node
 
 ARG NPM_BUILD_CMD="build"
 
+# Include translations in the final build. The default supports en only to
+# reduce complexity and weight for those only using en
+ARG BUILD_TRANSLATIONS="true"
+
+# Used by docker-compose to skip the frontend build,
+# in dev we mount the repo and build the frontend inside docker
+ARG DEV_MODE="false"
+
+# Include headless browsers? Allows for alerts, reports & thumbnails, but bloats the images
+ARG INCLUDE_CHROMIUM="true"
+ARG INCLUDE_FIREFOX="false"
+
 # Somehow we need python3 + build-essential on this side of the house to install node-gyp
 RUN apt-get update -qq \
     && apt-get install \
         -yqq --no-install-recommends \
         build-essential \
-        python3
+        python3 \
+        zstd \
+        jq
 
 ENV BUILD_CMD=${NPM_BUILD_CMD} \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true

@@ -248,10 +248,8 @@ class Chart extends PureComponent {
     );
   }
 
-  renderSpinner(databaseName) {
-    const message = databaseName
-      ? t('Waiting on %s', databaseName)
-      : t('Waiting on database...');
+  renderSpinner() {
+    const message = t('Loading...');
 
     return (
       <LoadingDiv>
