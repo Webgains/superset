@@ -46,11 +46,21 @@ RUN --mount=type=bind,target=./package.json,src=./superset-frontend/package.json
     npm ci
 
 # Runs the webpack build process
-COPY superset-frontend /app/superset-frontend
-
+COPY --chown=superset:superset superset-frontend /app/superset-frontend
 # This copies the .po files needed for translation
 RUN mkdir -p /app/superset/translations
 COPY superset/translations /app/superset/translations
+
+RUN mkdir -p /app/locales
+COPY locales /app/locales
+
+RUN if [ "$DEV_MODE" = "false" ]; then \
+        BUILD_TRANSLATIONS=$BUILD_TRANSLATIONS npm run ${BUILD_CMD}; \
+    else \
+        echo "Skipping 'npm run ${BUILD_CMD}' in dev mode"; \
+    fi
+
+
 # Compiles .json files from the .po files, then deletes the .po files
 RUN npm run build-translation
 RUN rm /app/superset/translations/*/LC_MESSAGES/*.po
