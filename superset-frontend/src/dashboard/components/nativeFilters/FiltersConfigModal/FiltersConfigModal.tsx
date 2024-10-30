@@ -297,7 +297,6 @@ function FiltersConfigModal({
     setRemovedFilters,
     setOrderedFilters,
     setSaveAlertVisible,
-    filterChanges,
     filterId => {
       setFilterChanges(prev => ({
         ...prev,
