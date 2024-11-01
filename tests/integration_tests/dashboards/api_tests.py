@@ -3180,3 +3180,20 @@ class TestDashboardApi(ApiOwnersTestCaseMixin, InsertChartMixin, SupersetTestCas
 
         response = self._get_screenshot(dashboard.id, cache_key, "invalid")
         assert response.status_code == 404
+
+    @pytest.mark.usefixtures("create_dashboard_with_tag")
+    @patch("superset.dashboards.api.is_feature_enabled")
+    def test_cache_dashboard_screenshot_feature_disabled(self, is_feature_enabled):
+        is_feature_enabled.return_value = False
+        self.login(ADMIN_USERNAME)
+
+        dashboard = (
+            db.session.query(Dashboard)
+            .filter(Dashboard.dashboard_title == "dash with tag")
+            .first()
+        )
+
+        assert dashboard is not None
+
+        response = self._cache_screenshot(dashboard.id)
+        assert response.status_code == 404
