@@ -253,7 +253,7 @@ const FilterControl = ({
   const label = useMemo(
     () => (
       <FilterControlTitleBox>
-        <FilterControlTitle data-test="filter-control-name">
+        <FilterControlTitle id={`filter-name-${filter.id}`} data-test="filter-control-name">
           {t(name)}
         </FilterControlTitle>
         {isRequired && <RequiredFieldIndicator />}
@@ -315,7 +315,7 @@ const FilterControl = ({
           <div>
             <FormItem
               label={label}
-              aria-label={name}
+              htmlFor={filter.id}
               required={filter?.controlValues?.enableEmptyFilter}
               validateStatus={validateStatus}
             >
