@@ -473,11 +473,11 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
       observer.observe(headerRef.current);
     }
 
-    window.addEventListener('click', fireWindowClickToParent);
+    document.addEventListener('click', fireWindowClickToParent);
 
     return () => {
       observer?.disconnect();
-      window.removeEventListener('click', fireWindowClickToParent);
+      document.removeEventListener('click', fireWindowClickToParent);
     };
   }, []);
 
