@@ -16,24 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { GenericDataType } from '@superset-ui/core';
-
-export const INPUT_HEIGHT = 32;
-
-export const INPUT_WIDTH = 270;
-
-export const TIME_FILTER_INPUT_WIDTH = 350;
-
-export const FILTER_SUPPORTED_TYPES = {
-  custom_filter_time: [GenericDataType.Temporal],
-  filter_time: [GenericDataType.Temporal],
-  filter_timegrain: [GenericDataType.Temporal],
-  filter_timecolumn: [GenericDataType.Temporal],
-  filter_select: [
-    GenericDataType.Boolean,
-    GenericDataType.String,
-    GenericDataType.Numeric,
-    GenericDataType.Temporal,
-  ],
-  filter_range: [GenericDataType.Numeric],
+export type SelectOptionType = {
+  value: string;
+  label: string;
 };
+
+export const CurrentDay = 'Current day';
+export const CurrentWeek = 'Current week';
+export const CurrentMonth = 'Current month';
+
+export type CustomFrameComponentProps = {
+  onChange: (timeRange: string) => void;
+  value: string;
+  currentSelector: string;
+  setCurrentSelector: (currentSelector: string) => void;
+}
+
+export interface DateFilterControlProps {
+  name: string;
+  onChange: (timeRange: string) => void;
+  value?: string;
+  onOpenPopover?: () => void;
+  onClosePopover?: () => void;
+  overlayStyle?: 'Modal' | 'Popover';
+  isOverflowingFilterBar?: boolean;
+}

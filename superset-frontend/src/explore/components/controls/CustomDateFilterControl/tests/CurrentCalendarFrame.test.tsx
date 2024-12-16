@@ -16,24 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { GenericDataType } from '@superset-ui/core';
+import { render } from '@testing-library/react';
+import '@testing-library/jest-dom'; // For advanced DOM assertions
+import { CurrentCalendarFrame } from '../components/CurrentCalendarFrame';
+import { CurrentWeek } from '../types';
 
-export const INPUT_HEIGHT = 32;
+const mockOnChange = jest.fn();
 
-export const INPUT_WIDTH = 270;
+test('calls onChange(CurrentWeek) when value is invalid', () => {
+  render(<CurrentCalendarFrame onChange={mockOnChange} value="InvalidValue" />);
+  expect(mockOnChange).toHaveBeenCalledWith(CurrentWeek);
+});
 
-export const TIME_FILTER_INPUT_WIDTH = 350;
-
-export const FILTER_SUPPORTED_TYPES = {
-  custom_filter_time: [GenericDataType.Temporal],
-  filter_time: [GenericDataType.Temporal],
-  filter_timegrain: [GenericDataType.Temporal],
-  filter_timecolumn: [GenericDataType.Temporal],
-  filter_select: [
-    GenericDataType.Boolean,
-    GenericDataType.String,
-    GenericDataType.Numeric,
-    GenericDataType.Temporal,
-  ],
-  filter_range: [GenericDataType.Numeric],
-};
+test('returns null if value is not a valid CurrentRangeType', () => {
+  const { container } = render(
+    <CurrentCalendarFrame onChange={mockOnChange} value="InvalidValue" />,
+  );
+  expect(container.childNodes.length).toBe(0);
+});
