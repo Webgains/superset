@@ -324,6 +324,7 @@ const FILTERS_WITH_ADHOC_FILTERS = ['filter_select', 'filter_range'];
 const FILTER_TYPE_NAME_MAPPING = {
   [t('Select filter')]: t('Value'),
   [t('Range filter')]: t('Numerical range'),
+  [t('Custom Time filter')]: t('Custom Time range'),
   [t('Time filter')]: t('Time range'),
   [t('Time column')]: t('Time column'),
   [t('Time grain')]: t('Time grain'),
