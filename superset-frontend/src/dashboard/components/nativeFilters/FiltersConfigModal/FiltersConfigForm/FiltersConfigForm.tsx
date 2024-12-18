@@ -946,7 +946,7 @@ const FiltersConfigForm = (
           expandIconPosition="right"
           key={`native-filter-config-${filterId}`}
         >
-          {formFilter?.filterType !== 'filter_time' && (
+          {!['custom_filter_time', 'filter_time'].includes(formFilter?.filterType) && (
             <Collapse.Panel
               forceRender
               header={FilterPanels.configuration.name}
