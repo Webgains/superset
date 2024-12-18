@@ -16,24 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { GenericDataType } from '@superset-ui/core';
+import { Behavior, ChartMetadata, ChartPlugin, t } from '@superset-ui/core';
+import controlPanel from './controlPanel';
+import transformProps from './transformProps';
+import thumbnail from './images/thumbnail.png';
 
-export const INPUT_HEIGHT = 32;
+export default class TimeFilterPlugin extends ChartPlugin {
+  constructor() {
+    const metadata = new ChartMetadata({
+      name: t('Custom Time filter'),
+      description: t('Custom time filter plugin'),
+      behaviors: [Behavior.InteractiveChart, Behavior.NativeFilter],
+      thumbnail,
+      tags: [t('Experimental')],
+      datasourceCount: 0,
+    });
 
-export const INPUT_WIDTH = 270;
-
-export const TIME_FILTER_INPUT_WIDTH = 350;
-
-export const FILTER_SUPPORTED_TYPES = {
-  custom_filter_time: [GenericDataType.Temporal],
-  filter_time: [GenericDataType.Temporal],
-  filter_timegrain: [GenericDataType.Temporal],
-  filter_timecolumn: [GenericDataType.Temporal],
-  filter_select: [
-    GenericDataType.Boolean,
-    GenericDataType.String,
-    GenericDataType.Numeric,
-    GenericDataType.Temporal,
-  ],
-  filter_range: [GenericDataType.Numeric],
-};
+    super({
+      controlPanel,
+      loadChart: () => import('./TimeFilterPlugin'),
+      metadata,
+      transformProps,
+    });
+  }
+}

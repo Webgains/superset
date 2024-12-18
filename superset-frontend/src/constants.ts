@@ -207,6 +207,7 @@ export enum FilterPlugins {
   Select = 'filter_select',
   Range = 'filter_range',
   Time = 'filter_time',
+  CustomTime = 'custom_filter_time',
   TimeColumn = 'filter_timecolumn',
   TimeGrain = 'filter_timegrain',
 }
