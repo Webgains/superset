@@ -66,13 +66,9 @@ const createProps = (): HeaderDropdownProps => ({
   userCanCurate: false,
   lastModifiedTime: 0,
   isDropdownVisible: true,
-  setIsDropdownVisible: jest.fn(),
-  directPathToChild: [],
   manageEmbedded: jest.fn(),
   dataMask: {},
   logEvent: jest.fn(),
-  refreshLimit: 0,
-  refreshWarning: '',
 });
 
 const editModeOnProps = {

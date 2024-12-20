@@ -30,7 +30,6 @@ import {
   passwordField,
   portField,
   queryField,
-  projectIdfield,
   usernameField,
 } from './CommonParameters';
 import { OAuth2ClientField } from './OAuth2ClientField';
@@ -51,7 +50,6 @@ export const FormFieldOrder = [
   'http_path',
   'http_path_field',
   'database_name',
-  'project_id',
   'credentials_info',
   'service_account_info',
   'catalog',
@@ -91,5 +89,4 @@ export const FORM_FIELD_MAP = {
   role: validatedInputField,
   account: validatedInputField,
   ssh: SSHTunnelSwitchComponent,
-  project_id: projectIdfield,
 };

@@ -16,45 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 import sinon from 'sinon';
 
 import SliceAdder, {
   ChartList,
   DEFAULT_SORT_KEY,
-  SliceAdderProps,
 } from 'src/dashboard/components/SliceAdder';
 import { sliceEntitiesForDashboard as mockSliceEntities } from 'spec/fixtures/mockSliceEntities';
 import { styledShallow } from 'spec/helpers/theming';
 
-jest.mock(
-  'lodash/debounce',
-  () => (fn: { throttle: jest.Mock<any, any, any> }) => {
-    // eslint-disable-next-line no-param-reassign
-    fn.throttle = jest.fn();
-    return fn;
-  },
-);
+jest.mock('lodash/debounce', () => fn => {
+  // eslint-disable-next-line no-param-reassign
+  fn.throttle = jest.fn();
+  return fn;
+});
 
 describe('SliceAdder', () => {
-  const props: SliceAdderProps = {
-    slices: {
-      ...mockSliceEntities.slices,
-    },
+  const props = {
+    ...mockSliceEntities,
     fetchSlices: jest.fn(),
     updateSlices: jest.fn(),
     selectedSliceIds: [127, 128],
     userId: 1,
-    dashboardId: 0,
-    editMode: false,
-    errorMessage: '',
-    isLoading: false,
-    lastUpdated: 0,
   };
   const errorProps = {
     ...props,
     errorMessage: 'this is error',
   };
+
   describe('SliceAdder.sortByComparator', () => {
     it('should sort by timestamp descending', () => {
       const sortedTimestamps = Object.values(props.slices)
@@ -94,88 +84,72 @@ describe('SliceAdder', () => {
   });
 
   it('componentDidMount', () => {
-    const componentDidMountSpy = sinon.spy(
-      SliceAdder.prototype,
-      'componentDidMount',
-    );
-    const fetchSlicesSpy = sinon.spy(props, 'fetchSlices');
+    sinon.spy(SliceAdder.prototype, 'componentDidMount');
+    sinon.spy(props, 'fetchSlices');
+
     shallow(<SliceAdder {...props} />, {
       lifecycleExperimental: true,
     });
+    expect(SliceAdder.prototype.componentDidMount.calledOnce).toBe(true);
+    expect(props.fetchSlices.calledOnce).toBe(true);
 
-    expect(componentDidMountSpy.calledOnce).toBe(true);
-
-    expect(fetchSlicesSpy.calledOnce).toBe(true);
-
-    componentDidMountSpy.restore();
-    fetchSlicesSpy.restore();
+    SliceAdder.prototype.componentDidMount.restore();
+    props.fetchSlices.restore();
   });
 
   describe('UNSAFE_componentWillReceiveProps', () => {
-    let wrapper: ShallowWrapper;
-    let setStateSpy: sinon.SinonSpy;
-
+    let wrapper;
     beforeEach(() => {
       wrapper = shallow(<SliceAdder {...props} />);
       wrapper.setState({ filteredSlices: Object.values(props.slices) });
-      setStateSpy = sinon.spy(wrapper.instance() as SliceAdder, 'setState');
+      sinon.spy(wrapper.instance(), 'setState');
     });
     afterEach(() => {
-      setStateSpy.restore();
+      wrapper.instance().setState.restore();
     });
 
     it('fetch slices should update state', () => {
-      const instance = wrapper.instance() as SliceAdder;
-      instance.UNSAFE_componentWillReceiveProps({
+      wrapper.instance().UNSAFE_componentWillReceiveProps({
         ...props,
         lastUpdated: new Date().getTime(),
       });
-      expect(setStateSpy.calledOnce).toBe(true);
+      expect(wrapper.instance().setState.calledOnce).toBe(true);
 
-      const stateKeys = Object.keys(setStateSpy.lastCall.args[0]);
+      const stateKeys = Object.keys(
+        wrapper.instance().setState.lastCall.args[0],
+      );
       expect(stateKeys).toContain('filteredSlices');
     });
 
     it('select slices should update state', () => {
-      const instance = wrapper.instance() as SliceAdder;
-
-      instance.UNSAFE_componentWillReceiveProps({
+      wrapper.instance().UNSAFE_componentWillReceiveProps({
         ...props,
         selectedSliceIds: [127],
       });
+      expect(wrapper.instance().setState.calledOnce).toBe(true);
 
-      expect(setStateSpy.calledOnce).toBe(true);
-
-      const stateKeys = Object.keys(setStateSpy.lastCall.args[0]);
+      const stateKeys = Object.keys(
+        wrapper.instance().setState.lastCall.args[0],
+      );
       expect(stateKeys).toContain('selectedSliceIdsSet');
     });
   });
 
   describe('should rerun filter and sort', () => {
-    let wrapper: ShallowWrapper<SliceAdder>;
-    let spy: jest.Mock;
-
+    let wrapper;
+    let spy;
     beforeEach(() => {
-      spy = jest.fn();
-      const fetchSlicesProps: SliceAdderProps = {
-        ...props,
-        fetchSlices: spy,
-      };
-      wrapper = shallow(<SliceAdder {...fetchSlicesProps} />);
-      wrapper.setState({
-        filteredSlices: Object.values(fetchSlicesProps.slices),
-      });
+      spy = props.fetchSlices;
+      wrapper = shallow(<SliceAdder {...props} fetchSlices={spy} />);
+      wrapper.setState({ filteredSlices: Object.values(props.slices) });
     });
-
     afterEach(() => {
       spy.mockReset();
     });
 
     it('searchUpdated', () => {
       const newSearchTerm = 'new search term';
-
-      (wrapper.instance() as SliceAdder).handleChange(newSearchTerm);
-
+      wrapper.instance().handleChange(newSearchTerm);
       expect(spy).toHaveBeenCalled();
       expect(spy).toHaveBeenCalledWith(
         props.userId,
@@ -186,9 +160,7 @@ describe('SliceAdder', () => {
 
     it('handleSelect', () => {
       const newSortBy = 'viz_type';
-
-      (wrapper.instance() as SliceAdder).handleSelect(newSortBy);
-
+      wrapper.instance().handleSelect(newSortBy);
       expect(spy).toHaveBeenCalled();
       expect(spy).toHaveBeenCalledWith(props.userId, '', newSortBy);
     });

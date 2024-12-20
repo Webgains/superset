@@ -24,8 +24,8 @@ const defaultProps = {
   dashboardId: 1,
   isPublished: false,
   savePublished: jest.fn(),
-  userCanEdit: false,
-  userCanSave: false,
+  canEdit: false,
+  canSave: false,
 };
 
 test('renders with unpublished status and readonly permissions', async () => {
@@ -44,8 +44,8 @@ test('renders with unpublished status and write permissions', async () => {
   render(
     <PublishedStatus
       {...defaultProps}
-      userCanEdit
-      userCanSave
+      canEdit
+      canSave
       savePublished={savePublished}
     />,
   );
@@ -69,8 +69,8 @@ test('renders with published status and write permissions', async () => {
     <PublishedStatus
       {...defaultProps}
       isPublished
-      userCanEdit
-      userCanSave
+      canEdit
+      canSave
       savePublished={savePublished}
     />,
   );

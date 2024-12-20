@@ -116,6 +116,7 @@ from superset.superset_typing import (
 )
 from superset.utils import core as utils, json
 from superset.utils.backports import StrEnum
+from superset.utils.core import GenericDataType, MediumText
 
 config = app.config
 metadata = Model.metadata  # pylint: disable=no-member
@@ -476,7 +477,7 @@ class BaseDatasource(AuditMixinNullable, ImportExportMixin):  # pylint: disable=
         ]
 
         filtered_columns: list[Column] = []
-        column_types: set[utils.GenericDataType] = set()
+        column_types: set[GenericDataType] = set()
         for column_ in data["columns"]:
             generic_type = column_.get("type_generic")
             if generic_type is not None:
@@ -510,7 +511,7 @@ class BaseDatasource(AuditMixinNullable, ImportExportMixin):  # pylint: disable=
     def filter_values_handler(  # pylint: disable=too-many-arguments
         values: FilterValues | None,
         operator: str,
-        target_generic_type: utils.GenericDataType,
+        target_generic_type: GenericDataType,
         target_native_type: str | None = None,
         is_list_target: bool = False,
         db_engine_spec: builtins.type[BaseEngineSpec] | None = None,
@@ -828,10 +829,10 @@ class TableColumn(AuditMixinNullable, ImportExportMixin, CertificationMixin, Mod
     advanced_data_type = Column(String(255))
     groupby = Column(Boolean, default=True)
     filterable = Column(Boolean, default=True)
-    description = Column(utils.MediumText())
+    description = Column(MediumText())
     table_id = Column(Integer, ForeignKey("tables.id", ondelete="CASCADE"))
     is_dttm = Column(Boolean, default=False)
-    expression = Column(utils.MediumText())
+    expression = Column(MediumText())
     python_date_format = Column(String(255))
     extra = Column(Text)
 
@@ -891,21 +892,21 @@ class TableColumn(AuditMixinNullable, ImportExportMixin, CertificationMixin, Mod
         """
         Check if the column has a boolean datatype.
         """
-        return self.type_generic == utils.GenericDataType.BOOLEAN
+        return self.type_generic == GenericDataType.BOOLEAN
 
     @property
     def is_numeric(self) -> bool:
         """
         Check if the column has a numeric datatype.
         """
-        return self.type_generic == utils.GenericDataType.NUMERIC
+        return self.type_generic == GenericDataType.NUMERIC
 
     @property
     def is_string(self) -> bool:
         """
         Check if the column has a string datatype.
         """
-        return self.type_generic == utils.GenericDataType.STRING
+        return self.type_generic == GenericDataType.STRING
 
     @property
     def is_temporal(self) -> bool:
@@ -917,7 +918,7 @@ class TableColumn(AuditMixinNullable, ImportExportMixin, CertificationMixin, Mod
         """
         if self.is_dttm is not None:
             return self.is_dttm
-        return self.type_generic == utils.GenericDataType.TEMPORAL
+        return self.type_generic == GenericDataType.TEMPORAL
 
     @property
     def database(self) -> Database:
@@ -934,7 +935,7 @@ class TableColumn(AuditMixinNullable, ImportExportMixin, CertificationMixin, Mod
     @property
     def type_generic(self) -> utils.GenericDataType | None:
         if self.is_dttm:
-            return utils.GenericDataType.TEMPORAL
+            return GenericDataType.TEMPORAL
 
         return (
             column_spec.generic_type
@@ -1037,12 +1038,12 @@ class SqlMetric(AuditMixinNullable, ImportExportMixin, CertificationMixin, Model
     metric_name = Column(String(255), nullable=False)
     verbose_name = Column(String(1024))
     metric_type = Column(String(32))
-    description = Column(utils.MediumText())
+    description = Column(MediumText())
     d3format = Column(String(128))
     currency = Column(String(128))
     warning_text = Column(Text)
     table_id = Column(Integer, ForeignKey("tables.id", ondelete="CASCADE"))
-    expression = Column(utils.MediumText(), nullable=False)
+    expression = Column(MediumText(), nullable=False)
     extra = Column(Text)
 
     table: Mapped[SqlaTable] = relationship(
@@ -1184,7 +1185,7 @@ class SqlaTable(
     )
     schema = Column(String(255))
     catalog = Column(String(256), nullable=True, default=None)
-    sql = Column(utils.MediumText())
+    sql = Column(MediumText())
     is_sqllab_view = Column(Boolean, default=False)
     template_params = Column(Text)
     extra = Column(Text)
@@ -1979,26 +1980,6 @@ class SqlaTable(
             templatable_statements.append(extras["where"])
         if "having" in extras:
             templatable_statements.append(extras["having"])
-        if columns := query_obj.get("columns"):
-            calculated_columns: dict[str, Any] = {
-                c.column_name: c.expression for c in self.columns if c.expression
-            }
-            for column_ in columns:
-                if utils.is_adhoc_column(column_):
-                    templatable_statements.append(column_["sqlExpression"])
-                elif isinstance(column_, str) and column_ in calculated_columns:
-                    templatable_statements.append(calculated_columns[column_])
-        if metrics := query_obj.get("metrics"):
-            metrics_by_name: dict[str, Any] = {
-                m.metric_name: m.expression for m in self.metrics
-            }
-            for metric in metrics:
-                if utils.is_adhoc_metric(metric) and (
-                    sql := metric.get("sqlExpression")
-                ):
-                    templatable_statements.append(sql)
-                elif isinstance(metric, str) and metric in metrics_by_name:
-                    templatable_statements.append(metrics_by_name[metric])
         if self.is_rls_supported:
             templatable_statements += [
                 f.clause for f in security_manager.get_rls_filters(self)
@@ -2140,4 +2121,4 @@ class RowLevelSecurityFilter(Model, AuditMixinNullable):
         secondary=RLSFilterTables,
         backref="row_level_security_filters",
     )
-    clause = Column(utils.MediumText(), nullable=False)
+    clause = Column(MediumText(), nullable=False)

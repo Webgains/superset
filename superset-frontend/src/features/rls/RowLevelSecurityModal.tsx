@@ -40,7 +40,7 @@ import { FilterType, RLSObject, RoleObject, TableObject } from './types';
 const noMargins = css`
   margin: 0;
 
-  .antd5-input {
+  .ant-input {
     margin: 0;
   }
 `;

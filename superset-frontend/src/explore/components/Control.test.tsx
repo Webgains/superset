@@ -76,9 +76,9 @@ test('call setControlValue if isVisible is false', async () => {
       default: false,
     }),
   );
-  expect(defaultProps.actions.setControlValue).not.toHaveBeenCalled();
+  expect(defaultProps.actions.setControlValue).not.toBeCalled();
   rerender(setup({ isVisible: false, default: false }));
   await waitFor(() =>
-    expect(defaultProps.actions.setControlValue).toHaveBeenCalled(),
+    expect(defaultProps.actions.setControlValue).toBeCalled(),
   );
 });

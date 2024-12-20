@@ -18,9 +18,9 @@
  */
 /* eslint-env browser */
 import { Component } from 'react';
+import PropTypes from 'prop-types';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList as List } from 'react-window';
-// @ts-ignore
 import { createFilter } from 'react-search-input';
 import { t, styled, css } from '@superset-ui/core';
 import { Input } from 'src/components/Input';
@@ -41,40 +41,31 @@ import {
   NEW_CHART_ID,
   NEW_COMPONENTS_SOURCE_ID,
 } from 'src/dashboard/util/constants';
+import { slicePropShape } from 'src/dashboard/util/propShapes';
 import { debounce, pickBy } from 'lodash';
 import Checkbox from 'src/components/Checkbox';
 import { InfoTooltipWithTrigger } from '@superset-ui/chart-controls';
-import { Dispatch } from 'redux';
-import { Slice } from 'src/dashboard/types';
 import AddSliceCard from './AddSliceCard';
 import AddSliceDragPreview from './dnd/AddSliceDragPreview';
 import DragDroppable from './dnd/DragDroppable';
 
-export type SliceAdderProps = {
-  fetchSlices: (
-    userId?: number,
-    filter_value?: string,
-    sortColumn?: string,
-  ) => Promise<void>;
-  updateSlices: (slices: {
-    [id: number]: Slice;
-  }) => (dispatch: Dispatch) => void;
-  isLoading: boolean;
-  slices: Record<number, Slice>;
-  lastUpdated: number;
-  errorMessage?: string;
-  userId: number;
-  selectedSliceIds?: number[];
-  editMode?: boolean;
-  dashboardId: number;
+const propTypes = {
+  fetchSlices: PropTypes.func.isRequired,
+  updateSlices: PropTypes.func.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  slices: PropTypes.objectOf(slicePropShape).isRequired,
+  lastUpdated: PropTypes.number.isRequired,
+  errorMessage: PropTypes.string,
+  userId: PropTypes.number.isRequired,
+  selectedSliceIds: PropTypes.arrayOf(PropTypes.number),
+  editMode: PropTypes.bool,
+  dashboardId: PropTypes.number,
 };
 
-type SliceAdderState = {
-  filteredSlices: Slice[];
-  searchTerm: string;
-  sortBy: keyof Slice;
-  selectedSliceIdsSet: Set<number>;
-  showOnlyMyCharts: boolean;
+const defaultProps = {
+  selectedSliceIds: [],
+  editMode: false,
+  errorMessage: '',
 };
 
 const KEYS_TO_FILTERS = ['slice_name', 'viz_type', 'datasource_name'];
@@ -101,7 +92,7 @@ const Controls = styled.div`
   `}
 `;
 
-const StyledSelect = styled(Select)<{ id?: string }>`
+const StyledSelect = styled(Select)`
   margin-left: ${({ theme }) => theme.gridUnit * 2}px;
   min-width: 150px;
 `;
@@ -133,33 +124,22 @@ export const ChartList = styled.div`
   min-height: 0;
 `;
 
-class SliceAdder extends Component<SliceAdderProps, SliceAdderState> {
-  private slicesRequest?: AbortController | Promise<void>;
-
-  static sortByComparator(attr: keyof Slice) {
+class SliceAdder extends Component {
+  static sortByComparator(attr) {
     const desc = attr === 'changed_on' ? -1 : 1;
 
-    return (a: Slice, b: Slice) => {
-      const aValue = a[attr] ?? Number.MIN_SAFE_INTEGER;
-      const bValue = b[attr] ?? Number.MIN_SAFE_INTEGER;
-
-      if (aValue < bValue) {
+    return (a, b) => {
+      if (a[attr] < b[attr]) {
         return -1 * desc;
       }
-      if (aValue > bValue) {
+      if (a[attr] > b[attr]) {
         return 1 * desc;
       }
       return 0;
     };
   }
 
-  static defaultProps = {
-    selectedSliceIds: [],
-    editMode: false,
-    errorMessage: '',
-  };
-
-  constructor(props: SliceAdderProps) {
+  constructor(props) {
     super(props);
     this.state = {
       filteredSlices: [],
@@ -183,15 +163,11 @@ class SliceAdder extends Component<SliceAdderProps, SliceAdderState> {
   }
 
   componentDidMount() {
-    this.slicesRequest = this.props.fetchSlices(
-      this.userIdForFetch(),
-      '',
-      this.state.sortBy,
-    );
+    this.slicesRequest = this.props.fetchSlices(this.userIdForFetch());
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: SliceAdderProps) {
-    const nextState: SliceAdderState = {} as SliceAdderState;
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    const nextState = {};
     if (nextProps.lastUpdated !== this.props.lastUpdated) {
       nextState.filteredSlices = this.getFilteredSortedSlices(
         nextProps.slices,
@@ -212,27 +188,22 @@ class SliceAdder extends Component<SliceAdderProps, SliceAdderState> {
 
   componentWillUnmount() {
     // Clears the redux store keeping only selected items
-    const selectedSlices = pickBy(this.props.slices, (value: Slice) =>
+    const selectedSlices = pickBy(this.props.slices, value =>
       this.state.selectedSliceIdsSet.has(value.slice_id),
     );
-
     this.props.updateSlices(selectedSlices);
-    if (this.slicesRequest instanceof AbortController) {
+    if (this.slicesRequest && this.slicesRequest.abort) {
       this.slicesRequest.abort();
     }
   }
 
-  getFilteredSortedSlices(
-    slices: SliceAdderProps['slices'],
-    searchTerm: string,
-    sortBy: keyof Slice,
-    showOnlyMyCharts: boolean,
-  ) {
+  getFilteredSortedSlices(slices, searchTerm, sortBy, showOnlyMyCharts) {
     return Object.values(slices)
       .filter(slice =>
         showOnlyMyCharts
-          ? slice?.owners?.find(owner => owner.id === this.props.userId) ||
-            slice?.created_by?.id === this.props.userId
+          ? (slice.owners &&
+              slice.owners.find(owner => owner.id === this.props.userId)) ||
+            (slice.created_by && slice.created_by.id === this.props.userId)
           : true,
       )
       .filter(createFilter(searchTerm, KEYS_TO_FILTERS))
@@ -248,7 +219,7 @@ class SliceAdder extends Component<SliceAdderProps, SliceAdderState> {
     );
   }, 300);
 
-  searchUpdated(searchTerm: string) {
+  searchUpdated(searchTerm) {
     this.setState(prevState => ({
       searchTerm,
       filteredSlices: this.getFilteredSortedSlices(
@@ -260,7 +231,7 @@ class SliceAdder extends Component<SliceAdderProps, SliceAdderState> {
     }));
   }
 
-  handleSelect(sortBy: keyof Slice) {
+  handleSelect(sortBy) {
     this.setState(prevState => ({
       sortBy,
       filteredSlices: this.getFilteredSortedSlices(
@@ -277,10 +248,9 @@ class SliceAdder extends Component<SliceAdderProps, SliceAdderState> {
     );
   }
 
-  rowRenderer({ index, style }: { index: number; style: React.CSSProperties }) {
+  rowRenderer({ key, index, style }) {
     const { filteredSlices, selectedSliceIdsSet } = this.state;
     const cellData = filteredSlices[index];
-
     const isSelected = selectedSliceIdsSet.has(cellData.slice_id);
     const type = CHART_TYPE;
     const id = NEW_CHART_ID;
@@ -291,7 +261,7 @@ class SliceAdder extends Component<SliceAdderProps, SliceAdderState> {
     };
     return (
       <DragDroppable
-        key={cellData.slice_id}
+        key={key}
         component={{ type, id, meta }}
         parentComponent={{
           id: NEW_COMPONENTS_SOURCE_ID,
@@ -325,7 +295,7 @@ class SliceAdder extends Component<SliceAdderProps, SliceAdderState> {
     );
   }
 
-  onShowOnlyMyCharts(showOnlyMyCharts: boolean) {
+  onShowOnlyMyCharts(showOnlyMyCharts) {
     if (!showOnlyMyCharts) {
       this.slicesRequest = this.props.fetchSlices(
         undefined,
@@ -420,13 +390,15 @@ class SliceAdder extends Component<SliceAdderProps, SliceAdderState> {
         {!this.props.isLoading && this.state.filteredSlices.length > 0 && (
           <ChartList>
             <AutoSizer>
-              {({ height, width }: { height: number; width: number }) => (
+              {({ height, width }) => (
                 <List
                   width={width}
                   height={height}
                   itemCount={this.state.filteredSlices.length}
                   itemSize={DEFAULT_CELL_HEIGHT}
-                  itemKey={index => this.state.filteredSlices[index].slice_id}
+                  searchTerm={this.state.searchTerm}
+                  sortBy={this.state.sortBy}
+                  selectedSliceIds={this.props.selectedSliceIds}
                 >
                   {this.rowRenderer}
                 </List>
@@ -449,5 +421,8 @@ class SliceAdder extends Component<SliceAdderProps, SliceAdderState> {
     );
   }
 }
+
+SliceAdder.propTypes = propTypes;
+SliceAdder.defaultProps = defaultProps;
 
 export default SliceAdder;
