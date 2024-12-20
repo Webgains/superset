@@ -61,7 +61,9 @@ describe('useFilterFocusHighlightStyles', () => {
   });
 
   it('should return unfocused styles if chart is not in scope of focused native filter', async () => {
-    mockGetRelatedCharts.mockReturnValue([]);
+    mockGetRelatedCharts.mockReturnValue({
+      'test-filter': [],
+    });
     const store = createMockStore({
       nativeFilters: {
         focusedFilterId: 'test-filter',
@@ -81,7 +83,9 @@ describe('useFilterFocusHighlightStyles', () => {
   });
 
   it('should return unfocused styles if chart is not in scope of hovered native filter', async () => {
-    mockGetRelatedCharts.mockReturnValue([]);
+    mockGetRelatedCharts.mockReturnValue({
+      'test-filter': [],
+    });
     const store = createMockStore({
       nativeFilters: {
         hoveredFilterId: 'test-filter',
@@ -102,7 +106,9 @@ describe('useFilterFocusHighlightStyles', () => {
 
   it('should return focused styles if chart is in scope of focused native filter', async () => {
     const chartId = 18;
-    mockGetRelatedCharts.mockReturnValue([chartId]);
+    mockGetRelatedCharts.mockReturnValue({
+      testFilter: [chartId],
+    });
     const store = createMockStore({
       nativeFilters: {
         focusedFilterId: 'testFilter',
@@ -123,7 +129,9 @@ describe('useFilterFocusHighlightStyles', () => {
 
   it('should return focused styles if chart is in scope of hovered native filter', async () => {
     const chartId = 18;
-    mockGetRelatedCharts.mockReturnValue([chartId]);
+    mockGetRelatedCharts.mockReturnValue({
+      testFilter: [chartId],
+    });
     const store = createMockStore({
       nativeFilters: {
         hoveredFilterId: 'testFilter',
@@ -144,7 +152,9 @@ describe('useFilterFocusHighlightStyles', () => {
 
   it('should return unfocused styles if focusedFilterField is targeting a different chart', async () => {
     const chartId = 18;
-    mockGetRelatedCharts.mockReturnValue([]);
+    mockGetRelatedCharts.mockReturnValue({
+      testFilter: [],
+    });
     const store = createMockStore({
       dashboardState: {
         focusedFilterField: {
@@ -168,7 +178,9 @@ describe('useFilterFocusHighlightStyles', () => {
 
   it('should return focused styles if focusedFilterField chart equals our own', async () => {
     const chartId = 18;
-    mockGetRelatedCharts.mockReturnValue([chartId]);
+    mockGetRelatedCharts.mockReturnValue({
+      testFilter: [chartId],
+    });
     const store = createMockStore({
       dashboardState: {
         focusedFilterField: {

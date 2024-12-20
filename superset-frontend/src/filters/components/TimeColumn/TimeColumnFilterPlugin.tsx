@@ -111,7 +111,6 @@ export default function PluginFilterTimeColumn(
         {...formItemData}
       >
         <Select
-          name={formData.nativeFilterId}
           allowClear
           value={value}
           placeholder={placeholderText}

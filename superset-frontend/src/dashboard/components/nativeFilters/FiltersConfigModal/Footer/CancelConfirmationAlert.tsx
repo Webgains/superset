@@ -61,7 +61,6 @@ export function CancelConfirmationAlert({
             buttonSize="small"
             buttonStyle="primary"
             onClick={onConfirm}
-            data-test="native-filter-modal-confirm-cancel-button"
           >
             {t('Yes, cancel')}
           </Button>

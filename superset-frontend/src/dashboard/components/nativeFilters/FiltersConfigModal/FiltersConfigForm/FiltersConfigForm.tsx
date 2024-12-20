@@ -39,9 +39,8 @@ import {
   t,
   ClientErrorObject,
   getClientErrorObject,
-  SLOW_DEBOUNCE,
 } from '@superset-ui/core';
-import { debounce, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import {
   forwardRef,
   useCallback,
@@ -307,7 +306,6 @@ export interface FiltersConfigFormProps {
   filterToEdit?: Filter;
   removedFilters: Record<string, FilterRemoval>;
   restoreFilter: (filterId: string) => void;
-  onModifyFilter: (filterId: string) => void;
   form: FormInstance<NativeFiltersForm>;
   getAvailableFilters: (
     filterId: string,
@@ -348,7 +346,6 @@ const FiltersConfigForm = (
     restoreFilter,
     handleActiveFilterPanelChange,
     setErroredFilters,
-    onModifyFilter,
     validateDependencies,
     getDependencySuggestion,
     isActive,
@@ -374,12 +371,6 @@ const FiltersConfigForm = (
   const filters = form.getFieldValue('filters');
   const formValues = filters?.[filterId];
   const formFilter = formValues || undoFormValues || defaultFormFilter;
-
-  const handleModifyFilter = useCallback(() => {
-    if (onModifyFilter) {
-      onModifyFilter(filterId);
-    }
-  }, [onModifyFilter, filterId]);
 
   const dependencies: string[] =
     formFilter?.dependencies || filterToEdit?.cascadeParentIds || [];
@@ -421,28 +412,12 @@ const FiltersConfigForm = (
     filterToEdit?.targets[0]?.datasetId ??
     mostUsedDataset(loadedDatasets, charts);
 
-  const formChanged = useCallback(() => {
-    form.setFields([
-      {
-        name: 'changed',
-        value: true,
-      },
-    ]);
-    handleModifyFilter();
-  }, [form, handleModifyFilter]);
-
-  const debouncedFormChanged = useCallback(
-    debounce(formChanged, SLOW_DEBOUNCE),
-    [],
-  );
-
   const { controlItems = {}, mainControlItems = {} } = formFilter
     ? getControlItemsMap({
         expanded,
         datasetId,
         disabled: false,
         forceUpdate,
-        formChanged,
         form,
         filterId,
         filterType: formFilter?.filterType,
@@ -513,6 +488,7 @@ const FiltersConfigForm = (
         groupby: formFilter?.column,
         ...formFilter,
       });
+
       formData.extra_form_data = dependenciesDefaultValues;
 
       setNativeFilterFieldValuesWrapper({
@@ -573,7 +549,6 @@ const FiltersConfigForm = (
     groupby: hasColumn ? formFilter?.column : undefined,
     ...formFilter,
   });
-
   newFormData.extra_form_data = dependenciesDefaultValues;
 
   const [hasDefaultValue, isRequired, defaultValueTooltip, setHasDefaultValue] =
@@ -582,10 +557,19 @@ const FiltersConfigForm = (
   const showDataset =
     !datasetId || datasetDetails || formFilter?.dataset?.label;
 
+  const formChanged = useCallback(() => {
+    form.setFields([
+      {
+        name: 'changed',
+        value: true,
+      },
+    ]);
+  }, [form]);
+
   const updateFormValues = useCallback(
-    (values: any, triggerFormChange = true) => {
+    (values: any) => {
       setNativeFilterFieldValues(form, filterId, values);
-      if (triggerFormChange) formChanged();
+      formChanged();
     },
     [filterId, form, formChanged],
   );
@@ -810,7 +794,6 @@ const FiltersConfigForm = (
             granularity_sqla: column,
           });
           forceUpdate();
-          formChanged();
         }}
       />
     </StyledRowFormItem>
@@ -834,7 +817,7 @@ const FiltersConfigForm = (
             hidden
             initialValue={NativeFilterType.NativeFilter}
           >
-            <Input onChange={formChanged} />
+            <Input />
           </StyledFormItem>
           <StyledFormItem
             expanded={expanded}
@@ -843,10 +826,7 @@ const FiltersConfigForm = (
             initialValue={filterToEdit?.name}
             rules={[{ required: !isRemoved, message: t('Name is required') }]}
           >
-            <Input
-              {...getFiltersConfigModalTestId('name-input')}
-              onChange={debouncedFormChanged}
-            />
+            <Input {...getFiltersConfigModalTestId('name-input')} />
           </StyledFormItem>
           <StyledFormItem
             expanded={expanded}
@@ -890,7 +870,6 @@ const FiltersConfigForm = (
                   column: null,
                 });
                 forceUpdate();
-                formChanged();
               }}
             />
           </StyledFormItem>
@@ -941,7 +920,6 @@ const FiltersConfigForm = (
                       });
                     }
                     forceUpdate();
-                    formChanged();
                   }}
                 />
               </StyledFormItem>
@@ -1040,7 +1018,6 @@ const FiltersConfigForm = (
                             adhoc_filters: filters,
                           });
                           forceUpdate();
-                          formChanged();
                           validatePreFilter();
                         }}
                         label={
@@ -1073,7 +1050,6 @@ const FiltersConfigForm = (
                               time_range: timeRange,
                             });
                             forceUpdate();
-                            formChanged();
                             validatePreFilter();
                           }}
                         />
@@ -1109,7 +1085,6 @@ const FiltersConfigForm = (
                       <Radio.Group
                         onChange={value => {
                           onSortChanged(value.target.value);
-                          formChanged();
                         }}
                       >
                         <Radio value>{t('Sort ascending')}</Radio>
@@ -1149,7 +1124,6 @@ const FiltersConfigForm = (
                               });
                               forceUpdate();
                             }
-                            formChanged();
                           }}
                         />
                       </StyledRowSubFormItem>
@@ -1182,10 +1156,9 @@ const FiltersConfigForm = (
                       }
                     >
                       <Radio.Group
-                        onChange={value => {
-                          onEnableSingleValueChanged(value.target.value);
-                          formChanged();
-                        }}
+                        onChange={value =>
+                          onEnableSingleValueChanged(value.target.value)
+                        }
                       >
                         <Radio value={SingleValueType.Minimum}>
                           {t('Minimum')}
@@ -1214,7 +1187,7 @@ const FiltersConfigForm = (
               initialValue={filterToEdit?.description}
               label={<StyledLabel>{t('Description')}</StyledLabel>}
             >
-              <TextArea onChange={debouncedFormChanged} />
+              <TextArea />
             </StyledFormItem>
             <CleanFormItem
               name={['filters', filterId, 'defaultValueQueriesData']}

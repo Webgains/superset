@@ -16,28 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { DragLayer, XYCoord } from 'react-dnd';
-import { Slice } from 'src/dashboard/types';
+import PropTypes from 'prop-types';
+import { DragLayer } from 'react-dnd';
+
 import AddSliceCard from '../AddSliceCard';
+import { slicePropShape } from '../../util/propShapes';
 import {
   NEW_COMPONENT_SOURCE_TYPE,
   CHART_TYPE,
 } from '../../util/componentTypes';
 
-interface DragItem {
-  index: number;
-  parentType: string;
-  type: string;
-}
-
-interface AddSliceDragPreviewProps {
-  dragItem: DragItem | null;
-  slices: Slice[] | null;
-  isDragging: boolean;
-  currentOffset: XYCoord | null;
-}
-
-const staticCardStyles: React.CSSProperties = {
+const staticCardStyles = {
   position: 'fixed',
   pointerEvents: 'none',
   top: 0,
@@ -46,12 +35,25 @@ const staticCardStyles: React.CSSProperties = {
   width: 376 - 2 * 16,
 };
 
-const AddSliceDragPreview: React.FC<AddSliceDragPreviewProps> = ({
-  dragItem,
-  slices,
-  isDragging,
-  currentOffset,
-}) => {
+const propTypes = {
+  dragItem: PropTypes.shape({
+    index: PropTypes.number.isRequired,
+  }),
+  slices: PropTypes.arrayOf(slicePropShape),
+  isDragging: PropTypes.bool.isRequired,
+  currentOffset: PropTypes.shape({
+    x: PropTypes.number.isRequired,
+    y: PropTypes.number.isRequired,
+  }),
+};
+
+const defaultProps = {
+  currentOffset: null,
+  dragItem: null,
+  slices: null,
+};
+
+function AddSliceDragPreview({ dragItem, slices, isDragging, currentOffset }) {
   if (!isDragging || !currentOffset || !dragItem || !slices) return null;
 
   const slice = slices[dragItem.index];
@@ -75,11 +77,14 @@ const AddSliceDragPreview: React.FC<AddSliceDragPreviewProps> = ({
       datasourceName={slice.datasource_name}
     />
   );
-};
+}
+
+AddSliceDragPreview.propTypes = propTypes;
+AddSliceDragPreview.defaultProps = defaultProps;
 
 // This injects these props into the component
 export default DragLayer(monitor => ({
-  dragItem: monitor.getItem() as DragItem | null,
+  dragItem: monitor.getItem(),
   currentOffset: monitor.getSourceClientOffset(),
   isDragging: monitor.isDragging(),
 }))(AddSliceDragPreview);

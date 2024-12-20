@@ -65,7 +65,6 @@ import {
   extractDataTotalValues,
   extractSeries,
   extractShowValueIndexes,
-  extractTooltipKeys,
   getAxisType,
   getColtypesMapping,
   getLegendProps,
@@ -252,7 +251,7 @@ export default function transformProps(
     legendState,
   });
   const seriesContexts = extractForecastSeriesContexts(
-    rawSeries.map(series => series.name as string),
+    Object.values(rawSeries).map(series => series.name as string),
   );
   const isAreaExpand = stack === StackControlsValue.Expand;
   const xAxisDataType = dataTypes?.[xAxisLabel] ?? dataTypes?.[xAxisOrig];
@@ -544,12 +543,11 @@ export default function transformProps(
           ? params[0].value[xIndex]
           : params.value[xIndex];
         const forecastValue: any[] = richTooltip ? params : [params];
-        const sortedKeys = extractTooltipKeys(
-          forecastValue,
-          yIndex,
-          richTooltip,
-          tooltipSortByMetric,
-        );
+
+        if (richTooltip && tooltipSortByMetric) {
+          forecastValue.sort((a, b) => b.data[yIndex] - a.data[yIndex]);
+        }
+
         const forecastValues: Record<string, ForecastValue> =
           extractForecastValuesFromTooltipParams(forecastValue, isHorizontal);
 
@@ -572,31 +570,27 @@ export default function transformProps(
         const showPercentage = showTotal && !forcePercentFormatter;
         const keys = Object.keys(forecastValues);
         let focusedRow;
-        sortedKeys
-          .filter(key => keys.includes(key))
-          .forEach(key => {
-            const value = forecastValues[key];
-            if (value.observation === 0 && stack) {
-              return;
-            }
-            const row = formatForecastTooltipSeries({
-              ...value,
-              seriesName: key,
-              formatter,
-            });
-            if (showPercentage && value.observation !== undefined) {
-              row.push(
-                percentFormatter.format(value.observation / (total || 1)),
-              );
-            }
-            rows.push(row);
-            if (key === focusedSeries) {
-              focusedRow = rows.length - 1;
-            }
+        keys.forEach(key => {
+          const value = forecastValues[key];
+          if (value.observation === 0 && stack) {
+            return;
+          }
+          const row = formatForecastTooltipSeries({
+            ...value,
+            seriesName: key,
+            formatter,
           });
+          if (showPercentage && value.observation !== undefined) {
+            row.push(percentFormatter.format(value.observation / (total || 1)));
+          }
+          rows.push(row);
+          if (key === focusedSeries) {
+            focusedRow = rows.length - 1;
+          }
+        });
         if (stack) {
           rows.reverse();
-          if (focusedRow !== undefined) {
+          if (focusedRow) {
             focusedRow = rows.length - focusedRow - 1;
           }
         }

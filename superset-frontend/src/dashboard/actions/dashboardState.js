@@ -63,7 +63,7 @@ import {
 } from './dashboardInfo';
 import { fetchDatasourceMetadata, setDatasources } from './datasources';
 import { updateDirectPathToFilter } from './dashboardFilters';
-import { SET_IN_SCOPE_STATUS_OF_FILTERS } from './nativeFilters';
+import { SET_FILTER_CONFIG_COMPLETE } from './nativeFilters';
 import getOverwriteItems from '../util/getOverwriteItems';
 import {
   applyColors,
@@ -337,7 +337,7 @@ export function saveDashboardRequest(data, id, saveType) {
         }
         if (metadata.native_filter_configuration) {
           dispatch({
-            type: SET_IN_SCOPE_STATUS_OF_FILTERS,
+            type: SET_FILTER_CONFIG_COMPLETE,
             filterConfig: metadata.native_filter_configuration,
           });
         }

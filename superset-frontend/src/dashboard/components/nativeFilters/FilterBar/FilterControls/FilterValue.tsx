@@ -182,6 +182,7 @@ const FilterValue: FC<FilterControlProps> = ({
           if (isFeatureEnabled(FeatureFlag.GlobalAsyncQueries)) {
             // deal with getChartDataRequest transforming the response data
             const result = 'result' in json ? json.result[0] : json;
+
             if (response.status === 200) {
               setState([result]);
               handleFilterLoadFinish();

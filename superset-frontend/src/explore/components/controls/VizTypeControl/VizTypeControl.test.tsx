@@ -247,7 +247,7 @@ describe('VizTypeControl', () => {
     const visualizations = screen.getByTestId(getTestId('viz-row'));
     userEvent.click(within(visualizations).getByText('Bar Chart'));
 
-    expect(defaultProps.onChange).not.toHaveBeenCalled();
+    expect(defaultProps.onChange).not.toBeCalled();
     userEvent.dblClick(within(visualizations).getByText('Line Chart'));
 
     expect(defaultProps.onChange).toHaveBeenCalledWith(

@@ -409,11 +409,7 @@ class BigQueryEngineSpec(BaseEngineSpec):  # pylint: disable=too-many-public-met
         pandas_gbq.to_gbq(df, **to_gbq_kwargs)
 
     @classmethod
-    def _get_client(
-        cls,
-        engine: Engine,
-        database: Database,  # pylint: disable=unused-argument
-    ) -> bigquery.Client:
+    def _get_client(cls, engine: Engine) -> bigquery.Client:
         """
         Return the BigQuery client associated with an engine.
         """
@@ -457,7 +453,7 @@ class BigQueryEngineSpec(BaseEngineSpec):  # pylint: disable=too-many-public-met
             catalog=catalog,
             schema=schema,
         ) as engine:
-            client = cls._get_client(engine, database)
+            client = cls._get_client(engine)
             return [
                 cls.custom_estimate_statement_cost(
                     cls.process_statement(statement, database),
@@ -481,7 +477,7 @@ class BigQueryEngineSpec(BaseEngineSpec):  # pylint: disable=too-many-public-met
             return project
 
         with database.get_sqla_engine() as engine:
-            client = cls._get_client(engine, database)
+            client = cls._get_client(engine)
             return client.project
 
     @classmethod
@@ -497,7 +493,7 @@ class BigQueryEngineSpec(BaseEngineSpec):  # pylint: disable=too-many-public-met
         """
         engine: Engine
         with database.get_sqla_engine() as engine:
-            client = cls._get_client(engine, database)
+            client = cls._get_client(engine)
             projects = client.list_projects()
 
         return {project.project_id for project in projects}

@@ -27,7 +27,6 @@ from superset.commands.base import BaseCommand, UpdateMixin
 from superset.commands.dashboard.exceptions import (
     DashboardForbiddenError,
     DashboardInvalidError,
-    DashboardNativeFiltersUpdateFailedError,
     DashboardNotFoundError,
     DashboardSlugExistsValidationError,
     DashboardUpdateFailedError,
@@ -68,6 +67,7 @@ class UpdateDashboardCommand(UpdateMixin, BaseCommand):
                 dashboard,
                 data=json.loads(self._properties.get("json_metadata", "{}")),
             )
+
         return dashboard
 
     def validate(self) -> None:
@@ -187,18 +187,3 @@ class UpdateDashboardCommand(UpdateMixin, BaseCommand):
         deleted_tabs = find_deleted_tabs()
         reports = find_reports_containing_tabs(deleted_tabs)
         deactivate_reports(reports)
-
-
-class UpdateDashboardNativeFiltersCommand(UpdateDashboardCommand):
-    @transaction(
-        on_error=partial(on_error, reraise=DashboardNativeFiltersUpdateFailedError)
-    )
-    def run(self) -> Model:
-        super().validate()
-        assert self._model
-
-        configuration = DashboardDAO.update_native_filters_config(
-            self._model, self._properties
-        )
-
-        return configuration

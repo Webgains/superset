@@ -51,21 +51,23 @@ const useFilterFocusHighlightStyles = (chartId: number) => {
     dashboardFilters,
   );
 
+  const datasources =
+    useSelector((state: RootState) => state.datasources) || {};
   const slices =
     useSelector((state: RootState) => state.sliceEntities.slices) || {};
 
+  const relatedCharts = getRelatedCharts(
+    nativeFilters.filters as Record<string, Filter>,
+    null,
+    slices,
+    datasources,
+  );
+
   const highlightedFilterId =
     nativeFilters?.focusedFilterId || nativeFilters?.hoveredFilterId;
-
   if (!(focusedFilterScope || highlightedFilterId)) {
     return {};
   }
-
-  const relatedCharts = getRelatedCharts(
-    highlightedFilterId as string,
-    nativeFilters.filters[highlightedFilterId as string] as Filter,
-    slices,
-  );
 
   // we use local styles here instead of a conditionally-applied class,
   // because adding any conditional class to this container
@@ -81,7 +83,7 @@ const useFilterFocusHighlightStyles = (chartId: number) => {
   };
 
   if (highlightedFilterId) {
-    if (relatedCharts.includes(chartId)) {
+    if (relatedCharts[highlightedFilterId]?.includes(chartId)) {
       return focusedChartStyles;
     }
   } else if (

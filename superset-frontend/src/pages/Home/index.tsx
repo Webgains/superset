@@ -46,7 +46,7 @@ import {
   loadingCardCount,
   mq,
 } from 'src/views/CRUD/utils';
-import { Switch } from 'src/components/Switch';
+import { AntdSwitch } from 'src/components';
 import getBootstrapData from 'src/utils/getBootstrapData';
 import { TableTab } from 'src/views/CRUD/types';
 import SubMenu, { SubMenuProps } from 'src/features/home/SubMenu';
@@ -340,7 +340,7 @@ function Welcome({ user, addDangerToast }: WelcomeProps) {
         name: (
           <WelcomeNav>
             <div className="switch">
-              <Switch checked={checked} onClick={handleToggle} />
+              <AntdSwitch checked={checked} onClick={handleToggle} />
               <span>{t('Thumbnails')}</span>
             </div>
           </WelcomeNav>

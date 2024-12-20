@@ -25,7 +25,7 @@
 export { default as Select } from './Select/Select';
 export { default as AsyncSelect } from './Select/AsyncSelect';
 export { default as Button } from './Button';
-export { default as Card } from './Card';
+
 /*
  * Components that don't conflict with the ones in src/components.
  * As Superset progresses to support full theming, this list should
@@ -33,6 +33,7 @@ export { default as Card } from './Card';
  */
 export {
   AutoComplete,
+  Avatar,
   Col,
   Divider,
   Empty,
@@ -56,7 +57,7 @@ export {
  * or extending the components in src/components.
  */
 export {
-  Breadcrumb as AntdBreadcrumb, // TODO: Make this a real Component
+  Breadcrumb as AntdBreadcrumb,
   Card as AntdCard,
   Checkbox as AntdCheckbox,
   Collapse as AntdCollapse,
@@ -66,6 +67,7 @@ export {
   Modal as AntdModal,
   Select as AntdSelect,
   Slider as AntdSlider,
+  Switch as AntdSwitch,
   Tabs as AntdTabs,
   Tooltip as AntdTooltip,
 } from 'antd';

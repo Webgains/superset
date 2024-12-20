@@ -537,9 +537,8 @@ class HiveEngineSpec(PrestoEngineSpec):
         return url
 
     @classmethod
-    def update_impersonation_config(  # pylint: disable=too-many-arguments
+    def update_impersonation_config(
         cls,
-        database: Database,
         connect_args: dict[str, Any],
         uri: str,
         username: str | None,
@@ -548,7 +547,6 @@ class HiveEngineSpec(PrestoEngineSpec):
         """
         Update a configuration dictionary
         that can set the correct properties for impersonating users
-        :param database: the Database Object
         :param connect_args:
         :param uri: URI string
         :param impersonate_user: Flag indicating if impersonation is enabled

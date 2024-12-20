@@ -34,8 +34,7 @@ test('renders two inputs', () => {
 test('receives null on non-numeric', async () => {
   render(<BoundsControl {...defaultProps} />);
   const minInput = screen.getAllByRole('spinbutton')[0];
-  userEvent.type(minInput, '1');
-  userEvent.clear(minInput);
+  userEvent.type(minInput, 'text');
   await waitFor(() =>
     expect(defaultProps.onChange).toHaveBeenCalledWith([null, null]),
   );

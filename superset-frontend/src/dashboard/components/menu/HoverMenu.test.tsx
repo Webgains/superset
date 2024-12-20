@@ -33,8 +33,8 @@ test('should call onHover when mouse enters and leaves', () => {
   const hoverMenu = screen.getByTestId('hover-menu');
 
   userEvent.hover(hoverMenu);
-  expect(onHover).toHaveBeenCalledWith({ isHovered: true });
+  expect(onHover).toBeCalledWith({ isHovered: true });
 
   userEvent.unhover(hoverMenu);
-  expect(onHover).toHaveBeenCalledWith({ isHovered: false });
+  expect(onHover).toBeCalledWith({ isHovered: false });
 });

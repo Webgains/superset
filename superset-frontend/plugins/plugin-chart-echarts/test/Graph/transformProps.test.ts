@@ -74,9 +74,6 @@ describe('EchartsGraph transformProps', () => {
                   col: 'source_column',
                   category: undefined,
                   id: '0',
-                  itemStyle: {
-                    color: '#1f77b4',
-                  },
                   label: { show: true },
                   name: 'source_value_1',
                   select: {
@@ -91,9 +88,6 @@ describe('EchartsGraph transformProps', () => {
                   col: 'target_column',
                   category: undefined,
                   id: '1',
-                  itemStyle: {
-                    color: '#1f77b4',
-                  },
                   label: { show: true },
                   name: 'target_value_1',
                   select: {
@@ -108,9 +102,6 @@ describe('EchartsGraph transformProps', () => {
                   col: 'source_column',
                   category: undefined,
                   id: '2',
-                  itemStyle: {
-                    color: '#1f77b4',
-                  },
                   label: { show: true },
                   name: 'source_value_2',
                   select: {
@@ -125,9 +116,6 @@ describe('EchartsGraph transformProps', () => {
                   col: 'target_column',
                   category: undefined,
                   id: '3',
-                  itemStyle: {
-                    color: '#1f77b4',
-                  },
                   label: { show: true },
                   name: 'target_value_2',
                   select: {
@@ -144,7 +132,7 @@ describe('EchartsGraph transformProps', () => {
               links: [
                 {
                   emphasis: { lineStyle: { width: 12 } },
-                  lineStyle: { width: 6, color: '#1f77b4' },
+                  lineStyle: { width: 6 },
                   select: {
                     lineStyle: { opacity: 1, width: 9.600000000000001 },
                   },
@@ -154,7 +142,7 @@ describe('EchartsGraph transformProps', () => {
                 },
                 {
                   emphasis: { lineStyle: { width: 5 } },
-                  lineStyle: { width: 1.5, color: '#1f77b4' },
+                  lineStyle: { width: 1.5 },
                   select: { lineStyle: { opacity: 1, width: 5 } },
                   source: '2',
                   target: '3',
@@ -229,9 +217,6 @@ describe('EchartsGraph transformProps', () => {
               data: [
                 {
                   id: '0',
-                  itemStyle: {
-                    color: '#1f77b4',
-                  },
                   col: 'source_column',
                   name: 'source_value',
                   value: 11,
@@ -243,9 +228,6 @@ describe('EchartsGraph transformProps', () => {
                 },
                 {
                   id: '1',
-                  itemStyle: {
-                    color: '#ff7f0e',
-                  },
                   col: 'target_column',
                   name: 'target_value',
                   value: 11,
