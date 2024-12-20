@@ -16,6 +16,7 @@ jobs:
       packages: read
       issues: read
       pull-requests: write
+      id-token: write
 
   labels:
     runs-on: ubuntu-latest
@@ -31,7 +32,7 @@ jobs:
   deploy:
     name: Deploy to Feature Environment
     needs: [labels, build]
-    uses: webgains/github-workflows/.github/workflows/deploy-service-to-environment.yml@WI-5868-allow-service-deploy-workflow-to-use-any-repositor
+    uses: ./.github/workflows/deploy-service-to-environment.yml
     secrets: inherit
     with:
       environment: feature
@@ -44,6 +45,7 @@ jobs:
           "namespace": "${{ needs.labels.outputs.feature_name }}",
           "supersetImageTag": "${{ needs.build.outputs.tag_hash }}"
         }
+
     permissions:
       contents: read
       deployments: write
