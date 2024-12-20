@@ -267,9 +267,9 @@ export default function TableChart<D extends DataRecord = DataRecord>(
   } = props;
   const comparisonColumns = [
     { key: 'all', label: t('Display all') },
-    { key: '#', label: t('Previous value') },
-    { key: '△', label: t('Difference') },
-    { key: '%', label: t('% Difference') },
+    { key: t('sv_previous'), label: t('sv_previous') },
+    { key: t('sv_change') , label: t('sv_change') },
+    { key: t('sv_change_percentage')  label: t('sv_change_percentage') },
   ];
   const timestampFormatter = useCallback(
     value => getTimeFormatterForGranularity(timeGrain)(value),
@@ -404,7 +404,7 @@ export default function TableChart<D extends DataRecord = DataRecord>(
     };
   };
 
-  const comparisonLabels = [t('Current value'), t('Previous value'), t('Difference'), t('% Difference')];
+  const comparisonLabels = [t('sv_current'), t('sv_previous'), t('sv_change'), t('sv_change_percentage')];
   const filteredColumnsMeta = useMemo(() => {
     if (!isUsingTimeComparison) {
       return columnsMeta;
