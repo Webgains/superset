@@ -15,13 +15,11 @@
 # specific language governing permissions and limitations
 # under the License.
 # isort:skip_file
-from __future__ import annotations
-
 import re
 from datetime import datetime
-from typing import Any, Literal, NamedTuple, Optional, Union
+from typing import Any, NamedTuple, Optional, Union
 from re import Pattern
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 import pytest
 
 import numpy as np

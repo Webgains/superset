@@ -30,8 +30,8 @@ test('Render a FilterInput', async () => {
   render(<FilterInput onChangeHandler={onChangeHandler} />);
   expect(await screen.findByRole('textbox')).toBeInTheDocument();
 
-  expect(onChangeHandler).toHaveBeenCalledTimes(0);
+  expect(onChangeHandler).toBeCalledTimes(0);
   userEvent.type(screen.getByRole('textbox'), 'test');
 
-  expect(onChangeHandler).toHaveBeenCalledTimes(4);
+  expect(onChangeHandler).toBeCalledTimes(4);
 });

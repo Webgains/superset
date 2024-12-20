@@ -72,7 +72,6 @@ const createProps: () => ControlItemsProps = () => ({
   filterId: 'filterId',
   filterToEdit: filterMock,
   filterType: 'filterType',
-  formChanged: jest.fn(),
 });
 
 const createControlItems = () => [
@@ -160,11 +159,11 @@ test('Clicking on checkbox', () => {
   (getControlItems as jest.Mock).mockReturnValue(createControlItems());
   const controlItemsMap = getControlItemsMap(props);
   renderControlItems(controlItemsMap);
-  expect(props.forceUpdate).not.toHaveBeenCalled();
-  expect(setNativeFilterFieldValues).not.toHaveBeenCalled();
+  expect(props.forceUpdate).not.toBeCalled();
+  expect(setNativeFilterFieldValues).not.toBeCalled();
   userEvent.click(screen.getByRole('checkbox'));
-  expect(setNativeFilterFieldValues).toHaveBeenCalled();
-  expect(props.forceUpdate).toHaveBeenCalled();
+  expect(setNativeFilterFieldValues).toBeCalled();
+  expect(props.forceUpdate).toBeCalled();
 });
 
 test('Clicking on checkbox when resetConfig:false', () => {
@@ -174,9 +173,9 @@ test('Clicking on checkbox when resetConfig:false', () => {
   ]);
   const controlItemsMap = getControlItemsMap(props);
   renderControlItems(controlItemsMap);
-  expect(props.forceUpdate).not.toHaveBeenCalled();
-  expect(setNativeFilterFieldValues).not.toHaveBeenCalled();
+  expect(props.forceUpdate).not.toBeCalled();
+  expect(setNativeFilterFieldValues).not.toBeCalled();
   userEvent.click(screen.getByRole('checkbox'));
-  expect(props.forceUpdate).toHaveBeenCalled();
-  expect(setNativeFilterFieldValues).not.toHaveBeenCalled();
+  expect(props.forceUpdate).toBeCalled();
+  expect(setNativeFilterFieldValues).not.toBeCalled();
 });

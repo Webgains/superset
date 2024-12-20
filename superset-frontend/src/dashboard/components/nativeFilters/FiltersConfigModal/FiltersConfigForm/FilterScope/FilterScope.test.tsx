@@ -47,7 +47,6 @@ describe('FilterScope', () => {
     activeFilterPanelKeys: `DefaultFilterId-${FilterPanels.configuration.key}`,
     isActive: true,
     validateDependencies: jest.fn(),
-    onModifyFilter: jest.fn(),
   };
 
   const MockModal = ({ scope }: { scope?: object }) => {

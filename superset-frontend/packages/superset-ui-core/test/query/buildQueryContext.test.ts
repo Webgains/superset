@@ -138,7 +138,7 @@ describe('buildQueryContext', () => {
       },
       () => [{}],
     );
-    expect(spyNormalizeTimeColumn).toHaveBeenCalled();
+    expect(spyNormalizeTimeColumn).toBeCalled();
     spyNormalizeTimeColumn.mockRestore();
   });
 });

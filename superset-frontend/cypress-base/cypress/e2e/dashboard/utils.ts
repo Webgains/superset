@@ -378,7 +378,7 @@ export function cancelNativeFilterSettings() {
     .should('be.visible')
     .should('have.text', 'There are unsaved changes.');
   cy.get(nativeFilters.modal.footer)
-    .find(nativeFilters.modal.confirmCancelButton)
+    .find(nativeFilters.modal.yesCancelButton)
     .contains('cancel')
     .click({ force: true });
   cy.get(nativeFilters.modal.container).should('not.exist');

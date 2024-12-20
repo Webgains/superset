@@ -114,8 +114,8 @@ class CacheRestApi(BaseSupersetModelRestApi):
                     CacheKey.cache_key.in_(cache_keys)
                 )
 
-                db.session.execute(delete_stmt)
-                db.session.commit()  # pylint: disable=consider-using-transaction
+                with db.session.begin_nested():
+                    db.session.execute(delete_stmt)
 
                 stats_logger_manager.instance.gauge(
                     "invalidated_cache", len(cache_keys)
@@ -126,7 +126,6 @@ class CacheRestApi(BaseSupersetModelRestApi):
                     len(datasource_uids),
                 )
             except SQLAlchemyError as ex:  # pragma: no cover
-                db.session.rollback()  # pylint: disable=consider-using-transaction
                 logger.error(ex, exc_info=True)
                 return self.response_500(str(ex))
         return self.response(201)

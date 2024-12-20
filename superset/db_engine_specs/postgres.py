@@ -351,16 +351,7 @@ class PostgresEngineSpec(BasicParametersMixin, PostgresBaseEngineSpec):
         return True
 
     @classmethod
-    def estimate_statement_cost(
-        cls, database: Database, statement: str, cursor: Any
-    ) -> dict[str, Any]:
-        """
-        Run a SQL query that estimates the cost of a given statement.
-        :param database: A Database object
-        :param statement: A single SQL statement
-        :param cursor: Cursor instance
-        :return: JSON response from Trino
-        """
+    def estimate_statement_cost(cls, statement: str, cursor: Any) -> dict[str, Any]:
         sql = f"EXPLAIN {statement}"
         cursor.execute(sql)
 

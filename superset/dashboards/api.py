@@ -47,7 +47,6 @@ from superset.commands.dashboard.exceptions import (
     DashboardDeleteFailedError,
     DashboardForbiddenError,
     DashboardInvalidError,
-    DashboardNativeFiltersUpdateFailedError,
     DashboardNotFoundError,
     DashboardUpdateFailedError,
 )
@@ -56,10 +55,7 @@ from superset.commands.dashboard.fave import AddFavoriteDashboardCommand
 from superset.commands.dashboard.importers.dispatcher import ImportDashboardsCommand
 from superset.commands.dashboard.permalink.create import CreateDashboardPermalinkCommand
 from superset.commands.dashboard.unfave import DelFavoriteDashboardCommand
-from superset.commands.dashboard.update import (
-    UpdateDashboardCommand,
-    UpdateDashboardNativeFiltersCommand,
-)
+from superset.commands.dashboard.update import UpdateDashboardCommand
 from superset.commands.database.exceptions import DatasetValidationError
 from superset.commands.exceptions import TagForbiddenError
 from superset.commands.importers.exceptions import NoValidFilesFoundError
@@ -84,7 +80,6 @@ from superset.dashboards.schemas import (
     DashboardCopySchema,
     DashboardDatasetSchema,
     DashboardGetResponseSchema,
-    DashboardNativeFiltersConfigUpdateSchema,
     DashboardPostSchema,
     DashboardPutSchema,
     EmbeddedDashboardConfigSchema,
@@ -156,15 +151,9 @@ def with_dashboard(
 class DashboardRestApi(BaseSupersetModelRestApi):
     datamodel = SQLAInterface(Dashboard)
 
-    @before_request(only=["thumbnail", "cache_dashboard_screenshot", "screenshot"])
+    @before_request(only=["thumbnail"])
     def ensure_thumbnails_enabled(self) -> Optional[Response]:
         if not is_feature_enabled("THUMBNAILS"):
-            return self.response_404()
-        return None
-
-    @before_request(only=["cache_dashboard_screenshot", "screenshot"])
-    def ensure_screenshots_enabled(self) -> Optional[Response]:
-        if not is_feature_enabled("ENABLE_DASHBOARD_SCREENSHOT_ENDPOINTS"):
             return self.response_404()
         return None
 
@@ -186,7 +175,6 @@ class DashboardRestApi(BaseSupersetModelRestApi):
         "copy_dash",
         "cache_dashboard_screenshot",
         "screenshot",
-        "put_filters",
     }
     resource_name = "dashboard"
     allow_browser_login = True
@@ -274,7 +262,6 @@ class DashboardRestApi(BaseSupersetModelRestApi):
 
     add_model_schema = DashboardPostSchema()
     edit_model_schema = DashboardPutSchema()
-    update_filters_model_schema = DashboardNativeFiltersConfigUpdateSchema()
     chart_entity_response_schema = ChartEntityResponseSchema()
     dashboard_get_response_schema = DashboardGetResponseSchema()
     dashboard_dataset_schema = DashboardDatasetSchema()
@@ -688,85 +675,6 @@ class DashboardRestApi(BaseSupersetModelRestApi):
             response = self.response_422(message=str(ex))
         return response
 
-    @expose("/<pk>/filters", methods=("PUT",))
-    @protect()
-    @safe
-    @statsd_metrics
-    @event_logger.log_this_with_context(
-        action=lambda self, *args, **kwargs: f"{self.__class__.__name__}.put_filters",
-        log_to_statsd=False,
-    )
-    @requires_json
-    def put_filters(self, pk: int) -> Response:
-        """
-        Modify native filters configuration for a dashboard.
-        ---
-        put:
-          summary: Update native filters configuration for a dashboard.
-          parameters:
-          - in: path
-            schema:
-              type: integer
-            name: pk
-          requestBody:
-            description: Native filters configuration
-            required: true
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/DashboardNativeFiltersConfigUpdateSchema'
-          responses:
-            200:
-              description: Dashboard native filters updated
-              content:
-                application/json:
-                  schema:
-                    type: object
-                    properties:
-                      result:
-                        type: array
-            400:
-              $ref: '#/components/responses/400'
-            401:
-              $ref: '#/components/responses/401'
-            403:
-              $ref: '#/components/responses/403'
-            404:
-              $ref: '#/components/responses/404'
-            422:
-              $ref: '#/components/responses/422'
-            500:
-              $ref: '#/components/responses/500'
-        """
-        try:
-            item = self.update_filters_model_schema.load(request.json, partial=True)
-        except ValidationError as error:
-            return self.response_400(message=error.messages)
-
-        try:
-            configuration = UpdateDashboardNativeFiltersCommand(pk, item).run()
-            response = self.response(
-                200,
-                result=configuration,
-            )
-        except DashboardNotFoundError:
-            response = self.response_404()
-        except DashboardForbiddenError:
-            response = self.response_403()
-        except TagForbiddenError as ex:
-            response = self.response(403, message=str(ex))
-        except DashboardInvalidError as ex:
-            return self.response_422(message=ex.normalized_messages())
-        except DashboardNativeFiltersUpdateFailedError as ex:
-            logger.error(
-                "Error changing native filters for dashboard %s: %s",
-                self.__class__.__name__,
-                str(ex),
-                exc_info=True,
-            )
-            response = self.response_422(message=str(ex))
-        return response
-
     @expose("/<pk>", methods=("DELETE",))
     @protect()
     @safe
@@ -1131,15 +1039,13 @@ class DashboardRestApi(BaseSupersetModelRestApi):
             logger.info("Triggering screenshot ASYNC")
             cache_dashboard_screenshot.delay(
                 username=get_current_user(),
-                guest_token=(
-                    g.user.guest_token
-                    if get_current_user() and isinstance(g.user, GuestUser)
-                    else None
-                ),
+                guest_token=g.user.guest_token
+                if get_current_user() and isinstance(g.user, GuestUser)
+                else None,
                 dashboard_id=dashboard.id,
                 dashboard_url=dashboard_url,
                 cache_key=cache_key,
-                force=False,
+                force=True,
                 thumb_size=thumb_size,
                 window_size=window_size,
             )
@@ -1603,16 +1509,15 @@ class DashboardRestApi(BaseSupersetModelRestApi):
         try:
             body = self.embedded_config_schema.load(request.json)
 
-            embedded = EmbeddedDashboardDAO.upsert(
-                dashboard,
-                body["allowed_domains"],
-            )
-            db.session.commit()  # pylint: disable=consider-using-transaction
+            with db.session.begin_nested():
+                embedded = EmbeddedDashboardDAO.upsert(
+                    dashboard,
+                    body["allowed_domains"],
+                )
 
             result = self.embedded_response_schema.dump(embedded)
             return self.response(200, result=result)
         except ValidationError as error:
-            db.session.rollback()  # pylint: disable=consider-using-transaction
             return self.response_400(message=error.messages)
 
     @expose("/<id_or_slug>/embedded", methods=("DELETE",))
