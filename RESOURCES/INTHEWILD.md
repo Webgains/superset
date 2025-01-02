@@ -48,7 +48,6 @@ Join our growing community!
 - [bumper](https://www.bumper.co/) [@vasu-ram, @JamiePercival]
 
 ### Gaming
-
 - [Popoko VM Games Studio](https://popoko.live)
 
 ### E-Commerce
