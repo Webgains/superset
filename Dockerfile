@@ -69,13 +69,6 @@ COPY superset/translations /app/superset/translations
 RUN mkdir -p /app/locales
 COPY locales /app/locales
 
-RUN if [ "$DEV_MODE" = "false" ]; then \
-        BUILD_TRANSLATIONS=$BUILD_TRANSLATIONS npm run ${BUILD_CMD}; \
-    else \
-        echo "Skipping 'npm run ${BUILD_CMD}' in dev mode"; \
-    fi
-
-
 # Compiles .json files from the .po files, then deletes the .po files
 RUN npm run build-translation
 RUN rm /app/superset/translations/*/LC_MESSAGES/*.po
