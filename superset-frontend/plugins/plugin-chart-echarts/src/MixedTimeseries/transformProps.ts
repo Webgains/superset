@@ -45,6 +45,7 @@ import {
 import { getOriginalSeries } from '@superset-ui/chart-controls';
 import type { EChartsCoreOption } from 'echarts/core';
 import type { SeriesOption } from 'echarts';
+import moment from 'moment';
 import {
   DEFAULT_FORM_DATA,
   EchartsMixedTimeseriesChartTransformedProps,
@@ -96,7 +97,6 @@ import {
   getXAxisFormatter,
   getYAxisFormatter,
 } from '../utils/formatters';
-import moment from 'moment';
 
 const getFormatter = (
   customFormatters: Record<string, ValueFormatter>,
@@ -639,7 +639,7 @@ export default function transformProps(
         if (seriesName) {
           const regex = new RegExp('.*(\\d+) (\\w+) ago');
           const result = seriesName.match(regex);
-          if (result && result.length == 3) {
+          if (result && result.length === 3) {
             const [_, diff, diffType] = result;
             xValue = moment
               .utc(xValue)
