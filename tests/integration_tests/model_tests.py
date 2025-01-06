@@ -496,7 +496,9 @@ class TestSqlaTableModel(SupersetTestCase):
         assert name_list2 == name_list1
 
     @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
-    def test_query_with_expr_groupby(self):
+    @mock.patch("superset.security.manager.g")
+    def test_query_with_expr_groupby(self, mock_g):
+        mock_g.user = security_manager.find_user("admin")
         self.query_with_expr_helper(is_timeseries=False)
 
     @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
