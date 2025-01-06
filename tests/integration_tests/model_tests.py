@@ -477,7 +477,9 @@ class TestSqlaTableModel(SupersetTestCase):
         return qr.df
 
     @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
-    def test_query_with_expr_groupby_timeseries(self):
+    @mock.patch("superset.security.manager.g")
+    def test_query_with_expr_groupby_timeseries(self, mock_g):
+        mock_g.user = security_manager.find_user("admin")
         if get_example_database().backend == "presto":
             # TODO(bkyryliuk): make it work for presto.
             return
