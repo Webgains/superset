@@ -18,6 +18,7 @@
 ######################################################################
 # Node stage to deal with static asset construction
 ######################################################################
+#test
 ARG PY_VER=3.10-slim-bookworm
 
 # If BUILDPLATFORM is null, set it to 'amd64' (or leave as is otherwise).
