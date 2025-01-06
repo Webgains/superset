@@ -17,6 +17,7 @@
 import re
 import time
 from typing import Any
+from unittest import mock
 from unittest.mock import Mock, patch
 
 import numpy as np
@@ -24,7 +25,7 @@ import pandas as pd
 import pytest
 from pandas import DateOffset
 
-from superset import app, db
+from superset import app, db, security_manager
 from superset.charts.schemas import ChartDataQueryContextSchema
 from superset.common.chart_data import ChartDataResultFormat, ChartDataResultType
 from superset.common.query_context import QueryContext
@@ -66,6 +67,11 @@ def get_sql_text(payload: dict[str, Any]) -> str:
 
 
 class TestQueryContext(SupersetTestCase):
+
+    @mock.patch("superset.security.manager.g")
+    def setUp(self, mock_g):
+        mock_g.user = security_manager.find_user("admin")
+
     @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
     def test_schema_deserialization(self):
         """
