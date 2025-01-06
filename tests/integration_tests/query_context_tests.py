@@ -66,11 +66,8 @@ def get_sql_text(payload: dict[str, Any]) -> str:
     return response["query"]
 
 
+@mock.patch("superset.security.manager.g.user", return_value = security_manager.find_user("admin"), autospec=True)
 class TestQueryContext(SupersetTestCase):
-
-    @mock.patch("superset.security.manager.g")
-    def setUp(self, mock_g):
-        mock_g.user = security_manager.find_user("admin")
 
     @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
     def test_schema_deserialization(self):
