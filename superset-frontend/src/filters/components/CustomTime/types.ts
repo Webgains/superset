@@ -16,24 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { GenericDataType } from '@superset-ui/core';
+import { RefObject } from 'react';
+import {
+  Behavior,
+  DataRecord,
+  FilterState,
+  QueryFormData,
+} from '@superset-ui/core';
+import { PluginFilterHooks, PluginFilterStylesProps } from '../types';
 
-export const INPUT_HEIGHT = 32;
+interface PluginFilterTimeCustomizeProps {
+  defaultValue?: string | null;
+}
 
-export const INPUT_WIDTH = 270;
+export type PluginFilterSelectQueryFormData = QueryFormData &
+  PluginFilterStylesProps &
+  PluginFilterTimeCustomizeProps;
 
-export const TIME_FILTER_INPUT_WIDTH = 350;
+export type PluginFilterTimeProps = PluginFilterStylesProps & {
+  behaviors: Behavior[];
+  data: DataRecord[];
+  formData: PluginFilterSelectQueryFormData;
+  filterState: FilterState;
+  inputRef: RefObject<HTMLInputElement>;
+  isOverflowingFilterBar?: boolean;
+} & PluginFilterHooks;
 
-export const FILTER_SUPPORTED_TYPES = {
-  custom_filter_time: [GenericDataType.Temporal],
-  filter_time: [GenericDataType.Temporal],
-  filter_timegrain: [GenericDataType.Temporal],
-  filter_timecolumn: [GenericDataType.Temporal],
-  filter_select: [
-    GenericDataType.Boolean,
-    GenericDataType.String,
-    GenericDataType.Numeric,
-    GenericDataType.Temporal,
-  ],
-  filter_range: [GenericDataType.Numeric],
+export const DEFAULT_FORM_DATA: PluginFilterTimeCustomizeProps = {
+  defaultValue: 'Current day',
 };
