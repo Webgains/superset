@@ -229,12 +229,13 @@
     "Δ Products": "Δ Products",
     "Total sales cmp": "Total sales cmp",
     "Δ Sales": "Δ Sales",
-    "Click cmp": "Click cmp",
+    "Clicks cmp": "Clicks cmp",
     "Δ Clicks": "Δ Clicks",
     "Commission cmp": "Commission cmp",
     "Δ Comm": "Δ Comm",
     "Override cmp": "Override cmp",
     "Δ Override": "Δ Override",
-    "Comparison start date": "Comparison start date",
-    "Select the start date to compare with the defined period": "Select the start date to compare with the defined period"
+    "Comparison start day": "Comparison start date",
+    "Select the start day to compare with the defined period": "Select the start date to compare with the defined period",
+    "CR": "Conversion rate"
 }
