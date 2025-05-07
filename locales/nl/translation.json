@@ -251,7 +251,7 @@
     "Touchpoints": "Raakvlakken",
     "Days before the purchase": "Dagen voor de aankoop",
     "Channels: First vs Last Click": "Kanalen: eerste vs. laatste klik",
-    "Campaigns: First vs Last Clicks": "Campagnes: eerste vs. laatste klik",
+    "Campaigns: First vs Last Clicks": "Publishers: eerste vs. laatste klik",
     "Transactions > Customer Journey": "Transacties > Klantreis",
     "Customer Journey on Transactions": "Klantreis per transactie",
     "transaction_id": "Transactie ID",
@@ -274,5 +274,7 @@
     "Tenancies forecast": "Tenancy prognose",
     "tenancy_type_name": "Tenancy type",
     "Assisted sales value": "Ondersteunde verkoopwaarde",
-    "type": "Type"
+    "type": "Type",
+    "Top publishers by Product": "",
+    "Top products by Publishers": ""
 }

@@ -251,7 +251,7 @@
     "Touchpoints": "Touchpoints",
     "Days before the purchase": "Days before the purchase",
     "Channels: First vs Last Click": "Channels: First vs last click",
-    "Campaigns: First vs Last Clicks": "Campaigns: First vs last click",
+    "Campaigns: First vs Last Clicks": "Publishers: First vs last click",
     "Transactions > Customer Journey": "Transactions > Customer Journey",
     "Customer Journey on Transactions": "Customer journey per transaction",
     "transaction_id": "Transaction ID",
@@ -274,5 +274,7 @@
     "Tenancies forecast": "Tenancy forecast",
     "tenancy_type_name": "Tenancy type",
     "Assisted sales value": "Assisted sales value",
-    "type": "Type"
+    "type": "Type",
+    "Top publishers by Product": "Top publishers by product",
+    "Top products by Publishers": "Top products by publishers"
 }

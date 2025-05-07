@@ -251,7 +251,7 @@
     "Touchpoints": "Puntos de contacto",
     "Days before the purchase": "Días antes de la compra",
     "Channels: First vs Last Click": "Canales: primer vs. último clic",
-    "Campaigns: First vs Last Clicks": "Campañas: primer vs. último clic",
+    "Campaigns: First vs Last Clicks": "Afiliados: primer vs. último clic",
     "Transactions > Customer Journey": "Transacciones > Recorrido del cliente",
     "Customer Journey on Transactions": "Recorrido del cliente por transacción",
     "transaction_id": "ID de transacción",
@@ -274,5 +274,7 @@
     "Tenancies forecast": "Previsión de Tenancy",
     "tenancy_type_name": "Tipo de Tenancy",
     "Assisted sales value": "Valor de ventas asistidas",
-    "type": "Tipo"
+    "type": "Tipo",
+    "Top publishers by Product": "Los mejores afiliados por producto",
+    "Top products by Publishers": "Los mejores productos por afiliado"
 }
