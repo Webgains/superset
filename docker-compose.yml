@@ -50,7 +50,7 @@ services:
     container_name: superset_nginx
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "8087:8087"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
@@ -104,7 +104,7 @@ services:
     container_name: superset_websocket
     build: ./superset-websocket
     ports:
-      - 8080:8080
+      - 8089:8089
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -128,7 +128,7 @@ services:
       # do not use this docker compose in production
       - ./docker/superset-websocket/config.json:/home/superset-websocket/config.json
     environment:
-      - PORT=8080
+      - PORT=8089
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_SSL=false
