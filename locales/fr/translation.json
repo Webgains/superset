@@ -251,7 +251,7 @@
     "Touchpoints": "Points de contact",
     "Days before the purchase": "Nombre de jours avant achat",
     "Channels: First vs Last Click": "Canaux : du premier au dernier clic",
-    "Campaigns: First vs Last Clicks": "Campagnes : du premier au dernier clic",
+    "Campaigns: First vs Last Clicks": "Éditeurs : du premier au dernier clic",
     "Transactions > Customer Journey": "Transactions > Parcours d'achat",
     "Customer Journey on Transactions": "Parcours d'achat par transaction",
     "transaction_id": "Identifiant (ID) de transaction",
@@ -274,5 +274,12 @@
     "Tenancies forecast": "Frais fixes prévisionnels",
     "tenancy_type_name": "Type de frais fixe",
     "Assisted sales value": "Montant total des ventes facilitées",
-    "type": "Type"
+    "type": "Type",
+    "Top publishers by Product": "Meilleurs éditeurs, par produit",
+    "Top products by Publishers": "Meilleurs produits, par éditeur",
+    "Tenancies during period": "",
+    "Channels: First": "",
+    "Channels: Last": "",
+    "Publishers: First": "",
+    "Publishers: Last": ""
 }
