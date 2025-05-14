@@ -22,13 +22,14 @@ import {
   styled,
   t,
   useTheme,
+  SupersetTheme,
   useCSSTextTruncation,
   fetchTimeRange,
 } from '@superset-ui/core';
 import Button from 'src/components/Button';
 import ControlHeader from 'src/explore/components/ControlHeader';
 import Modal from 'src/components/Modal';
-import { Divider } from 'src/components';
+import { Divider } from 'src/components/Divider';
 import Icons from 'src/components/Icons';
 import { Tooltip } from 'src/components/Tooltip';
 import { useDebouncedEffect } from 'src/explore/exploreUtils';
@@ -37,13 +38,8 @@ import { noOp } from 'src/utils/common';
 import ControlPopover from '../ControlPopover/ControlPopover';
 
 import { CurrentDay, DateFilterControlProps } from './types';
-import {
-  SELECT_DAY,
-} from './utils';
-import {
-  CustomFrame,
-  DateLabel,
-} from './components';
+import { SELECT_DAY } from './utils';
+import { CustomFrame, DateLabel } from './components';
 
 const ContentStyleWrapper = styled.div`
   ${({ theme }) => css`
@@ -122,6 +118,15 @@ const getTooltipTitle = (
   isLabelTruncated ? (
     <div>
       {label && <strong>{label}</strong>}
+      {range && (
+        <div
+          css={(theme: SupersetTheme) => css`
+            margin-top: ${theme.gridUnit}px;
+          `}
+        >
+          {range}
+        </div>
+      )}
     </div>
   ) : (
     range || null
@@ -149,7 +154,7 @@ export default function CustomDateFilterLabel(props: DateFilterControlProps) {
   const [labelRef, labelIsTruncated] = useCSSTextTruncation<HTMLSpanElement>();
   useEffect(() => {
     if (value === CurrentDay) {
-      return
+      return;
     }
     fetchTimeRange(value).then(({ value: actualRange, error }) => {
       if (error) {
@@ -158,9 +163,7 @@ export default function CustomDateFilterLabel(props: DateFilterControlProps) {
         setTooltipTitle(value || null);
       } else {
         setActualTimeRange(actualRange || '');
-        setTooltipTitle(
-          getTooltipTitle(labelIsTruncated, actualRange, value),
-        );
+        setTooltipTitle(getTooltipTitle(labelIsTruncated, actualRange, value));
 
         setValidTimeRange(true);
       }
@@ -225,11 +228,7 @@ export default function CustomDateFilterLabel(props: DateFilterControlProps) {
       <Divider />
       <div>
         <div className="section-title">{t('Actual time range')}</div>
-        {validTimeRange && (
-          <div>
-            {evalResponse}
-          </div>
-        )}
+        {validTimeRange && <div>{evalResponse}</div>}
         {!validTimeRange && (
           <IconWrapper className="warning">
             <Icons.ErrorSolidSmall iconColor={theme.colors.error.base} />
@@ -239,12 +238,7 @@ export default function CustomDateFilterLabel(props: DateFilterControlProps) {
       </div>
       <Divider />
       <div className="footer">
-        <Button
-          buttonStyle="secondary"
-          cta
-          key="cancel"
-          onClick={onHide}
-        >
+        <Button buttonStyle="secondary" cta key="cancel" onClick={onHide}>
           {t('CANCEL')}
         </Button>
         <Button
@@ -301,11 +295,7 @@ export default function CustomDateFilterLabel(props: DateFilterControlProps) {
 
   const modalContent = (
     <>
-      <Tooltip
-        placement="top"
-        title={tooltipTitle}
-        getPopupContainer={trigger => trigger.parentElement as HTMLElement}
-      >
+      <Tooltip placement="top" title={tooltipTitle}>
         <DateLabel
           onClick={toggleOverlay}
           label={actualTimeRange}
