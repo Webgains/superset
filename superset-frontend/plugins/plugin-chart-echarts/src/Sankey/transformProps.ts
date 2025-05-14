@@ -86,17 +86,17 @@ export default function transformProps(
     const { name, data } = params;
     const value = params.value as number;
     const rows = [[metricLabel, valueFormatter.format(value)]];
-    const { source, target } = data as Link;
-    if (source && target) {
-      rows.push([
-        `% (${source})`,
-        percentFormatter.format(value / nodeValues.get(source)!),
-      ]);
-      rows.push([
-        `% (${target})`,
-        percentFormatter.format(value / nodeValues.get(target)!),
-      ]);
-    }
+    // const { source, target } = data as Link;
+    // if (source && target) {
+    //   rows.push([
+    //     `% (${source})`,
+    //     percentFormatter.format(value / nodeValues.get(source)!),
+    //   ]);
+    //   rows.push([
+    //     `% (${target})`,
+    //     percentFormatter.format(value / nodeValues.get(target)!),
+    //   ]);
+    // }
     return tooltipHtml(rows, name);
   };
 
