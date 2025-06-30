@@ -728,6 +728,76 @@ def test_oauth2_happy_path(
     assert token.refresh_token == "ZZZ"  # noqa: S105
 
 
+def test_oauth2_permissions(
+    mocker: MockerFixture,
+    session: Session,
+    client: Any,
+) -> None:
+    """
+    Test the OAuth2 endpoint works for users without DB permissions.
+
+    Anyone should be able to authenticate with OAuth2, even if they don't have
+    permissions to read the database (which is needed to get the OAuth2 config).
+    """
+    from superset.databases.api import DatabaseRestApi
+    from superset.models.core import Database, DatabaseUserOAuth2Tokens
+
+    DatabaseRestApi.datamodel.session = session
+
+    # create table for databases
+    Database.metadata.create_all(session.get_bind())  # pylint: disable=no-member
+    db.session.add(
+        Database(
+            database_name="my_db",
+            sqlalchemy_uri="sqlite://",
+            uuid=UUID("7c1b7880-a59d-47cd-8bf1-f1eb8d2863cb"),
+        )
+    )
+    db.session.commit()
+
+    mocker.patch.object(
+        SqliteEngineSpec,
+        "get_oauth2_config",
+        return_value={"id": "one", "secret": "two"},
+    )
+    get_oauth2_token = mocker.patch.object(SqliteEngineSpec, "get_oauth2_token")
+    get_oauth2_token.return_value = {
+        "access_token": "YYY",
+        "expires_in": 3600,
+        "refresh_token": "ZZZ",
+    }
+
+    state = {
+        "user_id": 1,
+        "database_id": 1,
+        "tab_id": 42,
+    }
+    decode_oauth2_state = mocker.patch("superset.databases.api.decode_oauth2_state")
+    decode_oauth2_state.return_value = state
+
+    mocker.patch("superset.databases.api.render_template", return_value="OK")
+
+    with freeze_time("2024-01-01T00:00:00Z"):
+        response = client.get(
+            "/api/v1/database/oauth2/",
+            query_string={
+                "state": "some%2Estate",
+                "code": "XXX",
+            },
+        )
+
+    assert response.status_code == 200
+    decode_oauth2_state.assert_called_with("some%2Estate")
+    get_oauth2_token.assert_called_with({"id": "one", "secret": "two"}, "XXX")
+
+    token = db.session.query(DatabaseUserOAuth2Tokens).one()
+    assert token.user_id == 1
+    assert token.database_id == 1
+    assert token.access_token == "YYY"  # noqa: S105
+    assert token.access_token_expiration == datetime(2024, 1, 1, 1, 0)
+    assert token.refresh_token == "ZZZ"  # noqa: S105
+
+
 def test_oauth2_multiple_tokens(
     mocker: MockerFixture,
     session: Session,
@@ -842,6 +912,7 @@ def test_oauth2_error(
     [
         (
             {
+                "type": "csv",
                 "file": (create_csv_file(), "out.csv"),
                 "table_name": "table1",
                 "delimiter": ",",
@@ -855,6 +926,7 @@ def test_oauth2_error(
             ),
             (
                 {
+                    "type": "csv",
                     "already_exists": "fail",
                     "delimiter": ",",
                     "file": ANY,
@@ -864,6 +936,7 @@ def test_oauth2_error(
         ),
         (
             {
+                "type": "csv",
                 "file": (create_csv_file(), "out.csv"),
                 "table_name": "table2",
                 "delimiter": ";",
@@ -879,6 +952,7 @@ def test_oauth2_error(
             ),
             (
                 {
+                    "type": "csv",
                     "already_exists": "replace",
                     "column_dates": ["col1", "col2"],
                     "delimiter": ";",
@@ -889,6 +963,7 @@ def test_oauth2_error(
         ),
         (
             {
+                "type": "csv",
                 "file": (create_csv_file(), "out.csv"),
                 "table_name": "table2",
                 "delimiter": ";",
@@ -911,6 +986,7 @@ def test_oauth2_error(
             ),
             (
                 {
+                    "type": "csv",
                     "already_exists": "replace",
                     "columns_read": ["col1", "col2"],
                     "null_values": ["None", "N/A", "''"],
@@ -945,7 +1021,7 @@ def test_csv_upload(
     reader_mock = mocker.patch.object(CSVReader, "__init__")
     reader_mock.return_value = None
     response = client.post(
-        "/api/v1/database/1/csv_upload/",
+        "/api/v1/database/1/upload/",
         data=payload,
         content_type="multipart/form-data",
     )
@@ -960,6 +1036,7 @@ def test_csv_upload(
     [
         (
             {
+                "type": "csv",
                 "file": (create_csv_file(), "out.csv"),
                 "delimiter": ",",
                 "already_exists": "fail",
@@ -968,6 +1045,7 @@ def test_csv_upload(
         ),
         (
             {
+                "type": "csv",
                 "file": (create_csv_file(), "out.csv"),
                 "table_name": "",
                 "delimiter": ",",
@@ -976,11 +1054,17 @@ def test_csv_upload(
             {"message": {"table_name": ["Length must be between 1 and 10000."]}},
         ),
         (
-            {"table_name": "table1", "delimiter": ",", "already_exists": "fail"},
+            {
+                "type": "csv",
+                "table_name": "table1",
+                "delimiter": ",",
+                "already_exists": "fail",
+            },
             {"message": {"file": ["Field may not be null."]}},
         ),
         (
             {
+                "type": "csv",
                 "file": "xpto",
                 "table_name": "table1",
                 "delimiter": ",",
@@ -990,6 +1074,7 @@ def test_csv_upload(
         ),
         (
             {
+                "type": "csv",
                 "file": (create_csv_file(), "out.csv"),
                 "table_name": "table1",
                 "delimiter": ",",
@@ -999,6 +1084,7 @@ def test_csv_upload(
         ),
         (
             {
+                "type": "csv",
                 "file": (create_csv_file(), "out.csv"),
                 "table_name": "table1",
                 "delimiter": ",",
@@ -1009,6 +1095,7 @@ def test_csv_upload(
         ),
         (
             {
+                "type": "csv",
                 "file": (create_csv_file(), "out.csv"),
                 "table_name": "table1",
                 "delimiter": ",",
@@ -1019,6 +1106,7 @@ def test_csv_upload(
         ),
         (
             {
+                "type": "csv",
                 "file": (create_csv_file(), "out.csv"),
                 "table_name": "table1",
                 "delimiter": ",",
@@ -1029,6 +1117,7 @@ def test_csv_upload(
         ),
         (
             {
+                "type": "csv",
                 "file": (create_csv_file(), "out.csv"),
                 "table_name": "table1",
                 "delimiter": ",",
@@ -1039,6 +1128,7 @@ def test_csv_upload(
         ),
         (
             {
+                "type": "csv",
                 "file": (create_csv_file(), "out.csv"),
                 "table_name": "table1",
                 "delimiter": ",",
@@ -1049,6 +1139,7 @@ def test_csv_upload(
         ),
         (
             {
+                "type": "csv",
                 "file": (create_csv_file(), "out.csv"),
                 "table_name": "table1",
                 "delimiter": ",",
@@ -1059,6 +1150,7 @@ def test_csv_upload(
         ),
         (
             {
+                "type": "csv",
                 "file": (create_csv_file(), "out.csv"),
                 "table_name": "table1",
                 "delimiter": ",",
@@ -1082,38 +1174,12 @@ def test_csv_upload_validation(
     _ = mocker.patch.object(UploadCommand, "run")
 
     response = client.post(
-        "/api/v1/database/1/csv_upload/",
+        "/api/v1/database/1/upload/",
         data=payload,
         content_type="multipart/form-data",
     )
     assert response.status_code == 400
     assert response.json == expected_response
-
-
-def test_csv_upload_file_size_validation(
-    mocker: MockerFixture,
-    client: Any,
-    full_api_access: None,
-) -> None:
-    """
-    Test CSV Upload validation fails.
-    """
-    _ = mocker.patch.object(UploadCommand, "run")
-    current_app.config["CSV_UPLOAD_MAX_SIZE"] = 5
-    response = client.post(
-        "/api/v1/database/1/csv_upload/",
-        data={
-            "file": (create_csv_file(), "out.csv"),
-            "table_name": "table1",
-            "delimiter": ",",
-        },
-        content_type="multipart/form-data",
-    )
-    assert response.status_code == 400
-    assert response.json == {
-        "message": {"file": ["File size exceeds the maximum allowed size."]}
-    }
-    current_app.config["CSV_UPLOAD_MAX_SIZE"] = None
 
 
 @pytest.mark.parametrize(
@@ -1142,8 +1208,9 @@ def test_csv_upload_file_extension_invalid(
     """
     _ = mocker.patch.object(UploadCommand, "run")
     response = client.post(
-        "/api/v1/database/1/csv_upload/",
+        "/api/v1/database/1/upload/",
         data={
+            "type": "csv",
             "file": create_csv_file(filename=filename),
             "table_name": "table1",
             "delimiter": ",",
@@ -1178,8 +1245,9 @@ def test_csv_upload_file_extension_valid(
     """
     _ = mocker.patch.object(UploadCommand, "run")
     response = client.post(
-        "/api/v1/database/1/csv_upload/",
+        "/api/v1/database/1/upload/",
         data={
+            "type": "csv",
             "file": create_csv_file(filename=filename),
             "table_name": "table1",
             "delimiter": ",",
@@ -1194,6 +1262,7 @@ def test_csv_upload_file_extension_valid(
     [
         (
             {
+                "type": "excel",
                 "file": (create_excel_file(), "out.xls"),
                 "table_name": "table1",
             },
@@ -1206,6 +1275,7 @@ def test_csv_upload_file_extension_valid(
             ),
             (
                 {
+                    "type": "excel",
                     "already_exists": "fail",
                     "file": ANY,
                     "table_name": "table1",
@@ -1214,6 +1284,7 @@ def test_csv_upload_file_extension_valid(
         ),
         (
             {
+                "type": "excel",
                 "file": (create_excel_file(), "out.xls"),
                 "table_name": "table2",
                 "sheet_name": "Sheet1",
@@ -1229,6 +1300,7 @@ def test_csv_upload_file_extension_valid(
             ),
             (
                 {
+                    "type": "excel",
                     "already_exists": "replace",
                     "column_dates": ["col1", "col2"],
                     "sheet_name": "Sheet1",
@@ -1239,6 +1311,7 @@ def test_csv_upload_file_extension_valid(
         ),
         (
             {
+                "type": "excel",
                 "file": (create_excel_file(), "out.xls"),
                 "table_name": "table2",
                 "sheet_name": "Sheet1",
@@ -1257,6 +1330,7 @@ def test_csv_upload_file_extension_valid(
             ),
             (
                 {
+                    "type": "excel",
                     "already_exists": "replace",
                     "columns_read": ["col1", "col2"],
                     "null_values": ["None", "N/A", "''"],
@@ -1287,7 +1361,7 @@ def test_excel_upload(
     reader_mock = mocker.patch.object(ExcelReader, "__init__")
     reader_mock.return_value = None
     response = client.post(
-        "/api/v1/database/1/excel_upload/",
+        "/api/v1/database/1/upload/",
         data=payload,
         content_type="multipart/form-data",
     )
@@ -1302,6 +1376,7 @@ def test_excel_upload(
     [
         (
             {
+                "type": "excel",
                 "file": (create_excel_file(), "out.xls"),
                 "sheet_name": "Sheet1",
                 "already_exists": "fail",
@@ -1310,6 +1385,7 @@ def test_excel_upload(
         ),
         (
             {
+                "type": "excel",
                 "file": (create_excel_file(), "out.xls"),
                 "table_name": "",
                 "sheet_name": "Sheet1",
@@ -1318,11 +1394,12 @@ def test_excel_upload(
             {"message": {"table_name": ["Length must be between 1 and 10000."]}},
         ),
         (
-            {"table_name": "table1", "already_exists": "fail"},
+            {"type": "excel", "table_name": "table1", "already_exists": "fail"},
             {"message": {"file": ["Field may not be null."]}},
         ),
         (
             {
+                "type": "excel",
                 "file": "xpto",
                 "table_name": "table1",
                 "already_exists": "fail",
@@ -1331,6 +1408,7 @@ def test_excel_upload(
         ),
         (
             {
+                "type": "excel",
                 "file": (create_excel_file(), "out.xls"),
                 "table_name": "table1",
                 "already_exists": "xpto",
@@ -1339,6 +1417,7 @@ def test_excel_upload(
         ),
         (
             {
+                "type": "excel",
                 "file": (create_excel_file(), "out.xls"),
                 "table_name": "table1",
                 "already_exists": "fail",
@@ -1348,6 +1427,7 @@ def test_excel_upload(
         ),
         (
             {
+                "type": "excel",
                 "file": (create_excel_file(), "out.xls"),
                 "table_name": "table1",
                 "already_exists": "fail",
@@ -1357,6 +1437,7 @@ def test_excel_upload(
         ),
         (
             {
+                "type": "excel",
                 "file": (create_excel_file(), "out.xls"),
                 "table_name": "table1",
                 "already_exists": "fail",
@@ -1379,7 +1460,7 @@ def test_excel_upload_validation(
     _ = mocker.patch.object(UploadCommand, "run")
 
     response = client.post(
-        "/api/v1/database/1/excel_upload/",
+        "/api/v1/database/1/upload/",
         data=payload,
         content_type="multipart/form-data",
     )
@@ -1413,8 +1494,9 @@ def test_excel_upload_file_extension_invalid(
     """
     _ = mocker.patch.object(UploadCommand, "run")
     response = client.post(
-        "/api/v1/database/1/excel_upload/",
+        "/api/v1/database/1/upload/",
         data={
+            "type": "excel",
             "file": create_excel_file(filename=filename),
             "table_name": "table1",
         },
@@ -1429,6 +1511,7 @@ def test_excel_upload_file_extension_invalid(
     [
         (
             {
+                "type": "columnar",
                 "file": (create_columnar_file(), "out.parquet"),
                 "table_name": "table1",
             },
@@ -1441,6 +1524,7 @@ def test_excel_upload_file_extension_invalid(
             ),
             (
                 {
+                    "type": "columnar",
                     "already_exists": "fail",
                     "file": ANY,
                     "table_name": "table1",
@@ -1449,6 +1533,7 @@ def test_excel_upload_file_extension_invalid(
         ),
         (
             {
+                "type": "columnar",
                 "file": (create_columnar_file(), "out.parquet"),
                 "table_name": "table2",
                 "already_exists": "replace",
@@ -1465,6 +1550,7 @@ def test_excel_upload_file_extension_invalid(
             ),
             (
                 {
+                    "type": "columnar",
                     "already_exists": "replace",
                     "columns_read": ["col1", "col2"],
                     "file": ANY,
@@ -1493,7 +1579,7 @@ def test_columnar_upload(
     reader_mock = mocker.patch.object(ColumnarReader, "__init__")
     reader_mock.return_value = None
     response = client.post(
-        "/api/v1/database/1/columnar_upload/",
+        "/api/v1/database/1/upload/",
         data=payload,
         content_type="multipart/form-data",
     )
@@ -1508,6 +1594,7 @@ def test_columnar_upload(
     [
         (
             {
+                "type": "columnar",
                 "file": (create_columnar_file(), "out.parquet"),
                 "already_exists": "fail",
             },
@@ -1515,6 +1602,7 @@ def test_columnar_upload(
         ),
         (
             {
+                "type": "columnar",
                 "file": (create_columnar_file(), "out.parquet"),
                 "table_name": "",
                 "already_exists": "fail",
@@ -1522,11 +1610,12 @@ def test_columnar_upload(
             {"message": {"table_name": ["Length must be between 1 and 10000."]}},
         ),
         (
-            {"table_name": "table1", "already_exists": "fail"},
+            {"type": "columnar", "table_name": "table1", "already_exists": "fail"},
             {"message": {"file": ["Field may not be null."]}},
         ),
         (
             {
+                "type": "columnar",
                 "file": "xpto",
                 "table_name": "table1",
                 "already_exists": "fail",
@@ -1535,6 +1624,7 @@ def test_columnar_upload(
         ),
         (
             {
+                "type": "columnar",
                 "file": (create_columnar_file(), "out.parquet"),
                 "table_name": "table1",
                 "already_exists": "xpto",
@@ -1556,7 +1646,7 @@ def test_columnar_upload_validation(
     _ = mocker.patch.object(UploadCommand, "run")
 
     response = client.post(
-        "/api/v1/database/1/columnar_upload/",
+        "/api/v1/database/1/upload/",
         data=payload,
         content_type="multipart/form-data",
     )
@@ -1585,8 +1675,9 @@ def test_columnar_upload_file_extension_valid(
     """
     _ = mocker.patch.object(UploadCommand, "run")
     response = client.post(
-        "/api/v1/database/1/columnar_upload/",
+        "/api/v1/database/1/upload/",
         data={
+            "type": "columnar",
             "file": (create_columnar_file(), filename),
             "table_name": "table1",
         },
@@ -1621,8 +1712,9 @@ def test_columnar_upload_file_extension_invalid(
     """
     _ = mocker.patch.object(UploadCommand, "run")
     response = client.post(
-        "/api/v1/database/1/columnar_upload/",
+        "/api/v1/database/1/upload/",
         data={
+            "type": "columnar",
             "file": create_columnar_file(filename=filename),
             "table_name": "table1",
         },
@@ -1637,8 +1729,8 @@ def test_csv_metadata(
 ) -> None:
     _ = mocker.patch.object(CSVReader, "file_metadata")
     response = client.post(
-        "/api/v1/database/csv_metadata/",
-        data={"file": create_csv_file()},
+        "/api/v1/database/upload_metadata/",
+        data={"type": "csv", "file": create_csv_file()},
         content_type="multipart/form-data",
     )
     assert response.status_code == 200
@@ -1649,8 +1741,8 @@ def test_csv_metadata_bad_extension(
 ) -> None:
     _ = mocker.patch.object(CSVReader, "file_metadata")
     response = client.post(
-        "/api/v1/database/csv_metadata/",
-        data={"file": create_csv_file(filename="test.out")},
+        "/api/v1/database/upload_metadata/",
+        data={"type": "csv", "file": create_csv_file(filename="test.out")},
         content_type="multipart/form-data",
     )
     assert response.status_code == 400
@@ -1662,12 +1754,20 @@ def test_csv_metadata_validation(
 ) -> None:
     _ = mocker.patch.object(CSVReader, "file_metadata")
     response = client.post(
-        "/api/v1/database/csv_metadata/",
-        data={},
+        "/api/v1/database/upload_metadata/",
+        data={"type": "csv"},
         content_type="multipart/form-data",
     )
     assert response.status_code == 400
     assert response.json == {"message": {"file": ["Field may not be null."]}}
+
+    response = client.post(
+        "/api/v1/database/upload_metadata/",
+        data={"file": create_csv_file(filename="test.csv")},
+        content_type="multipart/form-data",
+    )
+    assert response.status_code == 400
+    assert response.json == {"message": {"type": ["Missing data for required field."]}}
 
 
 def test_excel_metadata(
@@ -1675,8 +1775,8 @@ def test_excel_metadata(
 ) -> None:
     _ = mocker.patch.object(ExcelReader, "file_metadata")
     response = client.post(
-        "/api/v1/database/excel_metadata/",
-        data={"file": create_excel_file()},
+        "/api/v1/database/upload_metadata/",
+        data={"type": "excel", "file": create_excel_file()},
         content_type="multipart/form-data",
     )
     assert response.status_code == 200
@@ -1687,8 +1787,8 @@ def test_excel_metadata_bad_extension(
 ) -> None:
     _ = mocker.patch.object(ExcelReader, "file_metadata")
     response = client.post(
-        "/api/v1/database/excel_metadata/",
-        data={"file": create_excel_file(filename="test.out")},
+        "/api/v1/database/upload_metadata/",
+        data={"type": "excel", "file": create_excel_file(filename="test.out")},
         content_type="multipart/form-data",
     )
     assert response.status_code == 400
@@ -1700,8 +1800,8 @@ def test_excel_metadata_validation(
 ) -> None:
     _ = mocker.patch.object(ExcelReader, "file_metadata")
     response = client.post(
-        "/api/v1/database/excel_metadata/",
-        data={},
+        "/api/v1/database/upload_metadata/",
+        data={"type": "excel"},
         content_type="multipart/form-data",
     )
     assert response.status_code == 400
@@ -1713,8 +1813,8 @@ def test_columnar_metadata(
 ) -> None:
     _ = mocker.patch.object(ColumnarReader, "file_metadata")
     response = client.post(
-        "/api/v1/database/columnar_metadata/",
-        data={"file": create_columnar_file()},
+        "/api/v1/database/upload_metadata/",
+        data={"type": "columnar", "file": create_columnar_file()},
         content_type="multipart/form-data",
     )
     assert response.status_code == 200
@@ -1725,8 +1825,8 @@ def test_columnar_metadata_bad_extension(
 ) -> None:
     _ = mocker.patch.object(ColumnarReader, "file_metadata")
     response = client.post(
-        "/api/v1/database/columnar_metadata/",
-        data={"file": create_columnar_file(filename="test.out")},
+        "/api/v1/database/upload_metadata/",
+        data={"type": "columnar", "file": create_columnar_file(filename="test.out")},
         content_type="multipart/form-data",
     )
     assert response.status_code == 400
@@ -1738,8 +1838,8 @@ def test_columnar_metadata_validation(
 ) -> None:
     _ = mocker.patch.object(ColumnarReader, "file_metadata")
     response = client.post(
-        "/api/v1/database/columnar_metadata/",
-        data={},
+        "/api/v1/database/upload_metadata/",
+        data={"type": "columnar"},
         content_type="multipart/form-data",
     )
     assert response.status_code == 400

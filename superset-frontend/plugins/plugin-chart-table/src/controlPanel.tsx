@@ -328,6 +328,26 @@ const config: ControlPanelConfig = {
         ],
         [
           {
+            name: 'order_desc',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Sort descending'),
+              default: true,
+              description: t(
+                'If enabled, this control sorts the results/values descending, otherwise it sorts the results ascending.',
+              ),
+              visibility: ({ controls }: ControlPanelsContainerProps) => {
+                const hasSortMetric = Boolean(
+                  controls?.timeseries_limit_metric?.value,
+                );
+                return hasSortMetric && isAggMode({ controls });
+              },
+              resetOnHide: false,
+            },
+          },
+        ],
+        [
+          {
             name: 'server_pagination',
             config: {
               type: 'CheckboxControl',
@@ -359,21 +379,6 @@ const config: ControlPanelConfig = {
               description: t('Rows per page, 0 means no pagination'),
               visibility: ({ controls }: ControlPanelsContainerProps) =>
                 Boolean(controls?.server_pagination?.value),
-            },
-          },
-        ],
-        [
-          {
-            name: 'order_desc',
-            config: {
-              type: 'CheckboxControl',
-              label: t('Sort descending'),
-              default: true,
-              description: t(
-                'If enabled, this control sorts the results/values descending, otherwise it sorts the results ascending.',
-              ),
-              visibility: isAggMode,
-              resetOnHide: false,
             },
           },
         ],
@@ -467,7 +472,7 @@ const config: ControlPanelConfig = {
               renderTrigger: true,
               default: true,
               description: t(
-                'Renders table cells as HTML when applicable. For example, HTML &lt;a&gt; tags will be rendered as hyperlinks.',
+                'Renders table cells as HTML when applicable. For example, HTML <a> tags will be rendered as hyperlinks.',
               ),
             },
           },
@@ -486,8 +491,9 @@ const config: ControlPanelConfig = {
                 return true;
               },
               mapStateToProps(explore, _, chart) {
-                const timeComparisonStatus =
-                  !!explore?.controls?.time_compare?.value;
+                const timeComparisonStatus = !isEmpty(
+                  explore?.controls?.time_compare?.value,
+                );
 
                 const { colnames: _colnames, coltypes: _coltypes } =
                   chart?.queriesResponse?.[0] ?? {};
@@ -649,9 +655,11 @@ const config: ControlPanelConfig = {
                           (colname: string, index: number) =>
                             coltypes[index] === GenericDataType.Numeric,
                         )
-                        .map(colname => ({
+                        .map((colname: string) => ({
                           value: colname,
-                          label: verboseMap[colname] ?? colname,
+                          label: Array.isArray(verboseMap)
+                            ? colname
+                            : (verboseMap[colname] ?? colname),
                         }))
                     : [];
                 const columnOptions = explore?.controls?.time_compare?.value

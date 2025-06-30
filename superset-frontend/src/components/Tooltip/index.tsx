@@ -18,20 +18,16 @@
  */
 import { supersetTheme } from '@superset-ui/core';
 import { Tooltip as AntdTooltip } from 'antd-v5';
-import {
-  TooltipProps as AntdTooltipProps,
-  TooltipPlacement as AntdTooltipPlacement,
-} from 'antd-v5/lib/tooltip';
+import { TooltipProps, TooltipPlacement } from 'antd-v5/lib/tooltip';
 
-export type TooltipPlacement = AntdTooltipPlacement;
-export type TooltipProps = AntdTooltipProps;
+export { TooltipProps, TooltipPlacement };
 
-export const Tooltip = (props: TooltipProps) => (
+export const Tooltip = ({ overlayStyle, ...props }: TooltipProps) => (
   <>
     <AntdTooltip
-      overlayInnerStyle={{
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
+      styles={{
+        body: { overflow: 'hidden', textOverflow: 'ellipsis' },
+        root: overlayStyle ?? {},
       }}
       color={`${supersetTheme.colors.grayscale.dark2}e6`}
       {...props}

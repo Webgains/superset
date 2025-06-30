@@ -355,6 +355,7 @@ const processComparisonColumns = (
       } = props;
       const savedFormat = columnFormats?.[col.key];
       const savedCurrency = currencyFormats?.[col.key];
+      const originalLabel = col.label;
       if (
         (col.isMetric || col.isPercentMetric) &&
         !col.key.includes(comparisonSuffix) &&

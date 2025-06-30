@@ -1237,6 +1237,35 @@ def test_check_sql_functions_exist() -> None:
     )
 
 
+def test_check_sql_functions_exist_with_comments() -> None:
+    """
+    Test sql functions are detected correctly with comments
+    """
+    assert not (
+        check_sql_functions_exist(
+            "select a, b from version/**/", {"version"}, "postgresql"
+        )
+    )
+
+    assert check_sql_functions_exist("select version/**/()", {"version"}, "postgresql")
+
+    assert check_sql_functions_exist(
+        "select version from version/**/()", {"version"}, "postgresql"
+    )
+
+    assert check_sql_functions_exist(
+        "select 1, a.version from (select version from version/**/()) as a",
+        {"version"},
+        "postgresql",
+    )
+
+    assert check_sql_functions_exist(
+        "select 1, a.version from (select version/**/()) as a",
+        {"version"},
+        "postgresql",
+    )
+
+
 def test_sanitize_clause_valid():
     # regular clauses
     assert sanitize_clause("col = 1") == "col = 1"
@@ -1507,7 +1536,7 @@ def test_insert_rls_as_subquery(
             else candidate_table.table
         )
         for left, right in zip(
-            candidate_table_name.split(".")[::-1], table.split(".")[::-1]
+            candidate_table_name.split(".")[::-1], table.split(".")[::-1], strict=False
         ):
             if left != right:
                 return None
@@ -1719,7 +1748,9 @@ def test_insert_rls_in_predicate(
         Return the RLS ``condition`` if ``candidate`` matches ``table``.
         """
         # compare ignoring schema
-        for left, right in zip(str(candidate).split(".")[::-1], table.split(".")[::-1]):
+        for left, right in zip(
+            str(candidate).split(".")[::-1], table.split(".")[::-1], strict=False
+        ):
             if left != right:
                 return None
         return condition
