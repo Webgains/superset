@@ -78,15 +78,6 @@ COPY superset-frontend /app/superset-frontend
 ######################################################################
 FROM superset-node-ci AS superset-node
 
-# Build the frontend if not in dev mode
-RUN --mount=type=cache,target=/root/.npm \
-    if [ "$DEV_MODE" = "false" ]; then \
-        echo "Running 'npm run ${BUILD_CMD}'"; \
-        npm run ${BUILD_CMD}; \
-    else \
-        echo "Skipping 'npm run ${BUILD_CMD}' in dev mode"; \
-    fi;
-
 # Copy translation files
 RUN mkdir -p /app/superset/translations
 COPY superset/translations /app/superset/translations
@@ -99,6 +90,7 @@ RUN npm run build-translation
 RUN rm /app/superset/translations/*/LC_MESSAGES/*.po
 RUN rm /app/superset/translations/messages.pot
 
+# Build the frontend assets
 RUN npm run ${BUILD_CMD}
 
 ######################################################################
