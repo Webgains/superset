@@ -94,9 +94,9 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     user: *superset-user
-    depends_on:
-      superset-init:
-        condition: service_completed_successfully
+    # depends_on:
+    #   superset-init:
+    #     condition: service_completed_successfully
     volumes: *superset-volumes
     environment:
       CYPRESS_CONFIG: "${CYPRESS_CONFIG:-}"
