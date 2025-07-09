@@ -24,13 +24,13 @@ import {
   logging,
   Behavior,
   t,
-  isFeatureEnabled,
-  FeatureFlag,
   getChartMetadataRegistry,
   VizType,
+  isFeatureEnabled,
+  FeatureFlag,
 } from '@superset-ui/core';
 import { Logger, LOG_ACTIONS_RENDER_CHART } from 'src/logger/LogUtils';
-import { EmptyStateBig, EmptyStateSmall } from 'src/components/EmptyState';
+import { EmptyState } from 'src/components/EmptyState';
 import { ChartSource } from 'src/types/ChartSource';
 import ChartContextMenu from './ChartContextMenu/ChartContextMenu';
 
@@ -92,10 +92,10 @@ class ChartRenderer extends Component {
       showContextMenu:
         props.source === ChartSource.Dashboard &&
         !suppressContextMenu &&
-        (isFeatureEnabled(FeatureFlag.DrillToDetail) ||
-          isFeatureEnabled(FeatureFlag.DashboardCrossFilters)),
+        isFeatureEnabled(FeatureFlag.DrillToDetail),
       inContextMenu: false,
       legendState: undefined,
+      legendIndex: 0,
     };
     this.hasQueryResponseChange = false;
 
@@ -110,6 +110,7 @@ class ChartRenderer extends Component {
     this.handleContextMenuClosed = this.handleContextMenuClosed.bind(this);
     this.handleLegendStateChanged = this.handleLegendStateChanged.bind(this);
     this.onContextMenuFallback = this.onContextMenuFallback.bind(this);
+    this.handleLegendScroll = this.handleLegendScroll.bind(this);
 
     this.hooks = {
       onAddFilter: this.handleAddFilter,
@@ -124,6 +125,7 @@ class ChartRenderer extends Component {
       setDataMask: dataMask => {
         this.props.actions?.updateDataMask(this.props.chartId, dataMask);
       },
+      onLegendScroll: this.handleLegendScroll,
     };
 
     // TODO: queriesResponse comes from Redux store but it's being edited by
@@ -247,6 +249,10 @@ class ChartRenderer extends Component {
     }
   }
 
+  handleLegendScroll(legendIndex) {
+    this.setState({ legendIndex });
+  }
+
   render() {
     const { chartAlert, chartStatus, chartId, emitCrossFilters } = this.props;
 
@@ -308,7 +314,8 @@ class ChartRenderer extends Component {
     const noResultImage = 'chart.svg';
     if (width > BIG_NO_RESULT_MIN_WIDTH && height > BIG_NO_RESULT_MIN_HEIGHT) {
       noResultsComponent = (
-        <EmptyStateBig
+        <EmptyState
+          size="large"
           title={noResultTitle}
           description={noResultDescription}
           image={noResultImage}
@@ -316,7 +323,7 @@ class ChartRenderer extends Component {
       );
     } else {
       noResultsComponent = (
-        <EmptyStateSmall title={noResultTitle} image={noResultImage} />
+        <EmptyState size="small" title={noResultTitle} image={noResultImage} />
       );
     }
 
@@ -367,6 +374,7 @@ class ChartRenderer extends Component {
             postTransformProps={postTransformProps}
             emitCrossFilters={emitCrossFilters}
             legendState={this.state.legendState}
+            legendIndex={this.state.legendIndex}
             {...drillToDetailProps}
           />
         </div>
