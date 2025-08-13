@@ -270,8 +270,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
     }
 
     ALPHA_ONLY_PMVS = {
-        ("can_csv_upload", "Database"),
-        ("can_excel_upload", "Database"),
+        ("can_upload", "Database"),
     }
 
     ADMIN_ONLY_PERMISSIONS = {
@@ -331,6 +330,8 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         ("menu_access", "SQL Editor"),
         ("menu_access", "Saved Queries"),
         ("menu_access", "Query Search"),
+        ("can_read", "SqlLabPermalinkRestApi"),
+        ("can_write", "SqlLabPermalinkRestApi"),
     }
 
     SQLLAB_EXTRA_PERMISSION_VIEWS = {
@@ -1109,7 +1110,9 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         """
         Find a List of models by a list of ids, if defined applies `base_filter`
         """
-        query = self.get_session.query(Role).filter(Role.id.in_(role_ids))
+        query = self.get_session.query(self.role_model).filter(
+            self.role_model.id.in_(role_ids)
+        )
         return query.all()
 
     def copy_role(

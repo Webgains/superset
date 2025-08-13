@@ -959,6 +959,11 @@ class TestDatabaseApi(SupersetTestCase):
         assert rv.status_code == 201
         assert "sqlalchemy_form" in response["result"]["configuration_method"]
 
+        # Cleanup
+        model = db.session.query(Database).get(response.get("id"))
+        db.session.delete(model)
+        db.session.commit()
+
     def test_create_database_server_cert_validate(self):
         """
         Database API: Test create server cert validation
@@ -1433,11 +1438,9 @@ class TestDatabaseApi(SupersetTestCase):
         assert rv.status_code == 200
         assert set(data["permissions"]) == {
             "can_read",
-            "can_columnar_upload",
-            "can_csv_upload",
-            "can_excel_upload",
             "can_write",
             "can_export",
+            "can_upload",
         }
 
     def test_get_invalid_database_table_metadata(self):
@@ -1817,35 +1820,6 @@ class TestDatabaseApi(SupersetTestCase):
             assert data["count"] == 1
             db.session.delete(database)
             db.session.commit()
-
-    def mock_empty_csv_function(d, user):  # noqa: N805
-        return []
-
-    @mock.patch(
-        "superset.views.core.app.config",
-        {**app.config, "ALLOWED_USER_CSV_SCHEMA_FUNC": mock_empty_csv_function},
-    )
-    def test_get_allow_file_upload_false_csv(self):
-        """
-        Database API: Test filter for allow file upload checks for schemas.
-        Both databases have false allow_file_upload
-        """
-        with self.create_app().app_context():
-            self.login(ADMIN_USERNAME)
-            arguments = {
-                "columns": ["allow_file_upload"],
-                "filters": [
-                    {
-                        "col": "allow_file_upload",
-                        "opr": "upload_is_enabled",
-                        "value": True,
-                    }
-                ],
-            }
-            uri = f"api/v1/database/?q={prison.dumps(arguments)}"
-            rv = self.client.get(uri)
-            data = json.loads(rv.data.decode("utf-8"))
-            assert data["count"] == 1
 
     def test_get_allow_file_upload_filter_no_permission(self):
         """
@@ -3036,6 +3010,59 @@ class TestDatabaseApi(SupersetTestCase):
                 ]
             }
         )
+
+    @mock.patch("superset.commands.database.importers.v1.utils.add_permissions")
+    def test_import_database_row_expansion_enabled(self, mock_add_permissions):
+        """
+        Database API: Test import database with row expansion enabled.
+        """
+        self.login(ADMIN_USERNAME)
+        uri = "api/v1/database/import/"
+
+        db_config = {
+            "database_name": "DB with expand rows enabled",
+            "allow_csv_upload": True,
+            "allow_ctas": True,
+            "allow_cvas": True,
+            "allow_dml": True,
+            "allow_run_async": False,
+            "cache_timeout": None,
+            "expose_in_sqllab": True,
+            "extra": {
+                "schema_options": {"expand_rows": True},
+            },
+            "sqlalchemy_uri": "postgresql://user:pass@host1",
+            "uuid": "b8a1ccd3-779d-4ab7-8ad8-9ab119d7ff90",
+            "version": "1.0.0",
+        }
+
+        buf = BytesIO()
+        with ZipFile(buf, "w") as bundle:
+            with bundle.open("database_export/metadata.yaml", "w") as fp:
+                fp.write(yaml.safe_dump(database_metadata_config).encode())
+            with bundle.open(
+                "database_export/databases/DB_with_expand_rows_enabled.yaml", "w"
+            ) as fp:
+                fp.write(yaml.safe_dump(db_config).encode())
+        buf.seek(0)
+
+        form_data = {
+            "formData": (buf, "database_export.zip"),
+            "passwords": json.dumps(
+                {"databases/DB_with_expand_rows_enabled.yaml": "SECRET"}
+            ),
+        }
+        rv = self.client.post(uri, data=form_data, content_type="multipart/form-data")
+        response = json.loads(rv.data.decode("utf-8"))
+
+        assert rv.status_code == 200
+        assert response == {"message": "OK"}
+
+        database = db.session.query(Database).filter_by(uuid=db_config["uuid"]).one()
+        assert database.extra == json.dumps({"schema_options": {"expand_rows": True}})
+
+        db.session.delete(database)
+        db.session.commit()
 
     @mock.patch(
         "superset.db_engine_specs.base.BaseEngineSpec.get_function_names",
