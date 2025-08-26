@@ -300,5 +300,7 @@
     "Summary": "Summary",
     "Show total aggregations of selected metrics. Note that row limit does not apply to the result.": "Show total aggregations of selected metrics. Note that row limit does not apply to the result.",
     "Total PC Commission": "Total PC commission",
-    "Total PV Commission": "Total PV commission"
+    "Total PV Commission": "Total PV commission",
+    "Top Publisher Groups by Sales": "Top Publisher Groups By Sales",
+    "Publisher group": "Publisher group"
 }
