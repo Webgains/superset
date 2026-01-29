@@ -1,0 +1,77 @@
+name: Dependabot Auto Merge
+
+# Usage:
+#   dependabot:
+#     name: Dependabot Auto Merge
+#     if: |
+#       github.event_name == 'pull_request' &&
+#       github.event.pull_request.user.login == 'dependabot[bot]'
+#     uses: webgains/github-workflows/.github/workflows/pr-dependabot-auto-merge.yml@main
+#     needs: [INSERT NEEDS HERE]
+#     with:
+#       pr-number: ${{ github.event.pull_request.number || 0 }}
+#       pr-url: ${{ github.event.pull_request.html_url || '' }}
+#     secrets: inherit
+
+on:
+  workflow_call:
+    inputs:
+      pr-number:
+        required: true
+        type: number
+      pr-url:
+        required: true
+        type: string
+    secrets:
+      GH_ACCESS_TOKEN:
+        description: 'PAT token with repo permissions to approve and merge PRs (required to trigger downstream workflows)'
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dependabot Metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: '${{ secrets.GITHUB_TOKEN }}'
+
+      - name: Validate Changed Files
+        id: changed-files
+        run: |
+          CHANGED_FILES=$(gh pr view ${{ inputs.pr-number }} --repo ${{ github.repository }} --json files --jq '.files[].path')
+          VALID=true
+
+          for file in $CHANGED_FILES; do
+            filename=$(basename "$file")
+            if [[ "$filename" != "package.json" \
+                && "$filename" != "package-lock.json" \
+                && "$filename" != "composer.json" \
+                && "$filename" != "composer.lock" \
+                && ! "$filename" =~ ^Dockerfile.*$ \
+                && ! "$file" =~ ^\.github/workflows/.*\.ya?ml$ ]]; then
+              VALID=false
+              break
+            fi
+          done
+
+          if [[ "$VALID" == "false" ]]; then
+            echo "::error::Dependabot PR should only contain package files, Dockerfiles, or github workflow YAMLs. Found: $CHANGED_FILES"
+            exit 1
+          fi
+
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Auto Merge
+        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' }}
+        run: |
+          gh pr review --approve "${{ inputs.pr-url }}"
+          gh pr merge --auto --merge "${{ inputs.pr-url }}"
+        env:
+          GH_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}

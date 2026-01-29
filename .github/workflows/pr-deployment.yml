@@ -63,7 +63,7 @@ jobs:
       github.event_name == 'pull_request' &&
       github.event.pull_request.user.login == 'dependabot[bot]'
     needs: [deploy]
-    uses: webgains/github-workflows/.github/workflows/pr-dependabot-auto-merge.yml@main
+    uses: ./.github/workflows/pr-dependabot-auto-merge.yml
     with:
       pr-number: ${{ github.event.pull_request.number}}
       pr-url: ${{ github.event.pull_request.html_url }}
