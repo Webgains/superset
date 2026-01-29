@@ -57,7 +57,6 @@ jobs:
     needs: [deploy]
     secrets: inherit
 
-  
   dependabot:
     name: Dependabot Auto Merge
     if: |
