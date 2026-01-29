@@ -309,5 +309,7 @@
     "KUR": "KUR (ratio coût\/ventes)",
     "Comment": "Commentaire",
     "There is currently no information to display.": "Aucune information à afficher actuellement.",
-    "Total Spend": "Dépenses totales"
+    "Total Spend": "Dépenses totales",
+    "Show %s entries per page": "",
+    "Customer type": ""
 }

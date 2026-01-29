@@ -309,5 +309,7 @@
     "KUR": "CRR",
     "Comment": "Commento",
     "There is currently no information to display.": "Al momento non ci sono informazioni da visualizzare.",
-    "Total Spend": "Spesa totale"
+    "Total Spend": "Spesa totale",
+    "Show %s entries per page": "",
+    "Customer type": ""
 }
