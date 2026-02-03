@@ -309,5 +309,7 @@
     "KUR": "KUR",
     "Comment": "Kommentar",
     "There is currently no information to display.": "Derzeit gibt es keine Informationen zum Anzeigen.",
-    "Total Spend": "Gesamtausgaben"
+    "Total Spend": "Gesamtausgaben",
+    "Show %s entries per page": "",
+    "Customer type": ""
 }
