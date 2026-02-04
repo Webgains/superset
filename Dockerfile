@@ -102,13 +102,6 @@ RUN if [ "$BUILD_TRANSLATIONS" = "true" ]; then \
     rm -rf /app/superset/translations/*/*/*.po; \
     rm -rf /app/superset/translations/*/*/*.mo;
 
-# Compiles .json files from the .po files, then deletes the .po files
-RUN npm run build-translation
-RUN rm /app/superset/translations/*/LC_MESSAGES/*.po
-RUN rm /app/superset/translations/messages.pot
-
-RUN npm run ${BUILD_CMD}
-
 ######################################################################
 # Base python layer
 ######################################################################
