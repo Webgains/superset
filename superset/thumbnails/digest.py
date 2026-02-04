@@ -20,9 +20,10 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from flask import current_app
+from flask import current_app as app
 
 from superset import security_manager
+from superset.tasks.exceptions import ExecutorNotFoundError
 from superset.tasks.types import ExecutorType
 from superset.tasks.utils import get_current_user, get_executor
 from superset.utils.core import override_user
@@ -89,15 +90,17 @@ def _adjust_string_with_rls(
     return unique_string
 
 
-def get_dashboard_digest(dashboard: Dashboard) -> str:
-    config = current_app.config
-    datasources = dashboard.datasources
-    executor_type, executor = get_executor(
-        executor_types=config["THUMBNAIL_EXECUTE_AS"],
-        model=dashboard,
-        current_user=get_current_user(),
-    )
-    if func := config["THUMBNAIL_DASHBOARD_DIGEST_FUNC"]:
+def get_dashboard_digest(dashboard: Dashboard) -> str | None:
+    try:
+        executor_type, executor = get_executor(
+            executors=app.config["THUMBNAIL_EXECUTORS"],
+            model=dashboard,
+            current_user=get_current_user(),
+        )
+    except ExecutorNotFoundError:
+        return None
+
+    if func := app.config["THUMBNAIL_DASHBOARD_DIGEST_FUNC"]:
         return func(dashboard, executor_type, executor)
 
     unique_string = (
@@ -106,25 +109,28 @@ def get_dashboard_digest(dashboard: Dashboard) -> str:
     )
 
     unique_string = _adjust_string_for_executor(unique_string, executor_type, executor)
-    unique_string = _adjust_string_with_rls(unique_string, datasources, executor)
+    unique_string = _adjust_string_with_rls(
+        unique_string, dashboard.datasources, executor
+    )
 
     return md5_sha_from_str(unique_string)
 
 
-def get_chart_digest(chart: Slice) -> str:
-    config = current_app.config
-    datasource = chart.datasource
-    executor_type, executor = get_executor(
-        executor_types=config["THUMBNAIL_EXECUTE_AS"],
-        model=chart,
-        current_user=get_current_user(),
-    )
+def get_chart_digest(chart: Slice) -> str | None:
+    try:
+        executor_type, executor = get_executor(
+            executors=app.config["THUMBNAIL_EXECUTORS"],
+            model=chart,
+            current_user=get_current_user(),
+        )
+    except ExecutorNotFoundError:
+        return None
 
-    if func := config["THUMBNAIL_CHART_DIGEST_FUNC"]:
+    if func := app.config["THUMBNAIL_CHART_DIGEST_FUNC"]:
         return func(chart, executor_type, executor)
 
     unique_string = f"{chart.params or ''}.{executor}"
     unique_string = _adjust_string_for_executor(unique_string, executor_type, executor)
-    unique_string = _adjust_string_with_rls(unique_string, [datasource], executor)
+    unique_string = _adjust_string_with_rls(unique_string, [chart.datasource], executor)
 
     return md5_sha_from_str(unique_string)

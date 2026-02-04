@@ -27,7 +27,7 @@ from sqlalchemy.engine.url import make_url
 from sqlalchemy.sql import sqltypes
 from sqlalchemy_bigquery import BigQueryDialect
 
-from superset.sql_parse import Table
+from superset.sql.parse import Table
 from superset.superset_typing import ResultSetColumnType
 from superset.utils import json
 from tests.unit_tests.db_engine_specs.utils import assert_convert_dttm
@@ -149,7 +149,7 @@ def test_select_star(mocker: MockerFixture) -> None:
 
     # mock the database so we can compile the query
     database = mocker.MagicMock()
-    database.compile_sqla_query = lambda query: str(
+    database.compile_sqla_query = lambda query, catalog, schema: str(
         query.compile(dialect=BigQueryDialect(), compile_kwargs={"literal_binds": True})
     )
 

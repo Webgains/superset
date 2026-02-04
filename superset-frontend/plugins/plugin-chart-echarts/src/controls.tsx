@@ -22,6 +22,7 @@ import {
   ControlSetItem,
   ControlSetRow,
   ControlSubSectionHeader,
+  CustomControlItem,
   DEFAULT_SORT_SERIES_DATA,
   SORT_SERIES_CHOICES,
   sharedControls,
@@ -66,7 +67,7 @@ const legendTypeControl: ControlSetItem = {
     label: t('Type'),
     choices: [
       ['scroll', t('Scroll')],
-      ['plain', t('Plain')],
+      ['plain', t('List')],
     ],
     default: legendType,
     renderTrigger: true,
@@ -185,12 +186,21 @@ const richTooltipControl: ControlSetItem = {
   },
 };
 
-const tooltipTimeFormatControl: ControlSetItem = {
+export const tooltipTimeFormatControl: ControlSetItem = {
   name: 'tooltipTimeFormat',
   config: {
     ...sharedControls.x_axis_time_format,
     label: t('Tooltip time format'),
     default: 'smart_date',
+    clearable: false,
+  },
+};
+
+export const tooltipValuesFormatControl: CustomControlItem = {
+  name: 'tooltipValuesFormat',
+  config: {
+    ...sharedControls.y_axis_format,
+    label: t('Number format'),
     clearable: false,
   },
 };
@@ -230,7 +240,7 @@ const tooltipPercentageControl: ControlSetItem = {
     type: 'CheckboxControl',
     label: t('Show percentage'),
     renderTrigger: true,
-    default: true,
+    default: false,
     description: t('Whether to display the percentage value in the tooltip'),
     visibility: ({ controls, form_data }: ControlPanelsContainerProps) =>
       Boolean(controls?.rich_tooltip?.value) &&
@@ -292,6 +302,23 @@ export const xAxisLabelRotation = {
   },
 };
 
+export const xAxisLabelInterval = {
+  name: 'xAxisLabelInterval',
+  config: {
+    type: 'SelectControl',
+    freeForm: false,
+    clearable: false,
+    label: t('X Axis Label Interval'),
+    choices: [
+      ['auto', t('Auto')],
+      ['0', t('All')],
+    ],
+    default: defaultXAxis.xAxisLabelInterval,
+    renderTrigger: true,
+    description: t('Choose how many X-Axis labels to show'),
+  },
+};
+
 export const seriesOrderSection: ControlSetRow[] = [
   [<ControlSubSectionHeader>{t('Series Order')}</ControlSubSectionHeader>],
   [sortSeriesType],
@@ -348,5 +375,15 @@ export const forceCategorical: ControlSetItem = {
     default: false,
     renderTrigger: true,
     description: t('Make the x-axis categorical'),
+  },
+};
+
+export const showExtraControls: CustomControlItem = {
+  name: 'show_extra_controls',
+  config: {
+    type: 'CheckboxControl',
+    label: t('Extra Controls'),
+    renderTrigger: true,
+    default: false,
   },
 };

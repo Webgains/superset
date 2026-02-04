@@ -17,12 +17,15 @@
  * under the License.
  */
 import { isValidElement } from 'react';
-import { render, screen } from 'spec/helpers/testing-library';
-import userEvent from '@testing-library/user-event';
+import { render, screen, userEvent } from 'spec/helpers/testing-library';
 import fetchMock from 'fetch-mock';
+import { Icons } from '@superset-ui/core/components/Icons';
 
 import RefreshIntervalModal from 'src/dashboard/components/RefreshIntervalModal';
-import { HeaderActionsDropdown } from 'src/dashboard/components/Header/HeaderActionsDropdown';
+import { Provider } from 'react-redux';
+import configureStore from 'redux-mock-store';
+import thunk from 'redux-thunk';
+import { useHeaderActionsMenu } from './Header/useHeaderActionsDropdownMenu';
 
 const createProps = () => ({
   addSuccessToast: jest.fn(),
@@ -81,10 +84,25 @@ const editModeOnProps = {
   editMode: true,
 };
 
+const mockStore = configureStore([thunk]);
+const store = mockStore({
+  dashboardState: {
+    dashboardInfo: createProps().dashboardInfo,
+  },
+});
+
+const HeaderActionsMenu = (props: any) => {
+  const [menu] = useHeaderActionsMenu(props);
+
+  return <>{menu}</>;
+};
+
 const setup = (overrides?: any) => (
-  <div className="dashboard-header">
-    <HeaderActionsDropdown {...editModeOnProps} {...overrides} />
-  </div>
+  <Provider store={store}>
+    <div className="dashboard-header">
+      <HeaderActionsMenu {...editModeOnProps} {...overrides} />
+    </div>
+  </Provider>
 );
 
 fetchMock.get('glob:*/csstemplateasyncmodelview/api/read', {});
@@ -100,7 +118,7 @@ const displayOptions = async () => {
 };
 
 const defaultRefreshIntervalModalProps = {
-  triggerNode: <i className="fa fa-edit" />,
+  triggerNode: <Icons.EditOutlined />,
   refreshFrequency: 0,
   onChange: jest.fn(),
   editMode: true,
@@ -117,7 +135,7 @@ test('is valid', () => {
 });
 
 test('renders refresh interval modal', async () => {
-  render(setup(editModeOnProps));
+  render(setup(editModeOnProps), { useTheme: true });
 
   expect(screen.queryByText('Refresh Interval')).not.toBeInTheDocument();
   await openRefreshIntervalModal();
@@ -127,7 +145,7 @@ test('renders refresh interval modal', async () => {
 });
 
 test('renders refresh interval options', async () => {
-  render(setup(editModeOnProps));
+  render(setup(editModeOnProps), { useTheme: true });
   await openRefreshIntervalModal();
   await displayOptions();
 
@@ -157,7 +175,7 @@ test('renders refresh interval options', async () => {
 });
 
 test('should change selected value', async () => {
-  render(setup(editModeOnProps));
+  render(setup(editModeOnProps), { useTheme: true });
   await openRefreshIntervalModal();
 
   // Initial selected value should be "Don't refresh"
@@ -174,7 +192,7 @@ test('should change selected value', async () => {
 });
 
 test('should change selected value to custom value', async () => {
-  render(setup(editModeOnProps));
+  render(setup(editModeOnProps), { useTheme: true });
   await openRefreshIntervalModal();
 
   // Initial selected value should be "Don't refresh"
@@ -191,7 +209,7 @@ test('should change selected value to custom value', async () => {
 });
 
 test('should save a newly-selected value', async () => {
-  render(setup(editModeOnProps));
+  render(setup(editModeOnProps), { useTheme: true });
   await openRefreshIntervalModal();
   await displayOptions();
 
@@ -214,7 +232,9 @@ test('should show warning message', async () => {
     refreshWarning: 'Show warning',
   };
 
-  const { getByRole, queryByRole } = render(setup(warningProps));
+  const { getByRole, queryByRole } = render(setup(warningProps), {
+    useTheme: true,
+  });
   await openRefreshIntervalModal();
   await displayOptions();
 

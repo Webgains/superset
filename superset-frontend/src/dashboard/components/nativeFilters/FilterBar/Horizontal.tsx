@@ -18,14 +18,8 @@
  */
 
 import { FC, memo, useMemo } from 'react';
-import {
-  DataMaskStateWithId,
-  FeatureFlag,
-  isFeatureEnabled,
-  styled,
-  t,
-} from '@superset-ui/core';
-import Loading from 'src/components/Loading';
+import { DataMaskStateWithId, styled, t } from '@superset-ui/core';
+import { Loading } from '@superset-ui/core/components';
 import { RootState } from 'src/dashboard/types';
 import { useChartLayoutItems } from 'src/dashboard/util/useChartLayoutItems';
 import { useChartIds } from 'src/dashboard/util/charts/useChartIds';
@@ -35,15 +29,14 @@ import { useChartsVerboseMaps, getFilterBarTestId } from './utils';
 import { HorizontalBarProps } from './types';
 import FilterBarSettings from './FilterBarSettings';
 import crossFiltersSelector from './CrossFilters/selectors';
-import { CrossFilterIndicator } from '../selectors';
 
 const HorizontalBar = styled.div`
   ${({ theme }) => `
-    padding: ${theme.gridUnit * 3}px ${theme.gridUnit * 2}px ${
-      theme.gridUnit * 3
-    }px ${theme.gridUnit * 4}px;
-    background: ${theme.colors.grayscale.light5};
-    box-shadow: inset 0px -2px 2px -1px ${theme.colors.grayscale.light2};
+    padding: ${theme.sizeUnit * 3}px ${theme.sizeUnit * 2}px ${
+      theme.sizeUnit * 3
+    }px ${theme.sizeUnit * 4}px;
+    background: ${theme.colorBgBase};
+    box-shadow: inset 0px -2px 2px -1px ${theme.colorSplit};
   `}
 `;
 
@@ -54,10 +47,8 @@ const HorizontalBarContent = styled.div`
     flex-wrap: nowrap;
     align-items: center;
     justify-content: flex-start;
-    line-height: 0;
-
     .loading {
-      margin: ${theme.gridUnit * 2}px auto ${theme.gridUnit * 2}px;
+      margin: ${theme.sizeUnit * 2}px auto ${theme.sizeUnit * 2}px;
       padding: 0;
     }
   `}
@@ -65,42 +56,38 @@ const HorizontalBarContent = styled.div`
 
 const FilterBarEmptyStateContainer = styled.div`
   ${({ theme }) => `
-    font-weight: ${theme.typography.weights.bold};
-    color: ${theme.colors.grayscale.base};
-    font-size: ${theme.typography.sizes.s}px;
-    padding-left: ${theme.gridUnit * 2}px;
+    font-weight: ${theme.fontWeightStrong};
+    color: ${theme.colorText};
+    font-size: ${theme.fontSizeSM}px;
+    padding-left: ${theme.sizeUnit * 2}px;
   `}
 `;
 
-const EMPTY_ARRAY: CrossFilterIndicator[] = [];
 const HorizontalFilterBar: FC<HorizontalBarProps> = ({
   actions,
   dataMaskSelected,
   filterValues,
   isInitialized,
   onSelectionChange,
+  clearAllTriggers,
+  onClearAllComplete,
 }) => {
   const dataMask = useSelector<RootState, DataMaskStateWithId>(
     state => state.dataMask,
   );
   const chartIds = useChartIds();
   const chartLayoutItems = useChartLayoutItems();
-  const isCrossFiltersEnabled = isFeatureEnabled(
-    FeatureFlag.DashboardCrossFilters,
-  );
   const verboseMaps = useChartsVerboseMaps();
 
   const selectedCrossFilters = useMemo(
     () =>
-      isCrossFiltersEnabled
-        ? crossFiltersSelector({
-            dataMask,
-            chartIds,
-            chartLayoutItems,
-            verboseMaps,
-          })
-        : EMPTY_ARRAY,
-    [chartIds, chartLayoutItems, dataMask, isCrossFiltersEnabled, verboseMaps],
+      crossFiltersSelector({
+        dataMask,
+        chartIds,
+        chartLayoutItems,
+        verboseMaps,
+      }),
+    [chartIds, chartLayoutItems, dataMask, verboseMaps],
   );
 
   const hasFilters = filterValues.length > 0 || selectedCrossFilters.length > 0;
@@ -122,6 +109,8 @@ const HorizontalFilterBar: FC<HorizontalBarProps> = ({
               <FilterControls
                 dataMaskSelected={dataMaskSelected}
                 onFilterSelectionChange={onSelectionChange}
+                clearAllTriggers={clearAllTriggers}
+                onClearAllComplete={onClearAllComplete}
               />
             )}
             {actions}
