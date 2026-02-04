@@ -85,10 +85,11 @@ FROM superset-node-ci AS superset-node
 RUN --mount=type=cache,target=/root/.npm \
     if [ "$DEV_MODE" = "false" ]; then \
     echo "Running 'npm run ${BUILD_CMD}'"; \
-    npm run ${BUILD_CMD}; \
+    npm run ${BUILD_CMD} && \
+    echo "Build completed successfully"; \
     else \
     echo "Skipping 'npm run ${BUILD_CMD}' in dev mode"; \
-    fi;
+    fi
 
 # Copy translation files
 COPY superset/translations /app/superset/translations
