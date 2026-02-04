@@ -86,7 +86,8 @@ RUN --mount=type=cache,target=/root/.npm \
     if [ "$DEV_MODE" = "false" ]; then \
     echo "Running 'npm run ${BUILD_CMD}'"; \
     npm run ${BUILD_CMD} && \
-    echo "Build completed successfully"; \
+    echo "Build completed successfully" && \
+    ls -la /app/superset/static/assets/ 2>&1 | head -20 || true; \
     else \
     echo "Skipping 'npm run ${BUILD_CMD}' in dev mode"; \
     fi
