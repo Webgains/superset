@@ -218,11 +218,9 @@ def test_get_query_catches_parsing_error() -> None:
     - Error message describes the parsing failure
     - Both should be returned to the frontend for display
     """
-    from flask import g
     from superset.common.query_actions import _get_query
     from superset.common.query_object import QueryObject
     from superset.exceptions import SupersetParseError
-    from tests.integration_tests.test_app import app
 
     # Create mock query_context and query_obj
     mock_query_context = Mock()
@@ -239,14 +237,9 @@ def test_get_query_catches_parsing_error() -> None:
 
     # Mock _get_datasource and datasource.get_query_str to raise the error
     with (
-        app.test_request_context(),
         patch("superset.common.query_actions._get_datasource") as mock_get_ds,
         patch("superset.common.query_actions.security_manager.can_access", return_value=True),
     ):
-        # Mock g.user
-        g.user = Mock()
-        g.user.is_anonymous = False
-
         mock_datasource = Mock()
         mock_datasource.query_language = "sql"
         mock_datasource.get_query_str.side_effect = parse_error
@@ -271,11 +264,9 @@ def test_get_query_handles_parsing_error_with_missing_sql_key() -> None:
 
     Ensures defensive programming when extracting SQL from exception extra data.
     """
-    from flask import g
     from superset.common.query_actions import _get_query
     from superset.common.query_object import QueryObject
     from superset.exceptions import SupersetParseError
-    from tests.integration_tests.test_app import app
 
     mock_query_context = Mock()
     mock_query_obj = Mock(spec=QueryObject)
@@ -288,14 +279,9 @@ def test_get_query_handles_parsing_error_with_missing_sql_key() -> None:
     parse_error.error.extra = {"other_field": "some_value"}
 
     with (
-        app.test_request_context(),
         patch("superset.common.query_actions._get_datasource") as mock_get_ds,
         patch("superset.common.query_actions.security_manager.can_access", return_value=True),
     ):
-        # Mock g.user
-        g.user = Mock()
-        g.user.is_anonymous = False
-
         mock_datasource = Mock()
         mock_datasource.query_language = "sql"
         mock_datasource.get_query_str.side_effect = parse_error
@@ -318,11 +304,9 @@ def test_get_query_handles_parsing_error_with_null_sql_value() -> None:
 
     Ensures defensive programming when extracting SQL from exception extra data.
     """
-    from flask import g
     from superset.common.query_actions import _get_query
     from superset.common.query_object import QueryObject
     from superset.exceptions import SupersetParseError
-    from tests.integration_tests.test_app import app
 
     mock_query_context = Mock()
     mock_query_obj = Mock(spec=QueryObject)
@@ -335,14 +319,9 @@ def test_get_query_handles_parsing_error_with_null_sql_value() -> None:
     parse_error.error.extra = {"sql": None}
 
     with (
-        app.test_request_context(),
         patch("superset.common.query_actions._get_datasource") as mock_get_ds,
         patch("superset.common.query_actions.security_manager.can_access", return_value=True),
     ):
-        # Mock g.user
-        g.user = Mock()
-        g.user.is_anonymous = False
-
         mock_datasource = Mock()
         mock_datasource.query_language = "sql"
         mock_datasource.get_query_str.side_effect = parse_error
