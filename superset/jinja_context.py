@@ -438,7 +438,7 @@ class ExtraCache:
                 ) and not isinstance(val, list):
                     val = [val]
 
-                    filters.append({"op": op, "col": column, "val": val})
+                filters.append({"op": op, "col": column, "val": val})
 
         return filters
 
