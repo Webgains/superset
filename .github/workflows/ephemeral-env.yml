@@ -90,10 +90,22 @@ jobs:
         id: eval-feature-flags
         if: steps.eval-label.outputs.result == 'up'
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const description = context.payload.pull_request
-              ? context.payload.pull_request.body || ''
-              : context.payload.inputs.pr_description || '';
+            let description = '';
+            if (context.payload.pull_request) {
+              description = context.payload.pull_request.body || '';
+            } else if (context.eventName === 'workflow_dispatch') {
+              const prNumber = '${{ github.event.inputs.issue_number }}';
+              if (prNumber) {
+                const { data: pr } = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber
+                });
+                description = pr.body || '';
+              }
+            }
 
             const pattern = /FEATURE_(\w+)=(\w+)/g;
             let results = [];
