@@ -400,7 +400,7 @@ export class TableRenderer extends Component {
           needToggle,
           subArrow,
           arrowClickHandle,
-          attrName,
+          t(attrName),
           namesMapping,
           allowRenderHtml,
         )}
@@ -440,8 +440,8 @@ export class TableRenderer extends Component {
 
         const headerCellFormattedValue =
           dateFormatters &&
-          dateFormatters[attrName] &&
-          typeof dateFormatters[attrName] === 'function'
+            dateFormatters[attrName] &&
+            typeof dateFormatters[attrName] === 'function'
             ? dateFormatters[attrName](colKey[attrIdx])
             : colKey[attrIdx];
         attrValueCells.push(
@@ -561,7 +561,7 @@ export class TableRenderer extends Component {
                 needLabelToggle,
                 subArrow,
                 arrowClickHandle,
-                r,
+                t(r),
                 namesMapping,
                 allowRenderHtml,
               )}
@@ -584,8 +584,8 @@ export class TableRenderer extends Component {
         >
           {colAttrs.length === 0
             ? t('Total (%(aggregatorName)s)', {
-                aggregatorName: t(this.props.aggregatorName),
-              })
+              aggregatorName: t(this.props.aggregatorName),
+            })
             : null}
         </th>
       </tr>

@@ -760,7 +760,7 @@ const Select = forwardRef(
           onSearch={shouldShowSearch ? handleOnSearch : undefined}
           onSelect={handleOnSelect}
           onClear={handleClear}
-          placeholder={placeholder}
+          placeholder={typeof placeholder === 'string' ? t(placeholder) : placeholder}
           tokenSeparators={tokenSeparators}
           value={selectValue}
           virtual={
@@ -781,7 +781,7 @@ const Select = forwardRef(
             )
           }
           options={visibleOptions}
-          optionRender={option => <Space>{option.label || option.value}</Space>}
+          optionRender={option => <Space>{t(option.label) || option.value}</Space>}
           oneLine={oneLine}
           css={props.css}
           {...props}
