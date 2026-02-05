@@ -325,7 +325,7 @@ function BigNumberVis({
               height: maxHeight,
             }}
           >
-            {text}
+            {t(text)}
           </div>
         </>
       );

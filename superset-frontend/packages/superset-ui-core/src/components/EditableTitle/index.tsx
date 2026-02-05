@@ -244,9 +244,9 @@ export function EditableTitle({
   if (!canEdit) {
     if (renderLink) {
       // New approach: let caller provide the link component
-      titleComponent = renderLink(value || '');
+      titleComponent = renderLink(t(value) || '');
     } else {
-      titleComponent = <span data-test="span-title">{value}</span>;
+      titleComponent = <span data-test="span-title">{t(value)}</span>;
     }
   }
 
