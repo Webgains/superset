@@ -204,7 +204,7 @@ export function EditableTitle({
       size="small"
       data-test="textarea-editable-title-input"
       ref={contentRef}
-      value={value}
+      value={t(value)}
       className={!title ? 'text-muted' : undefined}
       onChange={handleChange}
       onBlur={handleBlur}
