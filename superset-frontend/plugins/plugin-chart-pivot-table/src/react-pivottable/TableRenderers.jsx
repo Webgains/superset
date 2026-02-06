@@ -64,7 +64,7 @@ function displayHeaderCell(
       >
         {ArrowIcon}
       </span>
-      <span className="toggle-val">{labelContent}</span>
+      <span className="toggle-val">{t(labelContent)}</span>
     </span>
   ) : (
     labelContent

@@ -638,6 +638,38 @@ const Select = forwardRef(
       return num_selected - num_shown - (selectAllMode ? 1 : 0);
     }, [stableMaxTagCount, selectAllMode, selectValue]);
 
+    // Translate labels in selectValue for display
+    const translatedSelectValue = useMemo(() => {
+      if (!selectValue) return selectValue;
+
+      if (Array.isArray(selectValue)) {
+        // Multiple mode - translate labels in array of objects
+        return selectValue.map(item => {
+          if (isLabeledValue(item)) {
+            return {
+              ...item,
+              label:
+                typeof item.label === 'string' ? t(item.label) : item.label,
+            };
+          }
+          return item;
+        });
+      }
+
+      // Single mode with labelInValue - translate label in object
+      if (isLabeledValue(selectValue)) {
+        return {
+          ...selectValue,
+          label:
+            typeof selectValue.label === 'string'
+              ? t(selectValue.label)
+              : selectValue.label,
+        };
+      }
+
+      return selectValue;
+    }, [selectValue]);
+
     const customMaxTagPlaceholder = () =>
       `+ ${omittedCount > 0 ? omittedCount : 1} ...`;
 
@@ -760,9 +792,11 @@ const Select = forwardRef(
           onSearch={shouldShowSearch ? handleOnSearch : undefined}
           onSelect={handleOnSelect}
           onClear={handleClear}
-          placeholder={typeof placeholder === 'string' ? t(placeholder) : placeholder}
+          placeholder={
+            typeof placeholder === 'string' ? t(placeholder) : placeholder
+          }
           tokenSeparators={tokenSeparators}
-          value={selectValue}
+          value={translatedSelectValue}
           virtual={
             virtual !== undefined
               ? virtual
@@ -781,7 +815,9 @@ const Select = forwardRef(
             )
           }
           options={visibleOptions}
-          optionRender={option => <Space>{t(option.label) || option.value}</Space>}
+          optionRender={option => (
+            <Space>{t(option.label) || option.value}</Space>
+          )}
           oneLine={oneLine}
           css={props.css}
           {...props}
