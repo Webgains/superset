@@ -26,6 +26,7 @@ import { Styles } from './Styles';
 const parseLabel = value => {
   if (typeof value === 'string') {
     if (value === 'metric') return t('metric');
+    if (value === 'Total no. of sales') return t('Total no. of sales');
     return value;
   }
   if (typeof value === 'number') {
