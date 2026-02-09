@@ -62,8 +62,10 @@ jobs:
 
       - name: "Set up liccheck"
         run: |
-          pip install setuptools
-          pip install liccheck
+          python -m pip install --upgrade setuptools
+          python -c "import pkg_resources;"
+          python -m pip install liccheck
+          python -c "import liccheck;"
       - name: "Run liccheck"
         run: |
           # run the checks
