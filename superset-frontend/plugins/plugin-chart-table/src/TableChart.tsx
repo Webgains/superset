@@ -521,7 +521,7 @@ export default function TableChart<D extends DataRecord = DataRecord>(
         (!isKeyHidded &&
           (!comparisonLabels.includes(label) ||
             showAllColumns ||
-            selectedComparisonColumns.includes(key)))
+            selectedComparisonColumns.includes(keyPortion.trim())))
       );
     });
   }, [

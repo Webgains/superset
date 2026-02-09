@@ -322,6 +322,18 @@ const Select = forwardRef(
     }, [visibleOptions, selectValue]);
 
     const handleOnSelect: SelectProps['onSelect'] = (selectedItem, option) => {
+      // Find the original untranslated option from fullSelectOptions to ensure
+      // consistent labels between selectValue and options passed to onChange
+      const selectedValue = getValue(selectedItem);
+      const originalOption = fullSelectOptions.find(
+        opt => opt.value === selectedValue,
+      );
+      const itemToStore = originalOption
+        ? labelInValue
+          ? { label: originalOption.label, value: originalOption.value }
+          : originalOption.value
+        : selectedItem;
+
       if (isSingleMode) {
         // on select is fired in single value mode if the same value is selected
         const valueChanged = !utilsIsEqual(
@@ -329,7 +341,7 @@ const Select = forwardRef(
           selectValue as RawValue | AntdLabeledValue,
           'value',
         );
-        setSelectValue(selectedItem);
+        setSelectValue(itemToStore);
         if (valueChanged) {
           fireOnChange();
         }
@@ -338,12 +350,12 @@ const Select = forwardRef(
           const array = ensureIsArray(previousState);
           const value = getValue(selectedItem);
           if (!hasOption(value, array)) {
-            const result = [...array, selectedItem];
+            const result = [...array, itemToStore];
             if (
               result.length === selectAllEligible.length &&
               selectAllEnabled
             ) {
-              return isLabeledValue(selectedItem)
+              return isLabeledValue(itemToStore)
                 ? ([...result] as AntdLabeledValue[])
                 : ([...result] as (string | number)[]);
             }

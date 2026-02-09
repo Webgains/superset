@@ -26,7 +26,6 @@ import { Styles } from './Styles';
 const parseLabel = value => {
   if (typeof value === 'string') {
     if (value === 'metric') return t('metric');
-    if (value === 'Total no. of sales') return t('Total no. of sales');
     return value;
   }
   if (typeof value === 'number') {
@@ -65,7 +64,7 @@ function displayHeaderCell(
       >
         {ArrowIcon}
       </span>
-      <span className="toggle-val">{t(labelContent)}</span>
+      <span className="toggle-val">{labelContent}</span>
     </span>
   ) : (
     labelContent
@@ -401,7 +400,7 @@ export class TableRenderer extends Component {
           needToggle,
           subArrow,
           arrowClickHandle,
-          t(attrName),
+          attrName,
           namesMapping,
           allowRenderHtml,
         )}
@@ -562,7 +561,7 @@ export class TableRenderer extends Component {
                 needLabelToggle,
                 subArrow,
                 arrowClickHandle,
-                t(r),
+                r,
                 namesMapping,
                 allowRenderHtml,
               )}
