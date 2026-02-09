@@ -219,6 +219,14 @@ export const handleFilterOptionHelper = (
               .trim()
               .toLowerCase()
           : '';
+        // Also check translated label when filtering by 'label' prop
+        // This ensures search works with both original and translated text
+        if (prop === 'label' && typeof option.label === 'string') {
+          const translatedLabel = t(option.label).trim().toLowerCase();
+          if (translatedLabel.includes(searchValue)) {
+            return true;
+          }
+        }
         return optionProp.includes(searchValue);
       });
     }
