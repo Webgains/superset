@@ -55,7 +55,7 @@ setupClient({ appRoot: applicationRoot() });
 // Load language pack before anything else
 (async () => {
   const lang = bootstrapData.common.locale || 'en';
-  // if (lang !== 'en') {
+  if (lang !== 'en') {
     try {
       // Second call to configure to set the language pack
       const { json } = await SupersetClient.get({
@@ -71,7 +71,7 @@ setupClient({ appRoot: applicationRoot() });
       configure();
       dayjs.locale('en');
     }
-  // }
+  }
 
   // Continue with rest of setup
   initFeatureFlags(bootstrapData.common.feature_flags);

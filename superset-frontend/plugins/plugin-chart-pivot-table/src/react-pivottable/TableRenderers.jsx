@@ -65,7 +65,7 @@ function displayHeaderCell(
       >
         {ArrowIcon}
       </span>
-      <span className="toggle-val">{t(labelContent)}</span>
+      <span className="toggle-val">{labelContent}</span>
     </span>
   ) : (
     labelContent
@@ -401,7 +401,7 @@ export class TableRenderer extends Component {
           needToggle,
           subArrow,
           arrowClickHandle,
-          t(attrName),
+          attrName,
           namesMapping,
           allowRenderHtml,
         )}
@@ -562,7 +562,7 @@ export class TableRenderer extends Component {
                 needLabelToggle,
                 subArrow,
                 arrowClickHandle,
-                t(r),
+                r,
                 namesMapping,
                 allowRenderHtml,
               )}
