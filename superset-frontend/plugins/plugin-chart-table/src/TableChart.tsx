@@ -342,9 +342,9 @@ export default function TableChart<D extends DataRecord = DataRecord>(
   const comparisonColumns = useMemo(
     () => [
       { key: 'all', label: t('Display all') },
-      { key: t('sv_previous'), label: t('sv_previous') },
-      { key: t('sv_change'), label: t('sv_change') },
-      { key: t('sv_change_percentage'), label: t('sv_change_percentage') },
+      { key:'sv_previous', label: t('sv_previous') },
+      { key: 'sv_change', label: t('sv_change') },
+      { key: 'sv_change_percentage', label: t('sv_change_percentage') },
     ],
     [],
   );
@@ -521,7 +521,7 @@ export default function TableChart<D extends DataRecord = DataRecord>(
         (!isKeyHidded &&
           (!comparisonLabels.includes(label) ||
             showAllColumns ||
-            selectedComparisonColumns.includes(label)))
+            selectedComparisonColumns.includes(key)))
       );
     });
   }, [
@@ -1121,7 +1121,7 @@ export default function TableChart<D extends DataRecord = DataRecord>(
                 alignItems: 'flex-end',
               }}
             >
-              <span data-column-name={col.id}>{displayLabel}</span>
+              <span data-column-name={col.id}>{t(displayLabel)}</span>
               <SortIcon column={col} />
             </div>
           </th>

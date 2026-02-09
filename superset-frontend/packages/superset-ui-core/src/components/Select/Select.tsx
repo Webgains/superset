@@ -120,6 +120,7 @@ const Select = forwardRef(
       oneLine,
       maxTagCount: propsMaxTagCount,
       virtual = undefined,
+      optionRender: propsOptionRender,
       ...props
     }: SelectProps,
     ref: Ref<RefSelectProps>,
@@ -231,9 +232,39 @@ const Select = forwardRef(
       return result.slice().sort(sortSelectedFirst);
     }, [selectOptions, selectValue, sortSelectedFirst]);
 
-    const enabledOptions = useMemo(
-      () => visibleOptions.filter(option => !option.disabled),
+    // Translate option labels for display (translates if translation exists, otherwise keeps original)
+    // This ensures both dropdown items AND selected value display are translated
+    const translatedVisibleOptions = useMemo(
+      () =>
+        visibleOptions.map((option: AntdLabeledValue) => {
+          // Handle grouped options
+          if ('options' in option && Array.isArray(option.options)) {
+            return {
+              ...option,
+              options: (option.options as SelectOptionsType).map(
+                (subOption: AntdLabeledValue) => ({
+                  ...subOption,
+                  label:
+                    typeof subOption.label === 'string'
+                      ? t(subOption.label)
+                      : subOption.label,
+                }),
+              ),
+            };
+          }
+          // Regular option
+          return {
+            ...option,
+            label:
+              typeof option.label === 'string' ? t(option.label) : option.label,
+          };
+        }),
       [visibleOptions],
+    );
+
+    const enabledOptions = useMemo(
+      () => translatedVisibleOptions.filter(option => !option.disabled),
+      [translatedVisibleOptions],
     );
 
     const selectAllEligible = useMemo(
@@ -793,7 +824,9 @@ const Select = forwardRef(
           onSelect={handleOnSelect}
           onClear={handleClear}
           placeholder={
-            typeof placeholder === 'string' ? t(placeholder) : placeholder
+            typeof placeholder === 'string'
+              ? (t(placeholder) !== placeholder ? t(placeholder) : placeholder)
+              : placeholder
           }
           tokenSeparators={tokenSeparators}
           value={translatedSelectValue}
@@ -814,13 +847,17 @@ const Select = forwardRef(
               <StyledCheckOutlined iconSize="m" aria-label="check" />
             )
           }
-          options={visibleOptions}
-          optionRender={option => (
-            <Space>{t(option.label) || option.value}</Space>
-          )}
+          options={translatedVisibleOptions}
           oneLine={oneLine}
           css={props.css}
           {...props}
+          // Use custom optionRender if provided, otherwise use already-translated labels
+          optionRender={
+            propsOptionRender ||
+            ((option: AntdLabeledValue) => (
+              <Space>{option.label || option.value}</Space>
+            ))
+          }
           showSearch={shouldShowSearch}
           ref={ref}
         />
