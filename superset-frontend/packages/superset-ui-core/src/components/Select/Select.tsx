@@ -404,6 +404,23 @@ const Select = forwardRef(
     const handleFilterOption = (search: string, option: AntdLabeledValue) =>
       handleFilterOptionHelper(search, option, optionFilterProps, filterOption);
 
+    const matchesFilter = useCallback(
+      (search: string, option: AntdLabeledValue) => {
+        if (handleFilterOption(search, option)) return true;
+        if (typeof option.label === 'string') {
+          const translated = t(option.label);
+          if (translated !== option.label) {
+            return handleFilterOption(search, {
+              ...option,
+              label: translated,
+            });
+          }
+        }
+        return false;
+      },
+      [handleFilterOption],
+    );
+
     const handleOnSearch = debounce((search: string) => {
       const searchValue = search.trim();
       setIsSearching(!!searchValue);
@@ -439,15 +456,14 @@ const Select = forwardRef(
           */
           if ('options' in option && Array.isArray(option.options)) {
             const filteredGroupOptions = option.options.filter(
-              (subOption: AntdLabeledValue) =>
-                handleFilterOption(search, subOption),
+              (subOption: AntdLabeledValue) => matchesFilter(search, subOption),
             );
             return filteredGroupOptions.length > 0
               ? { ...option, options: filteredGroupOptions }
               : null;
           }
 
-          return handleFilterOption(search, option as AntdLabeledValue)
+          return matchesFilter(search, option as AntdLabeledValue)
             ? option
             : null;
         })
@@ -825,7 +841,9 @@ const Select = forwardRef(
           onClear={handleClear}
           placeholder={
             typeof placeholder === 'string'
-              ? (t(placeholder) !== placeholder ? t(placeholder) : placeholder)
+              ? t(placeholder) !== placeholder
+                ? t(placeholder)
+                : placeholder
               : placeholder
           }
           tokenSeparators={tokenSeparators}
