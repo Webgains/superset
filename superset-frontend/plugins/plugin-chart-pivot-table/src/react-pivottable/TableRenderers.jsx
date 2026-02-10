@@ -27,6 +27,14 @@ const parseLabel = value => {
   if (typeof value === 'string') {
     if (value === 'metric') return t('metric');
     if (value === 'Total no. of sales') return t('Total no. of sales');
+    if (value === 'Total no. of products') return t('Total no. of products');
+    if (value === 'Total Sales Value') return t(' Total Sales Value');
+    if (value === 'Clicks') return t(' Clicks');
+    if (value === 'AOV') return t(' AOV');
+    if (value === 'Total Commission') return t('Total Commission');
+    if (value === 'ROI') return t('ROI');
+    if (value === 'Override') return t('Override')
+    if (value === 'KUR') return t('KUR')
     return value;
   }
   if (typeof value === 'number') {
@@ -51,10 +59,19 @@ function displayHeaderCell(
 ) {
   const name = namesMapping[value] || value;
   const parsedLabel = parseLabel(name);
+  // parseLabel already translates specific values like 'metric'
+  // If parseLabel returned a different value, it was already translated
+  // Otherwise, translate plain strings that haven't been translated yet
+  const translatedLabel =
+    typeof parsedLabel === 'string' && parsedLabel !== name
+      ? parsedLabel // Already translated by parseLabel
+      : typeof parsedLabel === 'string'
+        ? t(parsedLabel) // Translate plain strings
+        : parsedLabel; // Numbers or other types
   const labelContent =
-    allowRenderHtml && typeof parsedLabel === 'string'
-      ? safeHtmlSpan(parsedLabel)
-      : parsedLabel;
+    allowRenderHtml && typeof translatedLabel === 'string'
+      ? safeHtmlSpan(translatedLabel)
+      : translatedLabel;
   return needToggle ? (
     <span className="toggle-wrapper">
       <span
@@ -65,7 +82,7 @@ function displayHeaderCell(
       >
         {ArrowIcon}
       </span>
-      <span className="toggle-val">{t(labelContent)}</span>
+      <span className="toggle-val">{labelContent}</span>
     </span>
   ) : (
     labelContent
@@ -401,7 +418,7 @@ export class TableRenderer extends Component {
           needToggle,
           subArrow,
           arrowClickHandle,
-          t(attrName),
+          attrName,
           namesMapping,
           allowRenderHtml,
         )}
@@ -562,7 +579,7 @@ export class TableRenderer extends Component {
                 needLabelToggle,
                 subArrow,
                 arrowClickHandle,
-                t(r),
+                r,
                 namesMapping,
                 allowRenderHtml,
               )}
