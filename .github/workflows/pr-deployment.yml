@@ -31,7 +31,6 @@ jobs:
           prefix: dashboard-
     outputs:
       feature_name: ${{ steps.feature.outputs.feature_name }}
-      host_name: ${{ steps.feature.outputs.feature_name }}
 
   deploy:
     name: Deploy to Feature Environment
