@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: feature
     concurrency:
-      group: superset-pr-${{ github.event.pull_request.number }}SupersetService-feature
+      group: dashboard-pr-${{ github.event.pull_request.number }}SupersetService-feature
     permissions:
       contents: read
       deployments: write
@@ -25,4 +25,4 @@ jobs:
           role-session-name: deploy-${{ github.run_id }}
 
       - name: Delete Stack
-        run: aws cloudformation delete-stack --stack-name superset-pr-${{ github.event.pull_request.number }}SupersetService
+        run: aws cloudformation delete-stack --stack-name dashboard-pr-${{ github.event.pull_request.number }}SupersetService

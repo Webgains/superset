@@ -1,0 +1,63 @@
+name: Lokalise Auto Merge
+
+# Usage:
+#   lokalise:
+#     name: Lokalise Auto Merge
+#     uses: webgains/github-workflows/.github/workflows/pr-lokalise-auto-merge.yml@main
+#     needs: [INSERT NEEDS HERE]
+#     secrets: inherit
+
+on:
+  workflow_call:
+    secrets:
+      GH_ACCESS_TOKEN:
+        description: 'PAT token with repo permissions to approve and merge PRs (required to trigger downstream workflows)'
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  lokalise:
+    if: github.event_name == 'pull_request' && startsWith(github.event.pull_request.title, 'Lokalise')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate Changed Files
+        run: |
+          CHANGED_FILES=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json files --jq '.files[].path')
+          INVALID_FILES=""
+
+          # Locale pattern: en_GB, nl_NL, es-ES, etc.
+          LOCALE="[a-z]{2}[_-][A-Z]{2}"
+          # Simple locale pattern: de, en, fr, etc.
+          SIMPLE_LOCALE="[a-z]{2}"
+
+          for file in $CHANGED_FILES; do
+            if [[ "$file" =~ ^resources/lang/${LOCALE}/lokalise\.php$ ]] ||
+              [[ "$file" =~ ^src/app/locales/${LOCALE}/translation\.json$ ]] ||
+              [[ "$file" =~ ^src/locales/${LOCALE}/translation\.json$ ]] ||
+              [[ "$file" =~ ^locales/${SIMPLE_LOCALE}/translation\.json$ ]]; then
+              continue
+            fi
+            INVALID_FILES="$INVALID_FILES $file"
+          done
+
+          if [[ -n "$INVALID_FILES" ]]; then
+            echo "::error::Lokalise PR should only contain translation files. Invalid files: $INVALID_FILES"
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Approve PR
+        run: |
+          gh pr review --approve "${{ github.event.pull_request.html_url }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Auto Merge
+        run: |
+          gh pr merge --auto --merge "${{ github.event.pull_request.html_url }}"
+        env:
+          GH_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}

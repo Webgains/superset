@@ -1,0 +1,23 @@
+name: "Compute Name From Ref"
+description: "Derive a sanitized name from GITHUB_REF (handles PRs, gh-readonly-queue, tags, etc.)"
+outputs:
+  name:
+    description: "Sanitized name derived from GITHUB_REF"
+    value: ${{ steps.compute.outputs.name }}
+runs:
+  using: "composite"
+  steps:
+    - name: Compute name from ref
+      id: compute
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        NAME="$(echo "$GITHUB_REF" | sed -E \
+          -e 's:refs/pull/([0-9]+)/merge:pr.\1:' \
+          -e 's:refs/heads/gh-readonly-queue/${{ github.event.repository.default_branch }}/pr-([0-9]+)-[a-f0-9]+:pr.\1:' \
+          -e 's:refs/heads/::' \
+          -e 's:tag/v?([.0-9]+):v\1:' \
+          -e 's:[^A-Za-z0-9._-]:.:g')"
+
+        echo "name=$NAME" >> "$GITHUB_OUTPUT"
