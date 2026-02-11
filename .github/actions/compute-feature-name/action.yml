@@ -13,7 +13,7 @@ runs:
   steps:
     - name: Compute name from ref
       id: name
-      uses: ./.github/actions/ompute-name-from-ref
+      uses: ./.github/actions/compute-name-from-ref
 
     - name: Make feature name
       id: mk
