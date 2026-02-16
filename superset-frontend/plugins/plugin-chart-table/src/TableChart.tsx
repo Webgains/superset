@@ -342,7 +342,7 @@ export default function TableChart<D extends DataRecord = DataRecord>(
   const comparisonColumns = useMemo(
     () => [
       { key: 'all', label: t('Display all') },
-      { key:'sv_previous', label: t('sv_previous') },
+      { key: 'sv_previous', label: t('sv_previous') },
       { key: 'sv_change', label: t('sv_change') },
       { key: 'sv_change_percentage', label: t('sv_change_percentage') },
     ],
