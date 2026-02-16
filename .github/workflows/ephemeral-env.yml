@@ -241,7 +241,7 @@ jobs:
         with:
           github-token: ${{ github.token }}
           script: |
-            const errMsg = '@${{ github.event.comment.user.login }} Container image not yet published for this PR. Please try again when build is complete.';
+            const errMsg = '@${{ github.actor }} Container image not yet published for this PR. Please try again when build is complete.';
             github.rest.issues.createComment({
               issue_number: ${{ github.event.inputs.issue_number || github.event.pull_request.number }},
               owner: context.repo.owner,
@@ -329,5 +329,5 @@ jobs:
               issue_number: issue_number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '@${{ github.event.inputs.user_login || github.event.comment.user.login }} Ephemeral environment creation failed. Please check the Actions logs for details.'
+              body: '@${{ github.actor }} Ephemeral environment creation failed. Please check the Actions logs for details.'
             })
