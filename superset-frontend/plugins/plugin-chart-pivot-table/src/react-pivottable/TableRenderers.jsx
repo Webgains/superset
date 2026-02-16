@@ -28,7 +28,7 @@ const parseLabel = value => {
     if (value === 'metric') return t('metric');
     if (value === 'Total no. of sales') return t('Total no. of sales');
     if (value === 'Total no. of products') return t('Total no. of products');
-    if (value === 'Total Sales Value') return t(' Total Sales Value');
+    if (value === 'Total Sales Value') return t('Total Sales Value');
     if (value === 'Clicks') return t(' Clicks');
     if (value === 'AOV') return t(' AOV');
     if (value === 'Total Commission') return t('Total Commission');
