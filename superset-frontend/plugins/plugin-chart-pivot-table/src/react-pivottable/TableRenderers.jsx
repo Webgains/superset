@@ -26,6 +26,15 @@ import { Styles } from './Styles';
 const parseLabel = value => {
   if (typeof value === 'string') {
     if (value === 'metric') return t('metric');
+    if (value === 'Total no. of sales') return t('Total no. of sales');
+    if (value === 'Total no. of products') return t('Total no. of products');
+    if (value === 'Total Sales Value') return t('Total Sales Value');
+    if (value === 'Clicks') return t('Clicks');
+    if (value === 'AOV') return t(' AOV');
+    if (value === 'Total Commission') return t('Total Commission');
+    if (value === 'ROI') return t('ROI');
+    if (value === 'Override') return t('Override')
+    if (value === 'KUR') return t('KUR')
     return value;
   }
   if (typeof value === 'number') {
@@ -34,6 +43,12 @@ const parseLabel = value => {
   return String(value);
 };
 
+function displayCell(value, allowRenderHtml) {
+  if (allowRenderHtml && typeof value === 'string') {
+    return safeHtmlSpan(value);
+  }
+  return parseLabel(value);
+}
 function displayHeaderCell(
   needToggle,
   ArrowIcon,
@@ -44,10 +59,19 @@ function displayHeaderCell(
 ) {
   const name = namesMapping[value] || value;
   const parsedLabel = parseLabel(name);
+  // parseLabel already translates specific values like 'metric'
+  // If parseLabel returned a different value, it was already translated
+  // Otherwise, translate plain strings that haven't been translated yet
+  const translatedLabel =
+    typeof parsedLabel === 'string' && parsedLabel !== name
+      ? parsedLabel // Already translated by parseLabel
+      : typeof parsedLabel === 'string'
+        ? t(parsedLabel) // Translate plain strings
+        : parsedLabel; // Numbers or other types
   const labelContent =
-    allowRenderHtml && typeof parsedLabel === 'string'
-      ? safeHtmlSpan(parsedLabel)
-      : parsedLabel;
+    allowRenderHtml && typeof translatedLabel === 'string'
+      ? safeHtmlSpan(translatedLabel)
+      : translatedLabel;
   return needToggle ? (
     <span className="toggle-wrapper">
       <span
@@ -434,8 +458,8 @@ export class TableRenderer extends Component {
 
         const headerCellFormattedValue =
           dateFormatters &&
-          dateFormatters[attrName] &&
-          typeof dateFormatters[attrName] === 'function'
+            dateFormatters[attrName] &&
+            typeof dateFormatters[attrName] === 'function'
             ? dateFormatters[attrName](colKey[attrIdx])
             : colKey[attrIdx];
         attrValueCells.push(
@@ -578,8 +602,8 @@ export class TableRenderer extends Component {
         >
           {colAttrs.length === 0
             ? t('Total (%(aggregatorName)s)', {
-                aggregatorName: t(this.props.aggregatorName),
-              })
+              aggregatorName: t(this.props.aggregatorName),
+            })
             : null}
         </th>
       </tr>
@@ -742,7 +766,7 @@ export class TableRenderer extends Component {
           onContextMenu={e => this.props.onContextMenu(e, colKey, rowKey)}
           style={style}
         >
-          {agg.format(aggValue)}
+          {displayCell(agg.format(aggValue), allowRenderHtml)}
         </td>
       );
     });
@@ -759,7 +783,7 @@ export class TableRenderer extends Component {
           onClick={rowTotalCallbacks[flatRowKey]}
           onContextMenu={e => this.props.onContextMenu(e, undefined, rowKey)}
         >
-          {agg.format(aggValue)}
+          {displayCell(agg.format(aggValue), allowRenderHtml)}
         </td>
       );
     }
@@ -823,7 +847,7 @@ export class TableRenderer extends Component {
           onContextMenu={e => this.props.onContextMenu(e, colKey, undefined)}
           style={{ padding: '5px' }}
         >
-          {agg.format(aggValue)}
+          {displayCell(agg.format(aggValue), this.props.allowRenderHtml)}
         </td>
       );
     });
@@ -840,7 +864,7 @@ export class TableRenderer extends Component {
           onClick={grandTotalCallback}
           onContextMenu={e => this.props.onContextMenu(e, undefined, undefined)}
         >
-          {agg.format(aggValue)}
+          {displayCell(agg.format(aggValue), this.props.allowRenderHtml)}
         </td>
       );
     }

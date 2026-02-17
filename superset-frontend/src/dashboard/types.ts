@@ -25,6 +25,7 @@ import {
   JsonObject,
   NativeFilterScope,
   NativeFiltersState,
+  NativeFilterTarget,
 } from '@superset-ui/core';
 import { Dataset } from '@superset-ui/chart-controls';
 import { chart } from 'src/components/Chart/chartReducer';
@@ -37,6 +38,10 @@ import Owner from 'src/types/Owner';
 import { ChartState } from '../explore/types';
 
 export type { Dashboard } from 'src/types/Dashboard';
+
+export interface ExtendedNativeFilterScope extends NativeFilterScope {
+  selectedLayers?: string[];
+}
 
 export type ChartReducerInitialState = typeof chart;
 
@@ -102,6 +107,8 @@ export type DashboardState = {
   colorScheme: string;
   sliceIds: number[];
   directPathLastUpdated: number;
+  nativeFiltersBarOpen?: boolean;
+  css?: string;
   focusedFilterField?: {
     chartId: number;
     column: string;
@@ -145,6 +152,11 @@ export type DashboardInfo = {
   changed_by?: Owner;
   created_by?: Owner;
   owners: Owner[];
+  theme?: {
+    id: number;
+    name: string;
+  } | null;
+  theme_id?: number | null;
 };
 
 export type ChartsState = { [key: string]: Chart };
@@ -183,28 +195,35 @@ export type Charts = { [key: number]: Chart };
 type ComponentTypesKeys = keyof typeof componentTypes;
 export type ComponentType = (typeof componentTypes)[ComponentTypesKeys];
 
+export type LayoutItemMeta = {
+  chartId: number;
+  defaultText?: string;
+  height: number;
+  placeholder?: string;
+  sliceName?: string;
+  sliceNameOverride?: string;
+  text?: string;
+  uuid: string;
+  width: number;
+};
+
 /** State of dashboardLayout item in redux */
 export type LayoutItem = {
   children: string[];
   parents?: string[];
   type: ComponentType;
   id: string;
-  meta: {
-    chartId: number;
-    defaultText?: string;
-    height: number;
-    placeholder?: string;
-    sliceName?: string;
-    sliceNameOverride?: string;
-    text?: string;
-    uuid: string;
-    width: number;
-  };
+  meta: LayoutItemMeta;
 };
 
 type ActiveFilter = {
+  filterType?: string;
+  targets: number[] | [Partial<NativeFilterTarget>];
   scope: number[];
   values: ExtraFormData;
+  layerScope?: {
+    [chartId: number]: number[];
+  };
 };
 
 export type ActiveFilters = {
@@ -277,4 +296,5 @@ export enum MenuKeys {
   ToggleFullscreen = 'toggle_fullscreen',
   ManageEmbedded = 'manage_embedded',
   ManageEmailReports = 'manage_email_reports',
+  ExportPivotXlsx = 'export_pivot_xlsx',
 }

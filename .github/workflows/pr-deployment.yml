@@ -51,8 +51,8 @@ jobs:
       deployments: write
       id-token: write
 
-  lokalise_auto_merge:
-    name: Lokalise Auto Merge
-    uses: webgains/github-workflows/.github/workflows/pr-lokalise-auto-merge.yml@main
-    needs: [deploy]
-    secrets: inherit
+  # lokalise_auto_merge:
+  #   name: Lokalise Auto Merge
+  #   uses: webgains/github-workflows/.github/workflows/pr-lokalise-auto-merge.yml@main
+  #   needs: [deploy]
+  #   secrets: inherit
