@@ -62,7 +62,11 @@ jobs:
 
       - name: "Set up liccheck"
         run: |
-          uv pip install --system liccheck
+          # Pin setuptools<78 because liccheck depends on pkg_resources,
+          # which was removed from the default setuptools install in v78+.
+          python -m pip install --upgrade --force-reinstall "setuptools<78"
+          python -m pip install liccheck
+          python -c "import liccheck;"
       - name: "Run liccheck"
         run: |
           # run the checks

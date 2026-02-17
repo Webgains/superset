@@ -55,22 +55,21 @@ setupClient({ appRoot: applicationRoot() });
 // Load language pack before anything else
 (async () => {
   const lang = bootstrapData.common.locale || 'en';
-  if (lang !== 'en') {
-    try {
-      // Second call to configure to set the language pack
-      const { json } = await SupersetClient.get({
-        endpoint: `/superset/language_pack/${lang}/`,
-      });
-      configure({ languagePack: json as LanguagePack });
-      dayjs.locale(lang);
-    } catch (err) {
-      console.warn(
-        'Failed to fetch language pack, falling back to default.',
-        err,
-      );
-      configure();
-      dayjs.locale('en');
-    }
+
+  try {
+    // Second call to configure to set the language pack
+    const { json } = await SupersetClient.get({
+      endpoint: `/superset/language_pack/${lang}/`,
+    });
+    configure({ languagePack: json as LanguagePack });
+    dayjs.locale(lang);
+  } catch (err) {
+    console.warn(
+      'Failed to fetch language pack, falling back to default.',
+      err,
+    );
+    configure();
+    dayjs.locale('en');
   }
 
   // Continue with rest of setup

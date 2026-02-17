@@ -120,6 +120,7 @@ const Select = forwardRef(
       oneLine,
       maxTagCount: propsMaxTagCount,
       virtual = undefined,
+      optionRender: propsOptionRender,
       ...props
     }: SelectProps,
     ref: Ref<RefSelectProps>,
@@ -231,9 +232,39 @@ const Select = forwardRef(
       return result.slice().sort(sortSelectedFirst);
     }, [selectOptions, selectValue, sortSelectedFirst]);
 
-    const enabledOptions = useMemo(
-      () => visibleOptions.filter(option => !option.disabled),
+    // Translate option labels for display (translates if translation exists, otherwise keeps original)
+    // This ensures both dropdown items AND selected value display are translated
+    const translatedVisibleOptions = useMemo(
+      () =>
+        visibleOptions.map((option: AntdLabeledValue) => {
+          // Handle grouped options
+          if ('options' in option && Array.isArray(option.options)) {
+            return {
+              ...option,
+              options: (option.options as SelectOptionsType).map(
+                (subOption: AntdLabeledValue) => ({
+                  ...subOption,
+                  label:
+                    typeof subOption.label === 'string'
+                      ? t(subOption.label)
+                      : subOption.label,
+                }),
+              ),
+            };
+          }
+          // Regular option
+          return {
+            ...option,
+            label:
+              typeof option.label === 'string' ? t(option.label) : option.label,
+          };
+        }),
       [visibleOptions],
+    );
+
+    const enabledOptions = useMemo(
+      () => translatedVisibleOptions.filter(option => !option.disabled),
+      [translatedVisibleOptions],
     );
 
     const selectAllEligible = useMemo(
@@ -373,6 +404,23 @@ const Select = forwardRef(
     const handleFilterOption = (search: string, option: AntdLabeledValue) =>
       handleFilterOptionHelper(search, option, optionFilterProps, filterOption);
 
+    const matchesFilter = useCallback(
+      (search: string, option: AntdLabeledValue) => {
+        if (handleFilterOption(search, option)) return true;
+        if (typeof option.label === 'string') {
+          const translated = t(option.label);
+          if (translated !== option.label) {
+            return handleFilterOption(search, {
+              ...option,
+              label: translated,
+            });
+          }
+        }
+        return false;
+      },
+      [handleFilterOption],
+    );
+
     const handleOnSearch = debounce((search: string) => {
       const searchValue = search.trim();
       setIsSearching(!!searchValue);
@@ -408,15 +456,14 @@ const Select = forwardRef(
           */
           if ('options' in option && Array.isArray(option.options)) {
             const filteredGroupOptions = option.options.filter(
-              (subOption: AntdLabeledValue) =>
-                handleFilterOption(search, subOption),
+              (subOption: AntdLabeledValue) => matchesFilter(search, subOption),
             );
             return filteredGroupOptions.length > 0
               ? { ...option, options: filteredGroupOptions }
               : null;
           }
 
-          return handleFilterOption(search, option as AntdLabeledValue)
+          return matchesFilter(search, option as AntdLabeledValue)
             ? option
             : null;
         })
@@ -638,6 +685,38 @@ const Select = forwardRef(
       return num_selected - num_shown - (selectAllMode ? 1 : 0);
     }, [stableMaxTagCount, selectAllMode, selectValue]);
 
+    // Translate labels in selectValue for display
+    const translatedSelectValue = useMemo(() => {
+      if (!selectValue) return selectValue;
+
+      if (Array.isArray(selectValue)) {
+        // Multiple mode - translate labels in array of objects
+        return selectValue.map(item => {
+          if (isLabeledValue(item)) {
+            return {
+              ...item,
+              label:
+                typeof item.label === 'string' ? t(item.label) : item.label,
+            };
+          }
+          return item;
+        });
+      }
+
+      // Single mode with labelInValue - translate label in object
+      if (isLabeledValue(selectValue)) {
+        return {
+          ...selectValue,
+          label:
+            typeof selectValue.label === 'string'
+              ? t(selectValue.label)
+              : selectValue.label,
+        };
+      }
+
+      return selectValue;
+    }, [selectValue]);
+
     const customMaxTagPlaceholder = () =>
       `+ ${omittedCount > 0 ? omittedCount : 1} ...`;
 
@@ -760,9 +839,15 @@ const Select = forwardRef(
           onSearch={shouldShowSearch ? handleOnSearch : undefined}
           onSelect={handleOnSelect}
           onClear={handleClear}
-          placeholder={placeholder}
+          placeholder={
+            typeof placeholder === 'string'
+              ? t(placeholder) !== placeholder
+                ? t(placeholder)
+                : placeholder
+              : placeholder
+          }
           tokenSeparators={tokenSeparators}
-          value={selectValue}
+          value={translatedSelectValue}
           virtual={
             virtual !== undefined
               ? virtual
@@ -780,11 +865,17 @@ const Select = forwardRef(
               <StyledCheckOutlined iconSize="m" aria-label="check" />
             )
           }
-          options={visibleOptions}
-          optionRender={option => <Space>{option.label || option.value}</Space>}
+          options={translatedVisibleOptions}
           oneLine={oneLine}
           css={props.css}
           {...props}
+          // Use custom optionRender if provided, otherwise use already-translated labels
+          optionRender={
+            propsOptionRender ||
+            ((option: AntdLabeledValue) => (
+              <Space>{option.label || option.value}</Space>
+            ))
+          }
           showSearch={shouldShowSearch}
           ref={ref}
         />
