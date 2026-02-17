@@ -72,7 +72,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Single platform builds in pull_request context to speed things up
-          if [ "${{ github.event_name }}" = "push" ]; then
+          if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             PLATFORM_ARG="--platform linux/arm64 --platform linux/amd64"
             # can only --load images in single-platform builds
             PUSH_OR_LOAD="--push"

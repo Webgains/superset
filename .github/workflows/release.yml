@@ -23,7 +23,20 @@ jobs:
 
   build:
     needs: config
-    if: needs.config.outputs.has-secrets
+    if: |
+      needs.config.outputs.has-secrets && (
+        github.ref == 'refs/heads/master' ||
+        startsWith(github.ref_name, '0.') ||
+        startsWith(github.ref_name, '1.') ||
+        startsWith(github.ref_name, '2.') ||
+        startsWith(github.ref_name, '3.') ||
+        startsWith(github.ref_name, '4.') ||
+        startsWith(github.ref_name, '5.') ||
+        startsWith(github.ref_name, '6.') ||
+        startsWith(github.ref_name, '7.') ||
+        startsWith(github.ref_name, '8.') ||
+        startsWith(github.ref_name, '9.')
+      )
     name: Bump version and publish package(s)
     runs-on: ubuntu-24.04
     steps:
