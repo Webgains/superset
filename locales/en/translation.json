@@ -114,7 +114,7 @@
     "Channel": "Channel",
     "Add\/Edit Filters": "Add\/Edit Filters",
     "Loading...": "Loading...",
-    "Ad Type": "Ad Type",
+    "Ad Type": "Ad type",
     "Ad name": "Ad name",
     "Publisher": "Publisher",
     "Filters out of scope (%d)": "Filters out of scope (%d)",
@@ -235,7 +235,7 @@
     "Δ Comm": "Δ Comm",
     "Override cmp": "Override cmp",
     "Δ Override": "Δ Override",
-    "Comparison start day": "Comparison start date",
+    "Comparison Start day": "Comparison start date",
     "Select the start day to compare with the defined period": "Select the start date to compare with the defined period",
     "CR": "Conversion rate",
     "Drill to detail": "Drill to detail",
@@ -301,7 +301,7 @@
     "Show total aggregations of selected metrics. Note that row limit does not apply to the result.": "Show total aggregations of selected metrics. Note that row limit does not apply to the result.",
     "Total PC Commission": "Total PC commission",
     "Total PV Commission": "Total PV commission",
-    "Top Publisher Groups by Sales": "Top Publisher Groups By Sales",
+    "Top Publisher Groups by Sales": "Top publisher groups by sales",
     "Publisher group": "Publisher group",
     "Total sales value": "Total sales value",
     "Total override": "Total override",
@@ -311,5 +311,26 @@
     "There is currently no information to display.": "There is currently no information to display.",
     "Total Spend": "Total spend",
     "Show %s entries per page": "Show %s entries per page",
-    "Customer type": "Customer type"
+    "Customer type": "Customer type",
+    "Show: count entries 1": "Show:",
+    "Show: count entries 2": {
+        "one": "{{count}} entry",
+        "other": "{{count}} entries"
+    },
+    "Search: count records 1": "Search:",
+    "Search: count records 2": {
+        "one": "{{count}} record",
+        "other": "{{count}} records"
+    },
+    "Dates:": "Dates:",
+    "Granularity:": "Granularity:",
+    "Status:": "Status:",
+    "Search by:": "Search by:",
+    "Top Publishers Performance Comparison": "Top publishers performance comparison",
+    "Top Channels Performance Comparison": "Top channels performance comparison",
+    "Results (max)": "Results (max)",
+    "Show: count entries 3": {
+        "one": "{{count}} entry per page",
+        "other": "{{count}} entries per page"
+    }
 }

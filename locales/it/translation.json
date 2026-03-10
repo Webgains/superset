@@ -54,7 +54,7 @@
     "Total Sales Value": "Valore totale vendite",
     "# Clicks": "# Click",
     "Conversion Rate": "Tasso di conversione",
-    "Country": "Paese",
+    "Country": "Mappa della Nazione",
     "Scheme": "Schema",
     "Comm": "Commissione",
     "Ads Type": "Tipo annunci",
@@ -235,7 +235,7 @@
     "Δ Comm": "Δ Comm.",
     "Override cmp": "Cfr. override",
     "Δ Override": "Δ Override",
-    "Comparison start day": "Data d'inizio del confronto",
+    "Comparison Start day": "Data d'inizio del confronto",
     "Select the start day to compare with the defined period": "Seleziona la data d'inizio da confrontare con il periodo definito",
     "CR": "Tasso di conversione",
     "Drill to detail": "Zoom sui dettagli",
@@ -310,6 +310,27 @@
     "Comment": "Commento",
     "There is currently no information to display.": "Al momento non ci sono informazioni da visualizzare.",
     "Total Spend": "Spesa totale",
-    "Show %s entries per page": "",
-    "Customer type": ""
+    "Show %s entries per page": "Mostra %s voci per pagina",
+    "Customer type": "Tipo di cliente",
+    "Show: count entries 1": "Mostra:",
+    "Show: count entries 2": {
+        "one": "{{count}} voce",
+        "other": "{{count}} voci"
+    },
+    "Search: count records 1": "Cerca:",
+    "Search: count records 2": {
+        "one": "{{count}} record",
+        "other": "{{count}} record"
+    },
+    "Dates:": "Date:",
+    "Granularity:": "Granularità:",
+    "Status:": "Stato:",
+    "Search by:": "Cerca per:",
+    "Top Publishers Performance Comparison": "Confronto tra i publisher più performanti",
+    "Top Channels Performance Comparison": "Confronto tra i canali più performanti",
+    "Results (max)": "Risultati (max.)",
+    "Show: count entries 3": {
+        "one": "{{count}} voce per pagina",
+        "other": "{{count}} voci per pagina"
+    }
 }

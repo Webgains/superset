@@ -235,7 +235,7 @@
     "Δ Comm": "Δ Comm",
     "Override cmp": "Override vgl.",
     "Δ Override": "Δ Override",
-    "Comparison start day": "Vergelijking startdatum",
+    "Comparison Start day": "Vergelijking startdatum",
     "Select the start day to compare with the defined period": "Selecteer de startdatum om met de gedefinieerde periode te vergelijken",
     "CR": "Conversieratio",
     "Drill to detail": "Doorklikken naar detail",
@@ -310,6 +310,27 @@
     "Comment": "Opmerking",
     "There is currently no information to display.": "Er is momenteel geen informatie om weer te geven.",
     "Total Spend": "Totale uitgaven",
-    "Show %s entries per page": "",
-    "Customer type": ""
+    "Show %s entries per page": "Toon %s items per pagina",
+    "Customer type": "Klanttype",
+    "Show: count entries 1": "Tonen:",
+    "Show: count entries 2": {
+        "one": "{{count}} item",
+        "other": "{{count}} items"
+    },
+    "Search: count records 1": "Zoeken:",
+    "Search: count records 2": {
+        "one": "{{count}} item",
+        "other": "{{count}} items"
+    },
+    "Dates:": "Data:",
+    "Granularity:": "Granulariteit:",
+    "Status:": "Status:",
+    "Search by:": "Zoeken op:",
+    "Top Publishers Performance Comparison": "Prestatievergelijking van top publishers",
+    "Top Channels Performance Comparison": "Prestatievergelijking van top kanalen",
+    "Results (max)": "Resultaten (max)",
+    "Show: count entries 3": {
+        "one": "{{count}} item per pagina",
+        "other": "{{count}} items per pagina"
+    }
 }
