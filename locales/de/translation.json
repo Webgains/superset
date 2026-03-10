@@ -235,7 +235,7 @@
     "Δ Comm": "Δ Prov.",
     "Override cmp": "Override (Vgl.)",
     "Δ Override": "Δ Override",
-    "Comparison start day": "Startdatum für den Vergleich",
+    "Comparison Start day": "Startdatum für den Vergleich",
     "Select the start day to compare with the defined period": "Wähle das Startdatum für den Vergleich mit dem festgelegten Zeitraum",
     "CR": "Conversion Rate",
     "Drill to detail": "Detaillierte Aufschlüsselung",
@@ -310,6 +310,27 @@
     "Comment": "Kommentar",
     "There is currently no information to display.": "Derzeit gibt es keine Informationen zum Anzeigen.",
     "Total Spend": "Gesamtausgaben",
-    "Show %s entries per page": "",
-    "Customer type": ""
+    "Show %s entries per page": "%s Einträge pro Seite anzeigen",
+    "Customer type": "Kundentyp",
+    "Show: count entries 1": "Anzeigen:",
+    "Show: count entries 2": {
+        "one": "{{count}} Eintrag",
+        "other": "{{count}} Einträge"
+    },
+    "Search: count records 1": "Suchen:",
+    "Search: count records 2": {
+        "one": "{{count}} Datensatz",
+        "other": "{{count}} Datensätze"
+    },
+    "Dates:": "Daten:",
+    "Granularity:": "Detailebene:",
+    "Status:": "Status:",
+    "Search by:": "Suchen nach:",
+    "Top Publishers Performance Comparison": "Performance-Vergleich der Top-Publisher",
+    "Top Channels Performance Comparison": "Performance-Vergleich der Top-Kanäle",
+    "Results (max)": "Ergebnisse (Max.)",
+    "Show: count entries 3": {
+        "one": "{{count}} Eintrag pro Seite",
+        "other": "{{count}} Einträge pro Seite"
+    }
 }
