@@ -333,11 +333,6 @@
         "one": "{{count}} entrada por página",
         "other": "{{count}} entradas por página"
     },
-    "30 days ago": "",
-    "1 week ago": "",
-    "7 days ago": "",
-    "1 year ago": "",
-    "1 month ago": "",
     "Start (inclusive)": "INICIO (FECHA INCLUIDA)",
     "End (exclusive)": "FIN (FECHA NO INCLUIDA)",
     "Range type": "TIPO DE INTERVALO"
