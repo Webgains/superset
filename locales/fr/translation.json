@@ -332,5 +332,13 @@
     "Show: count entries 3": {
         "one": "{{count}} élément par page",
         "other": "{{count}} éléments par page"
-    }
+    },
+    "30 days ago": "",
+    "1 week ago": "",
+    "7 days ago": "",
+    "1 year ago": "",
+    "1 month ago": "",
+    "Start (inclusive)": "DÉBUT (DATE INCLUSE)",
+    "End (exclusive)": "FIN (DATE NON INCLUSE)",
+    "Range type": "TYPE DE FOURCHETTE DE DONNÉES"
 }

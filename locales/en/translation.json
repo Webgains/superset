@@ -332,5 +332,13 @@
     "Show: count entries 3": {
         "one": "{{count}} entry per page",
         "other": "{{count}} entries per page"
-    }
+    },
+    "30 days ago": "30 days ago",
+    "1 week ago": "1 week ago",
+    "7 days ago": "7 days ago",
+    "1 year ago": "1 year ago",
+    "1 month ago": "1 month ago",
+    "Start (inclusive)": "Start (inclusive)",
+    "End (exclusive)": "End (exclusive)",
+    "Range type": "Range type"
 }
