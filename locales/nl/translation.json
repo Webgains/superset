@@ -312,7 +312,7 @@
     "Total Spend": "Totale uitgaven",
     "Show %s entries per page": "Toon %s items per pagina",
     "Customer type": "Klanttype",
-    "Show: count entries 1": "Tonen:",
+    "Show: count entries 1": "Toon:",
     "Show: count entries 2": {
         "one": "{{count}} item",
         "other": "{{count}} items"
@@ -332,5 +332,13 @@
     "Show: count entries 3": {
         "one": "{{count}} item per pagina",
         "other": "{{count}} items per pagina"
-    }
+    },
+    "30 days ago": "",
+    "1 week ago": "",
+    "7 days ago": "",
+    "1 year ago": "",
+    "1 month ago": "",
+    "Start (inclusive)": "START (INCLUSIEF)",
+    "End (exclusive)": "EIND (EXCLUSIEF)",
+    "Range type": "BEREIK TYPE"
 }

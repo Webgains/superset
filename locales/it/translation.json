@@ -319,8 +319,8 @@
     },
     "Search: count records 1": "Cerca:",
     "Search: count records 2": {
-        "one": "{{count}} record",
-        "other": "{{count}} record"
+        "one": "{{count}} voce",
+        "other": "{{count}} voci"
     },
     "Dates:": "Date:",
     "Granularity:": "Granularità:",
@@ -332,5 +332,13 @@
     "Show: count entries 3": {
         "one": "{{count}} voce per pagina",
         "other": "{{count}} voci per pagina"
-    }
+    },
+    "30 days ago": "",
+    "1 week ago": "",
+    "7 days ago": "",
+    "1 year ago": "",
+    "1 month ago": "",
+    "Start (inclusive)": "INIZIO (INCLUSA)",
+    "End (exclusive)": "FINE (ESCLUSA)",
+    "Range type": "TIPO DI INTERVALLO"
 }
