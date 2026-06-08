@@ -16,6 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<<< HEAD:superset-frontend/packages/superset-ui-core/src/components/EditableTitle/EditableTitle.stories.tsx
+import { EditableTitle } from '.';
+import type { EditableTitleProps } from './types';
+
+export default {
+  title: 'Components/EditableTitle',
+  component: EditableTitle,
+};
+
+export const InteractiveEditableTitle = (props: EditableTitleProps) => (
+  <EditableTitle {...props} />
+);
+
+InteractiveEditableTitle.args = {
+  canEdit: true,
+  editing: false,
+  emptyText: 'Empty text',
+  noPermitTooltip: 'Not permitted',
+  showTooltip: true,
+  title: 'Title',
+  defaultTitle: 'Default title',
+  placeholder: 'Placeholder',
+  maxWidth: 100,
+  autoSize: true,
+};
+
+InteractiveEditableTitle.argTypes = {
+  onSaveTitle: { action: 'onSaveTitle' },
+========
 
 export default {
   1: {
@@ -45,4 +74,5 @@ export const disabledAsyncDb = {
     force_ctas_schema: null,
     id: 21,
   },
+>>>>>>>> 6.1.0:superset-frontend/spec/fixtures/mockDatabases.ts
 };

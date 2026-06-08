@@ -16,17 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<<< HEAD:superset-frontend/packages/superset-ui-core/src/components/Divider/Divider.stories.tsx
+import { Divider } from '.';
+import type { DividerProps } from './types';
+
+export default {
+  title: 'Components/Divider',
+  component: Divider,
+========
 import { Avatar } from '.';
 import type { AvatarProps } from './types';
 
 export default {
   title: 'Components/Avatar',
   component: Avatar,
+>>>>>>>> 6.1.0:superset-frontend/packages/superset-ui-core/src/components/Avatar/Avatar.stories.tsx
 };
 
 export const InteractiveAvatar = (args: AvatarProps) => <Avatar {...args} />;
 
 InteractiveAvatar.args = {
+  children: 'AB',
   alt: '',
   gap: 4,
   shape: 'circle',
@@ -36,8 +46,26 @@ InteractiveAvatar.args = {
 };
 
 InteractiveAvatar.argTypes = {
+  children: {
+    description: 'Text or initials to display inside the avatar.',
+    control: { type: 'text' },
+  },
   shape: {
+    description: 'The shape of the avatar.',
     options: ['circle', 'square'],
     control: { type: 'select' },
+  },
+  size: {
+    description: 'The size of the avatar.',
+    options: ['small', 'default', 'large'],
+    control: { type: 'select' },
+  },
+  src: {
+    description: 'Image URL for the avatar. If provided, overrides children.',
+    control: { type: 'text' },
+  },
+  gap: {
+    description: 'Letter spacing inside the avatar.',
+    control: { type: 'number', min: 0, max: 10 },
   },
 };

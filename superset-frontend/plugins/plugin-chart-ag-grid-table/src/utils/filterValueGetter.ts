@@ -17,6 +17,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<<< HEAD:superset-frontend/packages/superset-ui-core/src/components/Icons/types.ts
+import Icon, {
+  IconComponentProps,
+} from '@ant-design/icons/lib/components/Icon';
+import { ComponentType, SVGProps } from 'react';
+
+export type AntdIconProps = IconComponentProps;
+export type IconType = AntdIconProps & {
+  iconColor?: string;
+  iconSize?: 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
+  fileName?: string;
+  customIcons?: boolean;
+};
+
+export type CustomIconType = ComponentType<SVGProps<SVGSVGElement>>;
+export type AntdIconType = typeof Icon;
+
+export interface BaseIconProps {
+  component: CustomIconType | AntdIconType;
+}
+========
 import { ValueGetterParams } from '@superset-ui/core/components/ThemedAgGridReact';
 
 const filterValueGetter = (params: ValueGetterParams) => {
@@ -32,3 +53,4 @@ const filterValueGetter = (params: ValueGetterParams) => {
 };
 
 export default filterValueGetter;
+>>>>>>>> 6.1.0:superset-frontend/plugins/plugin-chart-ag-grid-table/src/utils/filterValueGetter.ts

@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { css, styled, t } from '@superset-ui/core';
-import { useEffect, useState, useRef } from 'react';
+import { t } from '@apache-superset/core/translation';
+import { css, styled } from '@apache-superset/core/theme';
+import { useEffect, useLayoutEffect, useState, useRef } from 'react';
 import cx from 'classnames';
 import { Tooltip } from '../Tooltip';
 import { CertifiedBadge } from '../CertifiedBadge';
@@ -85,6 +86,7 @@ export function EditableTitle({
   renderLink,
   maxWidth,
   autoSize = true,
+  onEditingChange,
   ...rest
 }: EditableTitleProps) {
   const [isEditing, setIsEditing] = useState(editing);
@@ -103,7 +105,7 @@ export function EditableTitle({
     return 0;
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const { font } = window.getComputedStyle(
       contentRef.current?.resizableTextArea?.textArea || document.body,
     );
@@ -111,7 +113,7 @@ export function EditableTitle({
     const padding = 20;
     const maxAllowedWidth = typeof maxWidth === 'number' ? maxWidth : Infinity;
     setInputWidth(Math.min(textWidth + padding, maxAllowedWidth));
-  }, [currentTitle]);
+  }, [currentTitle, maxWidth]);
 
   useEffect(() => {
     if (title !== currentTitle) {
@@ -141,6 +143,7 @@ export function EditableTitle({
       textArea.setSelectionRange(length, length);
     }
     setIsEditing(true);
+    onEditingChange?.(true);
   }
 
   function handleBlur() {
@@ -148,6 +151,7 @@ export function EditableTitle({
 
     if (!canEdit) return;
     setIsEditing(false);
+    onEditingChange?.(false);
 
     if (!formattedTitle.length) {
       setCurrentTitle(lastTitle);
@@ -204,7 +208,7 @@ export function EditableTitle({
       size="small"
       data-test="textarea-editable-title-input"
       ref={contentRef}
-      value={t(value)}
+      value={value}
       className={!title ? 'text-muted' : undefined}
       onChange={handleChange}
       onBlur={handleBlur}
@@ -244,9 +248,9 @@ export function EditableTitle({
   if (!canEdit) {
     if (renderLink) {
       // New approach: let caller provide the link component
-      titleComponent = renderLink(t(value) || '');
+      titleComponent = renderLink(value || '');
     } else {
-      titleComponent = <span data-test="span-title">{t(value)}</span>;
+      titleComponent = <span data-test="span-title">{value}</span>;
     }
   }
 

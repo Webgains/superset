@@ -20,8 +20,14 @@ import { render, screen } from '@superset-ui/core/spec';
 import '@testing-library/jest-dom';
 import { Breadcrumb } from '.';
 
+<<<<<<<< HEAD:superset-frontend/cypress-base/cypress/applitools/explore.test.ts
+describe('explore view', () => {
+  beforeEach(() => {
+    cy.intercept('POST', '**/superset/explore_json/**').as('getJson');
+  });
+========
 describe('Breadcrumb Component', () => {
-  it('renders breadcrumb items correctly', () => {
+  test('renders breadcrumb items correctly', () => {
     render(
       <Breadcrumb>
         <Breadcrumb.Item>Home</Breadcrumb.Item>
@@ -29,12 +35,28 @@ describe('Breadcrumb Component', () => {
         <Breadcrumb.Item>Data</Breadcrumb.Item>
       </Breadcrumb>,
     );
+>>>>>>>> 6.1.0:superset-frontend/packages/superset-ui-core/src/components/Breadcrumb/Breadcrumb.test.tsx
 
     expect(screen.getByText('Home')).toBeInTheDocument();
     expect(screen.getByText('Library')).toBeInTheDocument();
     expect(screen.getByText('Data')).toBeInTheDocument();
 
+<<<<<<<< HEAD:superset-frontend/cypress-base/cypress/applitools/explore.test.ts
+  it('should load Explore', () => {
+    const LINE_CHART_DEFAULTS = {
+      ...FORM_DATA_DEFAULTS,
+      viz_type: 'echarts_timeseries_line',
+    };
+    const formData = { ...LINE_CHART_DEFAULTS, metrics: [NUM_METRIC] };
+    cy.visitChartByParams(formData);
+    cy.verifySliceSuccess({ waitAlias: '@getJson', chartSelector: 'svg' });
+    cy.eyesOpen({
+      testName: 'Explore page',
+    });
+    cy.eyesCheckWindow('Explore loaded');
+========
     const separators = screen.getAllByText('/');
     expect(separators.length).toBe(2);
+>>>>>>>> 6.1.0:superset-frontend/packages/superset-ui-core/src/components/Breadcrumb/Breadcrumb.test.tsx
   });
 });

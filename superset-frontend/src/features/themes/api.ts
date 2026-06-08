@@ -28,6 +28,22 @@ export const setSystemDarkTheme = (themeId: number) =>
     endpoint: `/api/v1/theme/${themeId}/set_system_dark`,
   });
 
+<<<<<<<< HEAD:superset-frontend/cypress-base/cypress/applitools/chartlist.test.ts
+  it('should load the Charts list', () => {
+    cy.get('[aria-label="unordered-list"]').click();
+    cy.eyesOpen({
+      testName: 'Charts list-view',
+    });
+    cy.eyesCheckWindow('Charts list-view loaded');
+  });
+
+  it('should load the Charts card list', () => {
+    cy.get('[aria-label="appstore"]').click();
+    cy.eyesOpen({
+      testName: 'Charts card-view',
+    });
+    cy.eyesCheckWindow('Charts card-view loaded');
+========
 export const unsetSystemDefaultTheme = () =>
   SupersetClient.delete({
     endpoint: `/api/v1/theme/unset_system_default`,
@@ -36,4 +52,5 @@ export const unsetSystemDefaultTheme = () =>
 export const unsetSystemDarkTheme = () =>
   SupersetClient.delete({
     endpoint: `/api/v1/theme/unset_system_dark`,
+>>>>>>>> 6.1.0:superset-frontend/src/features/themes/api.ts
   });

@@ -16,11 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<<< HEAD:superset-frontend/packages/superset-ui-core/src/components/Avatar/Avatar.stories.tsx
+import { Avatar } from '.';
+import type { AvatarProps } from './types';
+
+export default {
+  title: 'Components/Avatar',
+  component: Avatar,
+========
 import TableControls, { TableControlsProps } from './DrillDetailTableControls';
 
 export default {
   title: 'Components/Chart/DrillDetail/DrillDetailTableControls',
   component: TableControls,
+>>>>>>>> 6.1.0:superset-frontend/src/components/Chart/DrillDetail/DrillDetailTableControls.stories.tsx
 };
 
 export const InteractiveTableControls = (args: TableControlsProps) => (

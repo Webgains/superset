@@ -30,7 +30,8 @@ import {
   ReactElement,
 } from 'react';
 
-import { ensureIsArray, t, usePrevious } from '@superset-ui/core';
+import { t } from '@apache-superset/core/translation';
+import { ensureIsArray, formatNumber, usePrevious } from '@superset-ui/core';
 import { Constants } from '@superset-ui/core/components';
 import {
   LabeledValue as AntdLabeledValue,
@@ -63,6 +64,7 @@ import {
 } from './styles';
 import {
   DEFAULT_SORT_COMPARATOR,
+  DROPDOWN_ALIGN_BOTTOM,
   EMPTY_OPTIONS,
   MAX_TAG_COUNT,
   TOKEN_SEPARATORS,
@@ -120,7 +122,6 @@ const Select = forwardRef(
       oneLine,
       maxTagCount: propsMaxTagCount,
       virtual = undefined,
-      optionRender: propsOptionRender,
       ...props
     }: SelectProps,
     ref: Ref<RefSelectProps>,
@@ -129,13 +130,9 @@ const Select = forwardRef(
     const shouldShowSearch = allowNewOptions ? true : showSearch;
     const [selectValue, setSelectValue] = useState(value);
     const [inputValue, setInputValue] = useState('');
-    const [isLoading, setIsLoading] = useState(loading);
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
     const [visibleOptions, setVisibleOptions] = useState<SelectOptionsType>([]);
-    const [maxTagCount, setMaxTagCount] = useState(
-      propsMaxTagCount ?? MAX_TAG_COUNT,
-    );
     const [onChangeCount, setOnChangeCount] = useState(0);
     const previousChangeCount = usePrevious(onChangeCount, 0);
     const fireOnChange = useCallback(
@@ -143,15 +140,17 @@ const Select = forwardRef(
       [onChangeCount],
     );
 
-    useEffect(() => {
-      if (oneLine) {
-        setMaxTagCount(isDropdownVisible ? 0 : 1);
-      }
-    }, [isDropdownVisible, oneLine]);
+    const maxTagCount = oneLine
+      ? isDropdownVisible
+        ? 0
+        : 1
+      : (propsMaxTagCount ?? MAX_TAG_COUNT);
 
     // Prevent maxTagCount change during click events to avoid click target disappearing
     const [stableMaxTagCount, setStableMaxTagCount] = useState(maxTagCount);
     const isOpeningRef = useRef(false);
+    const selectContainerRef = useRef<HTMLDivElement>(null);
+    const [dropdownWidth, setDropdownWidth] = useState<number | true>(true);
 
     useEffect(() => {
       if (oneLine) {
@@ -162,12 +161,23 @@ const Select = forwardRef(
           requestAnimationFrame(() => {
             setStableMaxTagCount(0);
             isOpeningRef.current = false;
+
+            // Measure collapsed width and update dropdown width
+            const selectElement =
+              selectContainerRef.current?.querySelector('.ant-select');
+            if (selectElement) {
+              const { width } = selectElement.getBoundingClientRect();
+              if (width > 0) {
+                setDropdownWidth(width);
+              }
+            }
           });
           return;
         }
         if (!isDropdownVisible) {
           // When closing, immediately show the first tag
           setStableMaxTagCount(1);
+          setDropdownWidth(true); // Reset to default when closing
           isOpeningRef.current = false;
         }
         return;
@@ -232,39 +242,9 @@ const Select = forwardRef(
       return result.slice().sort(sortSelectedFirst);
     }, [selectOptions, selectValue, sortSelectedFirst]);
 
-    // Translate option labels for display (translates if translation exists, otherwise keeps original)
-    // This ensures both dropdown items AND selected value display are translated
-    const translatedVisibleOptions = useMemo(
-      () =>
-        visibleOptions.map((option: AntdLabeledValue) => {
-          // Handle grouped options
-          if ('options' in option && Array.isArray(option.options)) {
-            return {
-              ...option,
-              options: (option.options as SelectOptionsType).map(
-                (subOption: AntdLabeledValue) => ({
-                  ...subOption,
-                  label:
-                    typeof subOption.label === 'string'
-                      ? t(subOption.label)
-                      : subOption.label,
-                }),
-              ),
-            };
-          }
-          // Regular option
-          return {
-            ...option,
-            label:
-              typeof option.label === 'string' ? t(option.label) : option.label,
-          };
-        }),
-      [visibleOptions],
-    );
-
     const enabledOptions = useMemo(
-      () => translatedVisibleOptions.filter(option => !option.disabled),
-      [translatedVisibleOptions],
+      () => visibleOptions.filter(option => !option.disabled),
+      [visibleOptions],
     );
 
     const selectAllEligible = useMemo(
@@ -404,23 +384,6 @@ const Select = forwardRef(
     const handleFilterOption = (search: string, option: AntdLabeledValue) =>
       handleFilterOptionHelper(search, option, optionFilterProps, filterOption);
 
-    const matchesFilter = useCallback(
-      (search: string, option: AntdLabeledValue) => {
-        if (handleFilterOption(search, option)) return true;
-        if (typeof option.label === 'string') {
-          const translated = t(option.label);
-          if (translated !== option.label) {
-            return handleFilterOption(search, {
-              ...option,
-              label: translated,
-            });
-          }
-        }
-        return false;
-      },
-      [handleFilterOption],
-    );
-
     const handleOnSearch = debounce((search: string) => {
       const searchValue = search.trim();
       setIsSearching(!!searchValue);
@@ -456,14 +419,15 @@ const Select = forwardRef(
           */
           if ('options' in option && Array.isArray(option.options)) {
             const filteredGroupOptions = option.options.filter(
-              (subOption: AntdLabeledValue) => matchesFilter(search, subOption),
+              (subOption: AntdLabeledValue) =>
+                handleFilterOption(search, subOption),
             );
             return filteredGroupOptions.length > 0
               ? { ...option, options: filteredGroupOptions }
               : null;
           }
 
-          return matchesFilter(search, option as AntdLabeledValue)
+          return handleFilterOption(search, option as AntdLabeledValue)
             ? option
             : null;
         })
@@ -543,7 +507,7 @@ const Select = forwardRef(
 
     const bulkSelectComponent = useMemo(
       () => (
-        <StyledBulkActionsContainer justify="center">
+        <StyledBulkActionsContainer justify="space-between">
           <Button
             type="link"
             buttonStyle="link"
@@ -555,7 +519,7 @@ const Select = forwardRef(
               handleSelectAll();
             }}
           >
-            {`${t('Select all')} (${bulkSelectCounts.selectable})`}
+            {`${t('Select all')} (${formatNumber('SMART_NUMBER', bulkSelectCounts.selectable)})`}
           </Button>
           <Button
             type="link"
@@ -572,7 +536,7 @@ const Select = forwardRef(
               handleDeselectAll();
             }}
           >
-            {`${t('Deselect all')} (${bulkSelectCounts.deselectable})`}
+            {`${t('Clear')} (${formatNumber('SMART_NUMBER', bulkSelectCounts.deselectable)})`}
           </Button>
         </StyledBulkActionsContainer>
       ),
@@ -583,6 +547,8 @@ const Select = forwardRef(
         bulkSelectCounts.deselectable,
       ],
     );
+
+    const isLoading = loading ?? false;
 
     const popupRender = (
       originNode: ReactElement & { ref?: RefObject<HTMLElement> },
@@ -609,12 +575,6 @@ const Select = forwardRef(
       setSelectOptions(initialOptions);
       setVisibleOptions(initialOptions);
     }, [initialOptions]);
-
-    useEffect(() => {
-      if (loading !== undefined && loading !== isLoading) {
-        setIsLoading(loading);
-      }
-    }, [isLoading, loading]);
 
     useEffect(() => {
       setSelectValue(value);
@@ -684,38 +644,6 @@ const Select = forwardRef(
       const num_shown = stableMaxTagCount as number;
       return num_selected - num_shown - (selectAllMode ? 1 : 0);
     }, [stableMaxTagCount, selectAllMode, selectValue]);
-
-    // Translate labels in selectValue for display
-    const translatedSelectValue = useMemo(() => {
-      if (!selectValue) return selectValue;
-
-      if (Array.isArray(selectValue)) {
-        // Multiple mode - translate labels in array of objects
-        return selectValue.map(item => {
-          if (isLabeledValue(item)) {
-            return {
-              ...item,
-              label:
-                typeof item.label === 'string' ? t(item.label) : item.label,
-            };
-          }
-          return item;
-        });
-      }
-
-      // Single mode with labelInValue - translate label in object
-      if (isLabeledValue(selectValue)) {
-        return {
-          ...selectValue,
-          label:
-            typeof selectValue.label === 'string'
-              ? t(selectValue.label)
-              : selectValue.label,
-        };
-      }
-
-      return selectValue;
-    }, [selectValue]);
 
     const customMaxTagPlaceholder = () =>
       `+ ${omittedCount > 0 ? omittedCount : 1} ...`;
@@ -802,7 +730,11 @@ const Select = forwardRef(
     };
 
     return (
-      <StyledContainer className={className} headerPosition={headerPosition}>
+      <StyledContainer
+        ref={selectContainerRef}
+        className={className}
+        headerPosition={headerPosition}
+      >
         {header && (
           <StyledHeader headerPosition={headerPosition}>{header}</StyledHeader>
         )}
@@ -833,21 +765,15 @@ const Select = forwardRef(
           onBlur={handleOnBlur}
           onDeselect={handleOnDeselect}
           onOpenChange={handleOnDropdownVisibleChange}
-          // @ts-ignore
+          // @ts-expect-error
           onPaste={onPaste}
           onPopupScroll={undefined}
           onSearch={shouldShowSearch ? handleOnSearch : undefined}
           onSelect={handleOnSelect}
           onClear={handleClear}
-          placeholder={
-            typeof placeholder === 'string'
-              ? t(placeholder) !== placeholder
-                ? t(placeholder)
-                : placeholder
-              : placeholder
-          }
+          placeholder={placeholder}
           tokenSeparators={tokenSeparators}
-          value={translatedSelectValue}
+          value={selectValue}
           virtual={
             virtual !== undefined
               ? virtual
@@ -865,17 +791,13 @@ const Select = forwardRef(
               <StyledCheckOutlined iconSize="m" aria-label="check" />
             )
           }
-          options={translatedVisibleOptions}
+          options={visibleOptions}
+          optionRender={option => <Space>{option.label || option.value}</Space>}
           oneLine={oneLine}
+          popupMatchSelectWidth={oneLine ? dropdownWidth : true}
           css={props.css}
+          dropdownAlign={DROPDOWN_ALIGN_BOTTOM}
           {...props}
-          // Use custom optionRender if provided, otherwise use already-translated labels
-          optionRender={
-            propsOptionRender ||
-            ((option: AntdLabeledValue) => (
-              <Space>{option.label || option.value}</Space>
-            ))
-          }
           showSearch={shouldShowSearch}
           ref={ref}
         />

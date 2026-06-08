@@ -16,20 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<<< HEAD:superset-frontend/packages/superset-ui-core/src/components/Timer/Timer.stories.tsx
+import { extendedDayjs } from '../../utils/dates';
+import { Timer, TimerProps } from '.';
+
+export default {
+  title: 'Components/Timer',
+  component: Timer,
+========
 export type PermissionView = {
   name: string;
+>>>>>>>> 6.1.0:superset-frontend/src/features/roles/types.ts
 };
 
 export type PermissionResource = {
   id: number;
   permission: PermissionView;
   view_menu: PermissionView;
-};
-
-export type FormattedPermission = {
-  label: string;
-  value: string;
-  id: number;
 };
 
 export type RolePermissions = {
@@ -60,9 +63,9 @@ export type RoleInfo = {
 
 export type RoleForm = {
   roleName: string;
-  rolePermissions: number[];
-  roleUsers: SelectOption[];
-  roleGroups: number[];
+  rolePermissions?: SelectOption[];
+  roleUsers?: SelectOption[];
+  roleGroups?: SelectOption[];
 };
 
 export interface BaseModalProps {

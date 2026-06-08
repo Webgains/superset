@@ -17,7 +17,8 @@
  * under the License.
  */
 import { useEffect } from 'react';
-import { styled, t } from '@superset-ui/core';
+import { t } from '@apache-superset/core/translation';
+import { styled } from '@apache-superset/core/theme';
 import CodeSyntaxHighlighter, {
   SupportedLanguage,
   CodeSyntaxHighlighterProps,
@@ -121,7 +122,11 @@ export default function SyntaxHighlighterCopy({
         onClick={handleCopyClick}
         onKeyDown={handleKeyDown}
       />
-      <CodeSyntaxHighlighter language={language} {...syntaxHighlighterProps}>
+      <CodeSyntaxHighlighter
+        language={language}
+        showCopyButton={false}
+        {...syntaxHighlighterProps}
+      >
         {children}
       </CodeSyntaxHighlighter>
     </SyntaxHighlighterWrapper>

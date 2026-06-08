@@ -16,6 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import Loading from './loading.gif';
+import LoadingSvg from './loading.svg';
 
-export { Loading };
+<<<<<<<< HEAD:superset-frontend/src/visualizations/TimeTable/components/LeftCell/index.ts
+export { default } from './LeftCell';
+========
+export { LoadingSvg as Loading };
+>>>>>>>> 6.1.0:superset-frontend/packages/superset-ui-core/src/components/assets/images/index.ts

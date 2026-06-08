@@ -16,6 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<<< HEAD:superset-frontend/packages/superset-ui-core/src/components/Card/index.tsx
+import { SupersetTheme } from '@superset-ui/core';
+import { Card as AntdCard } from 'antd';
+import type { CardProps } from './types';
+
+const CustomCard = ({ padded, ...props }: CardProps) => (
+  <AntdCard
+    {...props}
+    css={(theme: SupersetTheme) => ({
+      '.ant-card-body': {
+        padding: padded ? theme.sizeUnit * 4 : theme.sizeUnit,
+      },
+    })}
+  />
+);
+
+export const Card = Object.assign(CustomCard, {
+  Meta: AntdCard.Meta,
+});
+========
 import { ensureAppRoot } from './pathUtils';
 
 export const navigateTo = (
@@ -42,3 +62,4 @@ export const navigateWithState = (
     window.history.pushState(state, '', ensureAppRoot(url));
   }
 };
+>>>>>>>> 6.1.0:superset-frontend/src/utils/navigationUtils.ts

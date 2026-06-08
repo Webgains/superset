@@ -17,7 +17,38 @@
  * under the License.
  */
 
-import { styled } from '@superset-ui/core';
+<<<<<<<< HEAD:superset-frontend/spec/fixtures/mockDatabases.ts
+export default {
+  1: {
+    allow_ctas: false,
+    allow_cvas: false,
+    allow_dml: false,
+    allow_file_upload: false,
+    allow_run_async: true,
+    backend: 'postgresql',
+    database_name: 'examples',
+    expose_in_sqllab: true,
+    force_ctas_schema: null,
+    id: 1,
+  },
+};
+
+export const disabledAsyncDb = {
+  21: {
+    allow_ctas: false,
+    allow_cvas: false,
+    allow_dml: false,
+    allow_file_upload: false,
+    allow_run_async: false,
+    backend: 'postgresql',
+    database_name: 'examples',
+    expose_in_sqllab: true,
+    force_ctas_schema: null,
+    id: 21,
+  },
+};
+========
+import { styled } from '@apache-superset/core/theme';
 
 const MetadataWrapper = styled.div`
   display: flex;
@@ -45,3 +76,4 @@ const Metadata: React.FC<MetadataProps> = ({ value }) => (
 );
 
 export default Metadata;
+>>>>>>>> 6.1.0:superset-frontend/packages/superset-ui-core/src/components/Metadata/index.tsx

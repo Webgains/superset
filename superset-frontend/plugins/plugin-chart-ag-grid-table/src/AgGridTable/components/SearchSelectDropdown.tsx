@@ -16,6 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<<< HEAD:superset-frontend/packages/superset-ui-core/src/components/Switch/Switch.stories.tsx
+import { useArgs } from '@storybook/preview-api';
+import { Switch, type SwitchProps } from '.';
+
+export default {
+  title: 'Components/Switch',
+};
+========
 import { SearchOption } from '../../types';
 import { StyledSelect } from '../../styles';
 
@@ -27,6 +35,7 @@ interface SearchSelectDropdownProps {
   /** Available search column options to populate the dropdown */
   searchOptions: SearchOption[];
 }
+>>>>>>>> 6.1.0:superset-frontend/plugins/plugin-chart-ag-grid-table/src/AgGridTable/components/SearchSelectDropdown.tsx
 
 function SearchSelectDropdown({
   value,
