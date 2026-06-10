@@ -65,9 +65,11 @@ jobs:
     concurrency:
       group: ${{ inputs.environment }}-${{ inputs.name }}
     permissions:
+      actions: read
       contents: read
       id-token: write
       deployments: write
+      packages: read
 
     steps:
       - name: Bootstrap Environment Variables
