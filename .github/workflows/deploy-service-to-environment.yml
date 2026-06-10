@@ -94,7 +94,7 @@ jobs:
           role-session-name: deploy-${{ github.run_id }}
 
       - name: Create Environment File
-        uses: webgains/action-generate-dotenv@main
+        uses: ./.github/actions/generate-dotenv
         with:
           file: .env
           template: .env.dist
