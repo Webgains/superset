@@ -16,27 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { t } from '@apache-superset/core/translation';
+import { Pagination as AntdPagination } from 'antd';
+import type { PaginationProps as AntdPaginationProps } from 'antd';
 
-/**
- * Shared popup offset configuration for navbar menu dropdowns.
- */
-export const NAVBAR_MENU_POPUP_OFFSET: [number, number] = [0, -8];
+export type PaginationProps = AntdPaginationProps;
 
-export const commonMenuData = {
-  name: t('SQL'),
-  tabs: [
-    {
-      name: 'Saved queries',
-      label: t('Saved queries'),
-      url: '/savedqueryview/list/',
-      usesRouter: true,
-    },
-    {
-      name: 'Query history',
-      label: t('Query history'),
-      url: '/sqllab/history/',
-      usesRouter: true,
-    },
-  ],
-};
+export const Pagination = AntdPagination;
