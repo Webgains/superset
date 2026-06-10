@@ -236,7 +236,13 @@ def test_get_query_catches_parsing_error() -> None:
     )
 
     # Mock _get_datasource and datasource.get_query_str to raise the error
-    with patch("superset.common.query_actions._get_datasource") as mock_get_ds:
+    with (
+        patch("superset.common.query_actions._get_datasource") as mock_get_ds,
+        patch(
+            "superset.common.query_actions.security_manager.can_access",
+            return_value=True,
+        ),
+    ):
         mock_datasource = Mock()
         mock_datasource.query_language = "sql"
         mock_datasource.get_query_str.side_effect = parse_error
@@ -275,7 +281,13 @@ def test_get_query_handles_parsing_error_with_missing_sql_key() -> None:
     # Mock error.extra to NOT have sql key
     parse_error.error.extra = {"other_field": "some_value"}
 
-    with patch("superset.common.query_actions._get_datasource") as mock_get_ds:
+    with (
+        patch("superset.common.query_actions._get_datasource") as mock_get_ds,
+        patch(
+            "superset.common.query_actions.security_manager.can_access",
+            return_value=True,
+        ),
+    ):
         mock_datasource = Mock()
         mock_datasource.query_language = "sql"
         mock_datasource.get_query_str.side_effect = parse_error
@@ -312,7 +324,13 @@ def test_get_query_handles_parsing_error_with_null_sql_value() -> None:
     # Mock error.extra to have sql key with None value
     parse_error.error.extra = {"sql": None}
 
-    with patch("superset.common.query_actions._get_datasource") as mock_get_ds:
+    with (
+        patch("superset.common.query_actions._get_datasource") as mock_get_ds,
+        patch(
+            "superset.common.query_actions.security_manager.can_access",
+            return_value=True,
+        ),
+    ):
         mock_datasource = Mock()
         mock_datasource.query_language = "sql"
         mock_datasource.get_query_str.side_effect = parse_error

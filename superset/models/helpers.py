@@ -1591,7 +1591,7 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
             # to the subquery so we prevent data inconsistency due to missing records
             # in the dataframes when performing the join
             if query_object.row_limit or query_object.row_offset:
-                query_object_clone_dct["row_limit"] = app.config["ROW_LIMIT"]
+                query_object_clone_dct["row_limit"] = current_app.config["ROW_LIMIT"]
                 query_object_clone_dct["row_offset"] = 0
 
             # Call the unified query method on the datasource
@@ -1879,9 +1879,9 @@ class ExploreMixin:  # pylint: disable=too-many-public-methods
         :param time_grain: The time grain used to calculate the temporal join key.
         :param join_keys: The keys to join on.
         """
-        join_column_producer = app.config["TIME_GRAIN_JOIN_COLUMN_PRODUCERS"].get(
-            time_grain
-        )
+        join_column_producer = current_app.config[
+            "TIME_GRAIN_JOIN_COLUMN_PRODUCERS"
+        ].get(time_grain)
 
         if join_column_producer and not time_grain:
             raise QueryObjectValidationError(
