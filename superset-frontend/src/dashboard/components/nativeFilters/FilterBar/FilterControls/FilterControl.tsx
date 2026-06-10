@@ -38,6 +38,7 @@ import {
   useFilterControlDisplay,
 } from './FilterControlShared';
 import GroupByFilterCard from './GroupByFilterCard';
+import { t } from '@apache-superset/core/translation';
 
 const FilterControl = ({
   dataMaskSelected,
