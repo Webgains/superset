@@ -833,7 +833,7 @@ export default function transformProps(
         if (seriesName) {
           const regex = new RegExp('.*(\\d+) (\\w+) ago');
           const result = seriesName.match(regex);
-          if (result && result.length == 3) {
+          if (result && result.length === 3) {
             const [_, diff, diffType] = result;
             xValue = moment
               .utc(xValue)

@@ -1774,12 +1774,9 @@ class DatasourceEditor extends PureComponent<
   renderOpenInSqlLabLink(isError = false) {
     return (
       <a
-        href="#"
-        role="button"
-        onClick={event => {
-          event.preventDefault();
-          this.openOnSqlLab();
-        }}
+        href={this.getSQLLabUrl()}
+        target="_blank"
+        rel="noopener noreferrer"
         css={theme => css`
           color: ${isError ? theme.colorErrorText : theme.colorText};
           font-size: ${theme.fontSizeSM}px;
