@@ -212,22 +212,22 @@ services:
   #   # mem_limit: 2038m
   #   # mem_reservation: 128M
 
-  superset-worker-beat:
-    build:
-      <<: *common-build
-    command: ["/app/docker/docker-bootstrap.sh", "beat"]
-    env_file:
-      - path: docker/.env # default
-        required: true
-      - path: docker/.env-local # optional override
-        required: false
-    restart: unless-stopped
-    depends_on:
-      - superset-worker
-    user: *superset-user
-    volumes: *superset-volumes
-    healthcheck:
-      disable: true
+  # superset-worker-beat:
+  #   build:
+  #     <<: *common-build
+  #   command: ["/app/docker/docker-bootstrap.sh", "beat"]
+  #   env_file:
+  #     - path: docker/.env # default
+  #       required: true
+  #     - path: docker/.env-local # optional override
+  #       required: false
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - superset-worker
+  #   user: *superset-user
+  #   volumes: *superset-volumes
+  #   healthcheck:
+  #     disable: true
 
   superset-tests-worker:
     build:
