@@ -86,6 +86,7 @@ import { findPermission } from 'src/utils/findPermission';
 import { StreamingExportModal } from 'src/components/StreamingExportModal';
 import { useStreamingExport } from 'src/components/StreamingExportModal/useStreamingExport';
 import { useConfirmModal } from 'src/hooks/useConfirmModal';
+import { navigateTo } from 'src/utils/navigationUtils';
 import { makeUrl } from 'src/utils/pathUtils';
 import ExploreCtasResultsButton from '../ExploreCtasResultsButton';
 import ExploreResultsButton from '../ExploreResultsButton';
@@ -316,8 +317,11 @@ const ResultSet = ({
     }
   };
 
+  const getExportCsvPath = (clientId: string) =>
+    `/api/v1/sqllab/export/${encodeURIComponent(clientId)}/`;
+
   const getExportCsvUrl = (clientId: string) =>
-    makeUrl(`/api/v1/sqllab/export/${clientId}/`);
+    makeUrl(getExportCsvPath(clientId));
 
   const handleCloseStreamingModal = () => {
     cancelExport();
@@ -380,7 +384,7 @@ const ResultSet = ({
               { rows: rowsCount.toLocaleString() },
             ),
             onConfirm: () => {
-              window.location.href = getExportCsvUrl(query.id);
+              navigateTo(getExportCsvPath(query.id), { assign: true });
             },
             confirmText: t('OK'),
             cancelText: t('Close'),

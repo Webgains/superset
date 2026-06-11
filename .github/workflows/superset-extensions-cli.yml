@@ -51,7 +51,7 @@ jobs:
         if: steps.check.outputs.superset-extensions-cli
         uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad # v5
         with:
-          file: ./coverage.xml
+          file: superset-extensions-cli/coverage.xml
           flags: superset-extensions-cli
           name: superset-extensions-cli-coverage
           fail_ci_if_error: false
@@ -61,4 +61,4 @@ jobs:
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
         with:
           name: superset-extensions-cli-coverage-html
-          path: htmlcov/
+          path: superset-extensions-cli/htmlcov/

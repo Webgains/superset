@@ -127,12 +127,18 @@ jobs:
           echo "Using PR number: $PR_NUM"
 
           # Run sync check-only with optional SHA override
+          set -o pipefail
           if [[ -n "${{ github.event.inputs.sha }}" ]]; then
-            OUTPUT=$(python -m showtime sync $PR_NUM --check-only --sha "${{ github.event.inputs.sha }}")
+            OUTPUT=$(python -m showtime sync "$PR_NUM" --check-only --sha "${{ github.event.inputs.sha }}")
           else
-            OUTPUT=$(python -m showtime sync $PR_NUM --check-only)
+            OUTPUT=$(python -m showtime sync "$PR_NUM" --check-only)
           fi
+          sync_exit=$?
           echo "$OUTPUT"
+          if [[ $sync_exit -ne 0 ]]; then
+            echo "❌ showtime sync --check-only failed with exit code $sync_exit"
+            exit $sync_exit
+          fi
 
           # Extract the outputs we need for conditional steps
           BUILD=$(echo "$OUTPUT" | grep "build_needed=" | cut -d'=' -f2)

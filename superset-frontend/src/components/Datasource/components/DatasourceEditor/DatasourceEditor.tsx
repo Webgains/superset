@@ -1145,15 +1145,18 @@ class DatasourceEditor extends PureComponent<
   }
 
   getSQLLabUrl() {
-    const queryParams = new URLSearchParams({
-      dbid: String(this.state.datasource.database?.id ?? ''),
-      sql: this.state.datasource.sql ?? '',
-      name: this.state.datasource.datasource_name ?? '',
-      schema: this.state.datasource.schema ?? '',
-      autorun: 'true',
-      isDataset: 'true',
-    });
-    return makeUrl(`/sqllab/?${queryParams.toString()}`);
+    const params = [
+      ['dbid', String(this.state.datasource.database?.id ?? '')],
+      ['sql', this.state.datasource.sql ?? ''],
+      ['name', this.state.datasource.datasource_name ?? ''],
+      ['schema', this.state.datasource.schema ?? ''],
+      ['autorun', 'true'],
+      ['isDataset', 'true'],
+    ];
+    const query = params
+      .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+      .join('&');
+    return makeUrl(`/sqllab/?${query}`);
   }
 
   openOnSqlLab() {
@@ -1771,9 +1774,12 @@ class DatasourceEditor extends PureComponent<
   renderOpenInSqlLabLink(isError = false) {
     return (
       <a
-        href={this.getSQLLabUrl()}
-        target="_blank"
-        rel="noopener noreferrer"
+        href="#"
+        role="button"
+        onClick={event => {
+          event.preventDefault();
+          this.openOnSqlLab();
+        }}
         css={theme => css`
           color: ${isError ? theme.colorErrorText : theme.colorText};
           font-size: ${theme.fontSizeSM}px;

@@ -424,14 +424,14 @@ const DashboardBuilder = () => {
     CLOSED_FILTER_BAR_WIDTH,
   );
 
-  // const fireResizeEventToParent = () => {
-  //   const data = {
-  //     event: 'supersetContentRefreshed',
-  //     width: window.document.body.scrollWidth,
-  //     height: window.document.body.scrollHeight,
-  //   };
-  //   window.parent.postMessage(data, '*');
-  // };
+  const fireResizeEventToParent = () => {
+    const data = {
+      event: 'supersetContentRefreshed',
+      width: window.document.body.scrollWidth,
+      height: window.document.body.scrollHeight,
+    };
+    window.parent.postMessage(data, '*');
+  };
 
   const fireWindowClickToParent = () => {
     const data = {
@@ -449,7 +449,7 @@ const DashboardBuilder = () => {
         setBarTopOffset(
           current => entries?.[0]?.contentRect?.height || current,
         );
-        // fireResizeEventToParent();
+        fireResizeEventToParent();
       });
 
       observer.observe(headerRef.current);
