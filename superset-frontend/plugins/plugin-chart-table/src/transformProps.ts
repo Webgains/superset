@@ -393,105 +393,99 @@ const processComparisonColumns = (
   props: TableChartProps,
   comparisonSuffix: string,
 ) =>
-  columns
-    .map(col => {
-      const {
-        datasource: { columnFormats, currencyFormats },
-        rawFormData: { column_config: columnConfig = {} },
-      } = props;
-      const savedFormat = columnFormats?.[col.key];
-      const savedCurrency = currencyFormats?.[col.key];
-      const originalLabel = col.label;
-      if (
-        (col.isMetric || col.isPercentMetric) &&
-        !col.key.includes(comparisonSuffix) &&
-        col.isNumeric
-      ) {
-        return [
-          {
-            ...col,
-            originalLabel,
-            label: t('sv_current'),
-            key: `${t('sv_current')} ${col.key}`,
-            config: getComparisonColConfig(
-              t('sv_current'),
-              col.key,
-              columnConfig,
-            ),
-            formatter: getComparisonColFormatter(
-              t('sv_current'),
-              col,
-              columnConfig,
-              savedFormat,
-              savedCurrency,
-            ),
-          },
-          {
-            ...col,
-            originalLabel,
-            label: t('sv_previous'),
-            key: `${t('sv_previous')} ${col.key}`,
-            config: getComparisonColConfig(
-              t('sv_previous'),
-              col.key,
-              columnConfig,
-            ),
-            formatter: getComparisonColFormatter(
-              t('sv_previous'),
-              col,
-              columnConfig,
-              savedFormat,
-              savedCurrency,
-            ),
-          },
-          {
-            ...col,
-            originalLabel,
-            label: t('sv_change'),
-            key: `${t('sv_change')} ${col.key}`,
-            config: getComparisonColConfig(
-              t('sv_change'),
-              col.key,
-              columnConfig,
-            ),
-            formatter: getComparisonColFormatter(
-              t('sv_change'),
-              col,
-              columnConfig,
-              savedFormat,
-              savedCurrency,
-            ),
-          },
-          {
-            ...col,
-            originalLabel,
-            label: t('sv_change_percentage'),
-            key: `${t('sv_change_percentage')} ${col.key}`,
-            config: getComparisonColConfig(
-              t('sv_change_percentage'),
-              col.key,
-              columnConfig,
-            ),
-            formatter: getComparisonColFormatter(
-              t('sv_change_percentage'),
-              col,
-              columnConfig,
-              savedFormat,
-              savedCurrency,
-            ),
-          },
-        ];
-      }
-      if (
-        !col.isMetric &&
-        !col.isPercentMetric &&
-        !col.key.includes(comparisonSuffix)
-      ) {
-        return [col];
-      }
-      return [];
-    })
-    .flat();
+  columns.flatMap(col => {
+    const {
+      datasource: { columnFormats, currencyFormats },
+      rawFormData: { column_config: columnConfig = {} },
+    } = props;
+    const savedFormat = columnFormats?.[col.key];
+    const savedCurrency = currencyFormats?.[col.key];
+    const originalLabel = col.label;
+    if (
+      (col.isMetric || col.isPercentMetric) &&
+      !col.key.includes(comparisonSuffix) &&
+      col.isNumeric
+    ) {
+      return [
+        {
+          ...col,
+          originalLabel,
+          label: t('sv_current'),
+          key: `${t('sv_current')} ${col.key}`,
+          config: getComparisonColConfig(
+            t('sv_current'),
+            col.key,
+            columnConfig,
+          ),
+          formatter: getComparisonColFormatter(
+            t('sv_current'),
+            col,
+            columnConfig,
+            savedFormat,
+            savedCurrency,
+          ),
+        },
+        {
+          ...col,
+          originalLabel,
+          label: t('sv_previous'),
+          key: `${t('sv_previous')} ${col.key}`,
+          config: getComparisonColConfig(
+            t('sv_previous'),
+            col.key,
+            columnConfig,
+          ),
+          formatter: getComparisonColFormatter(
+            t('sv_previous'),
+            col,
+            columnConfig,
+            savedFormat,
+            savedCurrency,
+          ),
+        },
+        {
+          ...col,
+          originalLabel,
+          label: t('sv_change'),
+          key: `${t('sv_change')} ${col.key}`,
+          config: getComparisonColConfig(t('sv_change'), col.key, columnConfig),
+          formatter: getComparisonColFormatter(
+            t('sv_change'),
+            col,
+            columnConfig,
+            savedFormat,
+            savedCurrency,
+          ),
+        },
+        {
+          ...col,
+          originalLabel,
+          label: t('sv_change_percentage'),
+          key: `${t('sv_change_percentage')} ${col.key}`,
+          config: getComparisonColConfig(
+            t('sv_change_percentage'),
+            col.key,
+            columnConfig,
+          ),
+          formatter: getComparisonColFormatter(
+            t('sv_change_percentage'),
+            col,
+            columnConfig,
+            savedFormat,
+            savedCurrency,
+          ),
+        },
+      ];
+    }
+    if (
+      !col.isMetric &&
+      !col.isPercentMetric &&
+      !col.key.includes(comparisonSuffix)
+    ) {
+      return [col];
+    }
+    return [];
+  });
 
 /**
  * Automatically set page size based on number of cells.
