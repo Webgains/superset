@@ -30,7 +30,6 @@ from flask import (
     current_app as app,
     g,
     redirect,
-    request,
     Response,
     session,
     url_for,
