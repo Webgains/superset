@@ -159,6 +159,13 @@ runs:
             add' |
           xargs -I{} -0 sed -i {} "env.sanitised-${{ inputs.environment }}"
         fi
+        if [[ -n '${{ inputs.ssm_param_map }}' ]]; then
+          echo '${{ inputs.ssm_param_map }}' | jq -r 'to_entries |
+            .[] |
+            ["s|",.key,"=.*|",.key, "=\"********\"|"] |
+            add' |
+          xargs -I{} -0 sed -i {} "env.sanitised-${{ inputs.environment }}"
+        fi
 
     - name: Upload sanitised env
       uses: actions/upload-artifact@v4

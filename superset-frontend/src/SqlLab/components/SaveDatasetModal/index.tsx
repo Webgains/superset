@@ -60,6 +60,7 @@ import { postFormData } from 'src/explore/exploreUtils/formData';
 import { URL_PARAMS } from 'src/constants';
 import { isEmpty } from 'lodash';
 import { clearDatasetCache } from 'src/utils/cachedSupersetGet';
+import { navigateTo } from 'src/utils/navigationUtils';
 
 interface QueryDatabase {
   id?: number;
@@ -213,13 +214,6 @@ export const SaveDatasetModal = ({
   const [includeTemplateParameters, setIncludeTemplateParameters] =
     useState(false);
 
-  const createWindow = (url: string) => {
-    if (openWindow) {
-      window.open(url, '_blank', 'noreferrer');
-    } else {
-      window.location.href = url;
-    }
-  };
   const formDataWithDefaults = {
     ...EXPLORE_CHART_DEFAULT,
     ...formData,
@@ -261,7 +255,7 @@ export const SaveDatasetModal = ({
       const url = mountExploreUrl('base', {
         [URL_PARAMS.formDataKey.name]: key,
       });
-      createWindow(url);
+      navigateTo(url, { newWindow: openWindow });
 
       setShouldOverwriteDataset(false);
       setDatasetName(getDefaultDatasetName());
@@ -367,7 +361,7 @@ export const SaveDatasetModal = ({
         const url = mountExploreUrl('base', {
           [URL_PARAMS.formDataKey.name]: key,
         });
-        createWindow(url);
+        navigateTo(url, { newWindow: openWindow });
         setDatasetName(getDefaultDatasetName());
         onHide();
       })

@@ -79,6 +79,7 @@ import {
 import Mousetrap from 'mousetrap';
 import { clearDatasetCache } from 'src/utils/cachedSupersetGet';
 import { makeUrl } from 'src/utils/pathUtils';
+import { navigateTo } from 'src/utils/navigationUtils';
 import {
   OwnerSelectLabel,
   OWNER_TEXT_LABEL_PROP,
@@ -1160,7 +1161,7 @@ class DatasourceEditor extends PureComponent<
   }
 
   openOnSqlLab() {
-    window.open(this.getSQLLabUrl(), '_blank', 'noopener,noreferrer');
+    navigateTo(this.getSQLLabUrl(), { newWindow: true });
   }
 
   tableChangeAndSyncMetadata() {
@@ -1774,7 +1775,7 @@ class DatasourceEditor extends PureComponent<
   renderOpenInSqlLabLink(isError = false) {
     return (
       <a
-        href={this.getSQLLabUrl()}
+        href={encodeURI(this.getSQLLabUrl())}
         target="_blank"
         rel="noopener noreferrer"
         css={theme => css`

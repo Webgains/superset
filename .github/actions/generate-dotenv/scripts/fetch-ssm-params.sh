@@ -32,7 +32,7 @@ parameters='[]'
 invalid='[]'
 for ((i=0; i<${#ssm_paths[@]}; i+=10)); do
   chunk=("${ssm_paths[@]:i:10}")
-  response="$(aws ssm get-parameters --names "${chunk[@]}" --output json)"
+  response="$(aws ssm get-parameters --names "${chunk[@]}" --with-decryption --output json)"
   parameters="$(jq -c --argjson acc "${parameters}" '$acc + .Parameters' <<< "${response}")"
   invalid="$(jq -c --argjson acc "${invalid}" '$acc + (.InvalidParameters // [])' <<< "${response}")"
 done

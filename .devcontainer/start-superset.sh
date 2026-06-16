@@ -18,11 +18,20 @@ else
     echo "📁 Using current directory: $(pwd)"
 fi
 
-# Check if docker is running
-if ! docker info > /dev/null 2>&1; then
-    echo "⏳ Waiting for Docker to start..."
-    sleep 5
-fi
+# Wait for Docker to become ready (Codespaces can resume before the daemon is up)
+MAX_DOCKER_RETRIES=12
+DOCKER_RETRY_INTERVAL=5
+for attempt in $(seq 1 "$MAX_DOCKER_RETRIES"); do
+    if docker info > /dev/null 2>&1; then
+        break
+    fi
+    if [[ "$attempt" -eq "$MAX_DOCKER_RETRIES" ]]; then
+        echo "❌ Docker did not become ready after $((MAX_DOCKER_RETRIES * DOCKER_RETRY_INTERVAL)) seconds"
+        exit 1
+    fi
+    echo "⏳ Waiting for Docker to start (attempt ${attempt}/${MAX_DOCKER_RETRIES})..."
+    sleep "$DOCKER_RETRY_INTERVAL"
+done
 
 # Clean up any existing containers
 echo "🧹 Cleaning up existing containers..."
