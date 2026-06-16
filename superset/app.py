@@ -44,6 +44,34 @@ from superset.initialization import SupersetAppInitializer
 logger = logging.getLogger(__name__)
 
 
+def _update_theme_tokens_for_app_root(app: Flask, app_root: str) -> None:
+    """Update theme token URLs for subdirectory deployments."""
+    for theme_key in ("THEME_DEFAULT", "THEME_DARK"):
+        theme = app.config[theme_key]
+        if not theme:
+            continue
+        token = theme.get("token", {})
+        if token.get("brandLogoUrl", "").startswith("/static/"):
+            token["brandLogoUrl"] = f"{app_root}{token['brandLogoUrl']}"
+        if token.get("brandLogoHref") == "/":
+            token["brandLogoHref"] = app_root
+
+
+def _configure_app_root(app: Flask, app_root: str) -> None:
+    """Configure Flask app for subdirectory deployments."""
+    if app_root == "/":
+        return
+
+    app.wsgi_app = AppRootMiddleware(app.wsgi_app, app_root)
+    if not app.config["STATIC_ASSETS_PREFIX"]:
+        app.config["STATIC_ASSETS_PREFIX"] = app_root
+    if app.config.get("APP_ICON", "").startswith("/static/"):
+        app.config["APP_ICON"] = f"{app_root}{app.config['APP_ICON']}"
+        _update_theme_tokens_for_app_root(app, app_root)
+    if app.config["APPLICATION_ROOT"] == "/":
+        app.config["APPLICATION_ROOT"] = app_root
+
+
 def create_app(
     superset_config_module: Optional[str] = None,
     superset_app_root: Optional[str] = None,
@@ -65,32 +93,7 @@ def create_app(
             or os.environ.get("SUPERSET_APP_ROOT")
             or app.config["APPLICATION_ROOT"],
         )
-        if app_root != "/":
-            app.wsgi_app = AppRootMiddleware(app.wsgi_app, app_root)
-            # If not set, manually configure options that depend on the
-            # value of app_root so things work out of the box
-            if not app.config["STATIC_ASSETS_PREFIX"]:
-                app.config["STATIC_ASSETS_PREFIX"] = app_root
-            # Prefix APP_ICON path with subdirectory root for subdirectory deployments
-            if (
-                app.config.get("APP_ICON", "").startswith("/static/")
-                and app_root != "/"
-            ):
-                app.config["APP_ICON"] = f"{app_root}{app.config['APP_ICON']}"
-                # Also update theme tokens for subdirectory deployments
-                for theme_key in ("THEME_DEFAULT", "THEME_DARK"):
-                    theme = app.config[theme_key]
-                    if not theme:
-                        continue
-                    token = theme.get("token", {})
-                    # Update brandLogoUrl if it points to /static/
-                    if token.get("brandLogoUrl", "").startswith("/static/"):
-                        token["brandLogoUrl"] = f"{app_root}{token['brandLogoUrl']}"
-                    # Update brandLogoHref if it's the default "/"
-                    if token.get("brandLogoHref") == "/":
-                        token["brandLogoHref"] = app_root
-            if app.config["APPLICATION_ROOT"] == "/":
-                app.config["APPLICATION_ROOT"] = app_root
+        _configure_app_root(app, app_root)
 
         app_initializer = app.config.get("APP_INITIALIZER", SupersetAppInitializer)(app)
         app_initializer.init_app()
