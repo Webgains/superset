@@ -93,9 +93,10 @@ COPY superset/translations /app/superset/translations
 RUN mkdir -p /app/locales
 COPY locales /app/locales
 
-# Build translations if enabled, then cleanup localization files
+# Build translations if enabled, merge custom locales, then cleanup localization files
 RUN if [ "${BUILD_TRANSLATIONS}" = "true" ]; then \
-        npm run build-translation; \
+        npm run build-translation && \
+        bash ./scripts/lokalise_merger.sh; \
     fi; \
     rm -rf /app/superset/translations/*/*/*.[po,mo];
 
