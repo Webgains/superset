@@ -59,6 +59,7 @@ import { FilterBarOrientation, RootState } from 'src/dashboard/types';
 import {
   DropdownContainer,
   type DropdownRef as DropdownContainerRef,
+  type DropdownItem,
   Typography,
 } from '@superset-ui/core/components';
 import { Icons } from '@superset-ui/core/components/Icons';
@@ -608,30 +609,59 @@ const FilterControls: FC<FilterControlsProps> = ({
                 )
           }
           dropdownContent={
-            overflowedFiltersInScope.length ||
-            overflowedCrossFilters.length ||
+            items.length > 0 ||
             (filtersOutOfScope.length && showCollapsePanel) ||
             (customizationsOutOfScope.length && showCustomizationCollapsePanel)
-              ? () => (
-                  <>
-                    <FiltersDropdownContent
-                      overflowedCrossFilters={overflowedCrossFilters}
-                      filtersInScope={overflowedFiltersInScope}
-                      filtersOutOfScope={filtersOutOfScope}
-                      renderer={renderer}
-                      rendererCrossFilter={rendererCrossFilter}
-                      showCollapsePanel={showCollapsePanel}
-                      forceRenderOutOfScope={hasRequiredFirst}
-                    />
-                    {showCustomizationCollapsePanel && (
-                      <CustomizationsOutOfScopeCollapsible
-                        customizationsOutOfScope={customizationsOutOfScope}
-                        renderer={customizationRenderer}
-                        forceRender={false}
-                      />
-                    )}
-                  </>
-                )
+              ? (overflowedDropdownItems: DropdownItem[]) => {
+                  const overflowedItemIds = new Set(
+                    overflowedDropdownItems.map(item => item.id),
+                  );
+
+                  const dropdownOverflowedFiltersInScope =
+                    filtersInScope.filter(({ id }) =>
+                      overflowedItemIds.has(id),
+                    );
+                  const dropdownOverflowedCrossFilters =
+                    selectedCrossFilters.filter(({ name, emitterId }) =>
+                      overflowedItemIds.has(`${name}${emitterId}`),
+                    );
+                  const overflowedChartCustomizationElements =
+                    overflowedDropdownItems
+                      .filter(
+                        item =>
+                          item.id.startsWith('chart-customization-') ||
+                          item.id === 'chart-customization-divider',
+                      )
+                      .map(item => item.element);
+
+                  return (
+                    <>
+                      {overflowedChartCustomizationElements}
+                      {(dropdownOverflowedFiltersInScope.length > 0 ||
+                        dropdownOverflowedCrossFilters.length > 0 ||
+                        (showCollapsePanel && filtersOutOfScope.length > 0)) && (
+                        <FiltersDropdownContent
+                          overflowedCrossFilters={
+                            dropdownOverflowedCrossFilters
+                          }
+                          filtersInScope={dropdownOverflowedFiltersInScope}
+                          filtersOutOfScope={filtersOutOfScope}
+                          renderer={renderer}
+                          rendererCrossFilter={rendererCrossFilter}
+                          showCollapsePanel={showCollapsePanel}
+                          forceRenderOutOfScope={hasRequiredFirst}
+                        />
+                      )}
+                      {showCustomizationCollapsePanel && (
+                        <CustomizationsOutOfScopeCollapsible
+                          customizationsOutOfScope={customizationsOutOfScope}
+                          renderer={customizationRenderer}
+                          forceRender={false}
+                        />
+                      )}
+                    </>
+                  );
+                }
               : undefined
           }
           forceRender={hasRequiredFirst}
@@ -653,8 +683,8 @@ const FilterControls: FC<FilterControlsProps> = ({
     [
       items,
       activeOverflowedFiltersInScope,
-      overflowedFiltersInScope,
-      overflowedCrossFilters,
+      filtersInScope,
+      selectedCrossFilters,
       filtersOutOfScope,
       showCollapsePanel,
       customizationsOutOfScope,
