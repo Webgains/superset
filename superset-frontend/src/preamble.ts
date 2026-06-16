@@ -27,6 +27,7 @@ import setupDashboardComponents from './setup/setupDashboardComponents';
 import { User } from './types/bootstrapTypes';
 import getBootstrapData, { applicationRoot } from './utils/getBootstrapData';
 import { makeUrl } from './utils/pathUtils';
+import { resolveAppLocale } from './utils/resolveAppLocale';
 import './hooks/useLocale';
 
 // Import dayjs plugin types for global TypeScript support
@@ -64,7 +65,8 @@ export default function initPreamble(): Promise<void> {
 
     // Load language pack before rendering
     // Use native fetch to avoid race condition with SupersetClient initialization
-    const lang = bootstrapData.common.locale || 'en';
+    const lang = resolveAppLocale(bootstrapData.common.locale);
+    bootstrapData.common.locale = lang;
     if (lang !== 'en') {
       const abortController = new AbortController();
       const timeoutId = window.setTimeout(() => {
