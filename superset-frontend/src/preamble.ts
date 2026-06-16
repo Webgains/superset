@@ -67,33 +67,32 @@ export default function initPreamble(): Promise<void> {
     // Use native fetch to avoid race condition with SupersetClient initialization
     const lang = resolveAppLocale(bootstrapData.common.locale);
     bootstrapData.common.locale = lang;
-    if (lang !== 'en') {
-      const abortController = new AbortController();
-      const timeoutId = window.setTimeout(() => {
-        abortController.abort();
-      }, LANGUAGE_PACK_REQUEST_TIMEOUT_MS);
 
-      try {
-        const languagePackUrl = makeUrl(`/superset/language_pack/${lang}/`);
-        const resp = await fetch(languagePackUrl, {
-          signal: abortController.signal,
-        });
-        if (!resp.ok) {
-          throw new Error(`Failed to fetch language pack: ${resp.status}`);
-        }
-        const json = await resp.json();
-        configure({ languagePack: json as LanguagePack });
-        dayjs.locale(lang);
-      } catch (err) {
-        logging.warn(
-          'Failed to fetch language pack, falling back to default.',
-          err,
-        );
-        configure();
-        dayjs.locale('en');
-      } finally {
-        window.clearTimeout(timeoutId);
+    const abortController = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      abortController.abort();
+    }, LANGUAGE_PACK_REQUEST_TIMEOUT_MS);
+
+    try {
+      const languagePackUrl = makeUrl(`/superset/language_pack/${lang}/`);
+      const resp = await fetch(languagePackUrl, {
+        signal: abortController.signal,
+      });
+      if (!resp.ok) {
+        throw new Error(`Failed to fetch language pack: ${resp.status}`);
       }
+      const json = await resp.json();
+      configure({ languagePack: json as LanguagePack });
+      dayjs.locale(lang);
+    } catch (err) {
+      logging.warn(
+        'Failed to fetch language pack, falling back to default.',
+        err,
+      );
+      configure();
+      dayjs.locale('en');
+    } finally {
+      window.clearTimeout(timeoutId);
     }
 
     // Continue with rest of setup

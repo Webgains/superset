@@ -639,7 +639,8 @@ const FilterControls: FC<FilterControlsProps> = ({
                       {overflowedChartCustomizationElements}
                       {(dropdownOverflowedFiltersInScope.length > 0 ||
                         dropdownOverflowedCrossFilters.length > 0 ||
-                        (showCollapsePanel && filtersOutOfScope.length > 0)) && (
+                        (showCollapsePanel &&
+                          filtersOutOfScope.length > 0)) && (
                         <FiltersDropdownContent
                           overflowedCrossFilters={
                             dropdownOverflowedCrossFilters
