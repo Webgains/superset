@@ -70,6 +70,11 @@ const HandlebarsTemplateControl = (
         'Formats a number as currency using a row currency code or ISO code. Example: {{formatCurrency value format=",.2f" code=currency_code_col}}.',
     },
     {
+      key: 'currencySymbol',
+      descKey:
+        'Returns only the currency symbol for styling separately from the amount. Example: {{currencySymbol currencyColumn="currency_code"}}.',
+    },
+    {
       key: 'parseJson',
       descKey: 'Parses a JSON string into a JavaScript object.',
     },

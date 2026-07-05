@@ -92,6 +92,23 @@ describe('registerHandlebarsHelpers', () => {
     expect(template({ value: 1000 })).toBe('1,000.00');
   });
 
+  test('currencySymbol helper returns symbol for an explicit currency code', () => {
+    const template = Handlebars.compile('{{currencySymbol code="EUR"}}');
+    expect(template({})).toBe('€');
+  });
+
+  test('currencySymbol helper reads currency code from row context', () => {
+    const template = Handlebars.compile(
+      '{{#with row}}{{currencySymbol currencyColumn="currency_code"}}{{/with}}',
+    );
+    expect(template({ row: { currency_code: 'GBP' } })).toBe('£');
+  });
+
+  test('currencySymbol helper returns empty string without a currency', () => {
+    const template = Handlebars.compile('{{currencySymbol}}');
+    expect(template({})).toBe('');
+  });
+
   test('tn helper returns a string for pluralized keys', () => {
     const { configure } = jest.requireActual(
       '@apache-superset/core/translation',

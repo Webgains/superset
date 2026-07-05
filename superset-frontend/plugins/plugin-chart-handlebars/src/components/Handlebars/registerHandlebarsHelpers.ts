@@ -20,7 +20,9 @@ import { t, tn } from '@apache-superset/core/translation';
 import {
   AUTO_CURRENCY_SYMBOL,
   CurrencyFormatter,
+  getCurrencySymbol,
   getNumberFormatter,
+  normalizeCurrency,
 } from '@superset-ui/core';
 import { extendedDayjs as dayjs } from '@superset-ui/core/utils/dates';
 import Handlebars, { HelperOptions } from 'handlebars';
@@ -161,6 +163,41 @@ export function registerHandlebarsHelpers(): void {
       }
 
       return String(getNumberFormatter(format)(num));
+    },
+  );
+
+  // usage: {{currencySymbol code="EUR"}}
+  // usage: {{currencySymbol currencyColumn="currency_code"}}
+  Handlebars.registerHelper(
+    'currencySymbol',
+    function (
+      this: Record<string, string | number | boolean | null | undefined>,
+      block: HelperOptions,
+    ) {
+      const rowData = getRowData(this);
+      const currencyColumn = block.hash.currencyColumn as string | undefined;
+      const code = block.hash.code as string | undefined;
+
+      const resolveSymbol = (currencyCode: string): string => {
+        try {
+          return getCurrencySymbol({ symbol: currencyCode }) ?? '';
+        } catch {
+          return '';
+        }
+      };
+
+      if (code) {
+        return resolveSymbol(code);
+      }
+
+      if (currencyColumn && rowData) {
+        const normalized = normalizeCurrency(rowData[currencyColumn]);
+        if (normalized) {
+          return resolveSymbol(normalized);
+        }
+      }
+
+      return '';
     },
   );
 
