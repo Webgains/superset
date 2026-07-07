@@ -87,9 +87,14 @@ Below, you will find a list of all currently registered helpers in the Handlebar
 2. **`stringify`**: Converts an object into a JSON string or returns a string representation of non-object values.
    - **Usage**: `{{stringify myObj}}`.
 
-3. **`formatNumber`**: Formats a number using locale-specific formatting.
-   - **Usage**: `{{formatNumber number locale="en-US"}}`.
-   - **Default locale**: `en-US`.
+3. **`formatNumber`**: Formats a number using a Superset d3 format or locale.
+   - **Usage**: `{{formatNumber value format=",.2f"}}` or `{{formatNumber number locale="en-US"}}`.
+   - **Common formats**: `,.2f` (2 decimals with commas), `,d` (integer with commas).
 
-4. **`parseJson`**: Parses a JSON string into a JavaScript object.
+4. **`formatCurrency`**: Formats a number as currency using a Superset d3 format.
+   - **Usage**: `{{formatCurrency value format=",.2f" code=currency_code_col}}`.
+   - **Auto currency from row**: `{{formatCurrency value currencyColumn="currency_code_col"}}`.
+   - **Fixed currency**: `{{formatCurrency value code="EUR" format=",.2f"}}`.
+
+5. **`parseJson`**: Parses a JSON string into a JavaScript object.
    - **Usage**: `{{parseJson jsonString}}`.

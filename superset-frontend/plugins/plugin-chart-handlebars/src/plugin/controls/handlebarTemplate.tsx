@@ -47,11 +47,32 @@ const HandlebarsTemplateControl = (
   );
 
   const helperDescriptions = [
+    {
+      key: 't',
+      descKey:
+        'Translates a string using the active Superset language pack. Example: {{t "Conversion Rate"}}.',
+    },
+    {
+      key: 'tn',
+      descKey:
+        'Translates a pluralized string using the active Superset language pack.',
+    },
     { key: 'dateFormat', descKey: 'Formats a date using a specified format.' },
     { key: 'stringify', descKey: 'Converts an object to a JSON string.' },
     {
       key: 'formatNumber',
-      descKey: 'Formats a number using locale-specific formatting.',
+      descKey:
+        'Formats a number using a Superset d3 format or locale. Example: {{formatNumber value format=",.2f"}}.',
+    },
+    {
+      key: 'formatCurrency',
+      descKey:
+        'Formats a number as currency using a row currency code or ISO code. Example: {{formatCurrency value format=",.2f" code=currency_code_col}}.',
+    },
+    {
+      key: 'currencySymbol',
+      descKey:
+        'Returns only the currency symbol for styling separately from the amount. Example: {{currencySymbol currencyColumn="currency_code"}}.',
     },
     {
       key: 'parseJson',
