@@ -29,8 +29,6 @@ from flask_caching.backends.filesystemcache import FileSystemCache
 
 logger = logging.getLogger()
 
-SUPERSET_LOG_VIEW = False
-
 # Force light/white mode for all users (hides dark mode and theme switcher).
 THEME_DARK = None
 ENABLE_UI_THEME_ADMINISTRATION = False
