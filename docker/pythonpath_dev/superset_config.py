@@ -23,11 +23,53 @@
 import logging
 import os
 import sys
+from typing import Any
 
 from celery.schedules import crontab
 from flask_caching.backends.filesystemcache import FileSystemCache
 
+from superset.stats_logger import BaseStatsLogger
+from superset.utils.log import AbstractEventLogger
+
 logger = logging.getLogger()
+
+
+class NoOpStatsLogger(BaseStatsLogger):
+    def incr(self, key: str) -> None:
+        pass
+
+    def decr(self, key: str) -> None:
+        pass
+
+    def timing(self, key: str, value: float) -> None:
+        pass
+
+    def gauge(self, key: str, value: float) -> None:
+        pass
+
+
+class NoOpEventLogger(AbstractEventLogger):
+    """Silently discard all action/audit events."""
+
+    def log(  # pylint: disable=too-many-arguments
+        self,
+        user_id: int | None,
+        action: str,
+        dashboard_id: int | None,
+        duration_ms: int | None,
+        slice_id: int | None,
+        referrer: str | None,
+        curated_payload: dict[str, Any] | None,
+        curated_form_data: dict[str, Any] | None,
+        *args: object,
+        **kwargs: object,
+    ) -> None:
+        pass
+
+
+STATS_LOGGER = NoOpStatsLogger()
+EVENT_LOGGER = NoOpEventLogger()
+SUPERSET_LOG_VIEW = False
 
 DATABASE_DIALECT = os.getenv("DATABASE_DIALECT")
 DATABASE_USER = os.getenv("DATABASE_USER")
