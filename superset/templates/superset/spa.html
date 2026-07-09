@@ -70,12 +70,14 @@
         color: #000;
       }
 
+      {% if dark_theme_bg and entry != 'embedded' %}
       @media (prefers-color-scheme: dark) {
         body {
           background: #000;
           color: #fff;
         }
       }
+      {% endif %}
     </style>
 
     {% block head_css %}
