@@ -8,9 +8,9 @@ jobs:
   destroy:
     name: Destroy Stack
     runs-on: ubuntu-latest
-    environment: feature
+    environment: dev
     concurrency:
-      group: superset-pr-${{ github.event.pull_request.number }}SupersetService-feature
+      group: superset-pr-${{ github.event.pull_request.number }}SupersetService-dev
     permissions:
       contents: read
       deployments: write

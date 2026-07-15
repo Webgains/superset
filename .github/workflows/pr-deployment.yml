@@ -4,6 +4,18 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+concurrency:
+  group: superset-pr-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  contents: write
+  deployments: write
+  id-token: write
+  packages: read
+  pull-requests: write
+
 jobs:
   build:
     uses: ./.github/workflows/build.yml
@@ -30,12 +42,12 @@ jobs:
       feature_name: ${{ steps.add_labels.outputs.feature_name }}
 
   deploy:
-    name: Deploy to Feature Environment
+    name: Deploy to Dev Environment
     needs: [labels, build]
     uses: ./.github/workflows/deploy-service-to-environment.yml
     secrets: inherit
     with:
-      environment: feature
+      environment: dev
       name: ${{ needs.labels.outputs.feature_name }}
       stack: ${{ needs.labels.outputs.feature_name }}
       service: superset
@@ -45,16 +57,9 @@ jobs:
           "namespace": "${{ needs.labels.outputs.feature_name }}",
           "supersetImageTag": "${{ needs.build.outputs.tag_hash }}"
         }
-
     permissions:
       actions: read
       contents: read
       deployments: write
       id-token: write
       packages: read
-
-  # lokalise_auto_merge:
-  #   name: Lokalise Auto Merge
-  #   uses: webgains/github-workflows/.github/workflows/pr-lokalise-auto-merge.yml@main
-  #   needs: [deploy]
-  #   secrets: inherit
