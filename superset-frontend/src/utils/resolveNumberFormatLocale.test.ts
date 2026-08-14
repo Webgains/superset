@@ -16,22 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { DEFAULT_D3_FORMAT } from '@superset-ui/core';
 import {
   resolveNumberFormatLocale,
   NUMBER_FORMAT_LOCALES,
 } from './resolveNumberFormatLocale';
 
-test('defaults to en_US when locale is missing', () => {
-  expect(resolveNumberFormatLocale(null)).toEqual(NUMBER_FORMAT_LOCALES.en_US);
-  expect(resolveNumberFormatLocale(undefined)).toEqual(
-    NUMBER_FORMAT_LOCALES.en_US,
-  );
+test('defaults to server d3_format when locale is missing', () => {
+  const d3Format = { decimal: ',', thousands: '.' };
+  expect(resolveNumberFormatLocale(null, d3Format)).toEqual({
+    ...DEFAULT_D3_FORMAT,
+    ...d3Format,
+  });
+  expect(resolveNumberFormatLocale(undefined, d3Format)).toEqual({
+    ...DEFAULT_D3_FORMAT,
+    ...d3Format,
+  });
 });
 
-test('defaults to en_US when locale is unsupported', () => {
-  expect(resolveNumberFormatLocale('fr_FR')).toEqual(
-    NUMBER_FORMAT_LOCALES.en_US,
-  );
+test('defaults to server d3_format when locale is unsupported', () => {
+  const d3Format = { decimal: ',', thousands: '.' };
+  expect(resolveNumberFormatLocale('fr_FR', d3Format)).toEqual({
+    ...DEFAULT_D3_FORMAT,
+    ...d3Format,
+  });
 });
 
 test('resolves en_US', () => {

@@ -60,6 +60,7 @@ export default function initPreamble(): Promise<void> {
 
     const numberFormatLocale = resolveNumberFormatLocale(
       getUrlParam(URL_PARAMS.locale),
+      bootstrapData.common.d3_format,
     );
 
     setupFormatters(numberFormatLocale, bootstrapData.common.d3_time_format);

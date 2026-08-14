@@ -41,13 +41,14 @@ export const NUMBER_FORMAT_LOCALES: Record<
 
 /**
  * Resolve a URL `locale` value to a d3-format locale definition.
- * Missing / unsupported values default to en_US.
+ * Missing / unsupported values fall back to the server d3_format config.
  */
 export function resolveNumberFormatLocale(
   localeParam?: string | null,
+  d3Format?: Partial<FormatLocaleDefinition>,
 ): FormatLocaleDefinition {
   if (localeParam && localeParam in NUMBER_FORMAT_LOCALES) {
     return NUMBER_FORMAT_LOCALES[localeParam as NumberFormatLocaleCode];
   }
-  return NUMBER_FORMAT_LOCALES.en_US;
+  return { ...DEFAULT_D3_FORMAT, ...d3Format };
 }

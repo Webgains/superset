@@ -134,7 +134,6 @@ export const RESERVED_DASHBOARD_URL_PARAMS: string[] = [
   URL_PARAMS.permalinkKey.name,
   URL_PARAMS.preselectFilters.name,
   URL_PARAMS.editMode.name,
-  URL_PARAMS.locale.name,
 ];
 
 export const DEFAULT_COMMON_BOOTSTRAP_DATA: CommonBootstrapData = {
