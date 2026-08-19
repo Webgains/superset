@@ -100,6 +100,24 @@ def test_get_data_table_like(processor, mock_query_context):
 
 
 @patch("superset.common.query_context_processor.csv.df_to_escaped_csv")
+def test_get_data_csv_applies_locale_formatting(
+    mock_df_to_escaped_csv, processor, mock_query_context
+):
+    df = pd.DataFrame({"col1": [1234.5], "col2": ["a"]})
+    coltypes = [GenericDataType.NUMERIC, GenericDataType.STRING]
+    mock_query_context.result_format = ChartDataResultFormat.CSV
+    mock_query_context.form_data = {"locale": "de_DE"}
+
+    mock_df_to_escaped_csv.return_value = "col1,col2\n1.234,50,a\n"
+    result = processor.get_data(df, coltypes)
+
+    assert result == "col1,col2\n1.234,50,a\n"
+    called_df = mock_df_to_escaped_csv.call_args[0][0]
+    assert called_df["col1"].tolist() == ["1.234,50"]
+    assert called_df["col2"].tolist() == ["a"]
+
+
+@patch("superset.common.query_context_processor.csv.df_to_escaped_csv")
 def test_get_data_csv(mock_df_to_escaped_csv, processor, mock_query_context):
     df = pd.DataFrame({"col1": [1, 2, 3], "col2": ["a", "b", "c"]})
     coltypes = [GenericDataType.NUMERIC, GenericDataType.STRING]

@@ -31,6 +31,7 @@ from sqlalchemy import text
 
 from superset import db
 from superset.commands.base import BaseCommand
+from superset.utils.export_formatting import format_export_cell_value
 
 logger = logging.getLogger(__name__)
 
@@ -68,14 +69,20 @@ class BaseStreamingCSVExportCommand(BaseCommand):
     - _get_row_limit(): Return optional row limit for the export
     """
 
-    def __init__(self, chunk_size: int = 1000):
+    def __init__(
+        self,
+        chunk_size: int = 1000,
+        export_locale: str | None = None,
+    ):
         """
         Initialize the streaming export command.
 
         Args:
             chunk_size: Number of rows to fetch per database query (default: 1000)
+            export_locale: Optional locale code for numeric cell formatting
         """
         self._chunk_size = chunk_size
+        self._export_locale = export_locale
         self._current_app = app._get_current_object()
 
     @abstractmethod
@@ -128,7 +135,13 @@ class BaseStreamingCSVExportCommand(BaseCommand):
                 if limit is not None and row_count >= limit:
                     break
 
-                csv_writer.writerow(row)
+                export_row = row
+                if self._export_locale:
+                    export_row = tuple(
+                        format_export_cell_value(value, self._export_locale)
+                        for value in row
+                    )
+                csv_writer.writerow(export_row)
                 row_count += 1
 
                 # Check buffer size and flush if needed

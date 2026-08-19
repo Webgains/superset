@@ -21,6 +21,7 @@ from __future__ import annotations
 from typing import Any, TYPE_CHECKING
 
 from superset.commands.streaming_export.base import BaseStreamingCSVExportCommand
+from superset.utils.export_formatting import get_export_locale_from_form_data
 
 if TYPE_CHECKING:
     from superset.common.query_context import QueryContext
@@ -48,7 +49,8 @@ class StreamingCSVExportCommand(BaseStreamingCSVExportCommand):
             query_context: The query context containing datasource and query details
             chunk_size: Number of rows to fetch per database query (default: 1000)
         """
-        super().__init__(chunk_size)
+        export_locale = get_export_locale_from_form_data(query_context.form_data)
+        super().__init__(chunk_size, export_locale=export_locale)
         self._query_context = query_context
 
     def validate(self) -> None:

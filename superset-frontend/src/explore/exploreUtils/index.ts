@@ -34,6 +34,7 @@ import { availableDomains } from 'src/utils/hostNamesConfig';
 import { safeStringify } from 'src/utils/safeStringify';
 import { optionLabel } from 'src/utils/common';
 import { ensureAppRoot } from 'src/utils/pathUtils';
+import { getExportLocale } from 'src/utils/getExportLocale';
 import { URL_PARAMS } from 'src/constants';
 import {
   DISABLE_INPUT_OPERATORS,
@@ -359,23 +360,27 @@ export const exportChart = async ({
   ownState = {},
   onStartStreamingExport = null,
 }: ExportChartParams): Promise<void> => {
+  const formDataWithLocale: QueryFormData = {
+    ...formData,
+    locale: formData.locale ?? getExportLocale(),
+  };
   let url: string | null;
   let payload: QueryFormData | ReturnType<typeof buildQueryContext>;
-  const [useLegacyApi] = getQuerySettings(formData);
+  const [useLegacyApi] = getQuerySettings(formDataWithLocale);
   if (useLegacyApi) {
     const endpointType = getLegacyEndpointType({ resultFormat, resultType });
     url = getExploreUrl({
-      formData,
+      formData: formDataWithLocale,
       endpointType,
       force,
       allowDomainSharding: false,
       relative: true,
     });
-    payload = formData;
+    payload = formDataWithLocale;
   } else {
     url = ensureAppRoot('/api/v1/chart/data');
     payload = await buildV1ChartDataPayload({
-      formData,
+      formData: formDataWithLocale,
       force,
       resultFormat,
       resultType,
