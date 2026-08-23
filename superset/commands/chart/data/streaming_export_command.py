@@ -63,8 +63,9 @@ class StreamingCSVExportCommand(BaseStreamingCSVExportCommand):
     def _resolve_export_numeric_indices(self, column_names: list[str]) -> set[int]:
         """Format only metric columns during streaming export."""
         query_obj = self._query_context.queries[0]
-        verbose_map = self._query_context.datasource.data.get("verbose_map", {}) or {}
-        metric_names = set(get_metric_names(query_obj.metrics, verbose_map))
+        # Streaming CSV headers use SQL aliases (metric_name / adhoc label), not
+        # verbose display names applied by the non-streaming export path.
+        metric_names = set(get_metric_names(query_obj.metrics))
         return {
             index
             for index, column_name in enumerate(column_names)
