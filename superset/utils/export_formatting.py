@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import numbers
 from typing import Any
+from urllib.parse import parse_qs, urlparse
 
 import pandas as pd
 
@@ -29,13 +30,43 @@ from superset.utils.number_format_locale import (
 )
 
 
+def _normalize_export_locale(locale: object) -> str | None:
+    if isinstance(locale, str) and locale in NUMBER_FORMAT_LOCALES:
+        return locale
+    return None
+
+
 def get_export_locale_from_form_data(form_data: dict[str, Any] | None) -> str | None:
-    if not isinstance(form_data, dict):
+    """
+    Resolve export locale for CSV/XLSX downloads.
+
+    Checks, in order:
+    1. ``locale`` on chart ``form_data`` (set by the export request payload)
+    2. ``locale`` query param on the export HTTP request
+    3. ``locale`` query param on the Referer URL (dashboard/explore page)
+    """
+    if isinstance(form_data, dict):
+        if locale := _normalize_export_locale(form_data.get("locale")):
+            return locale
+
+    try:
+        from flask import has_request_context, request
+
+        if not has_request_context():
+            return None
+
+        if locale := _normalize_export_locale(request.args.get("locale")):
+            return locale
+
+        referer = request.headers.get("Referer")
+        if referer:
+            referer_locale = parse_qs(urlparse(referer).query).get("locale", [None])[0]
+            if locale := _normalize_export_locale(referer_locale):
+                return locale
+    except RuntimeError:
         return None
-    locale = form_data.get("locale")
-    if not isinstance(locale, str) or locale not in NUMBER_FORMAT_LOCALES:
-        return None
-    return locale
+
+    return None
 
 
 def is_formattable_number(value: object) -> bool:

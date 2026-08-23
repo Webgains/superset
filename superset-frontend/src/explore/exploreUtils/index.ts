@@ -352,6 +352,9 @@ export const getLegacyEndpointType = ({
 }): string =>
   resultFormat === 'csv' || resultFormat === 'xlsx' ? resultFormat : resultType;
 
+export const withExportLocaleQueryParam = (url: string, locale: string): string =>
+  locale ? URI(url).addQuery('locale', locale).toString() : url;
+
 export const exportChart = async ({
   formData,
   resultFormat = 'json',
@@ -360,25 +363,32 @@ export const exportChart = async ({
   ownState = {},
   onStartStreamingExport = null,
 }: ExportChartParams): Promise<void> => {
+  const exportLocale = formData.locale ?? getExportLocale();
   const formDataWithLocale: QueryFormData = {
     ...formData,
-    locale: formData.locale ?? getExportLocale(),
+    locale: exportLocale,
   };
   let url: string | null;
   let payload: QueryFormData | ReturnType<typeof buildQueryContext>;
   const [useLegacyApi] = getQuerySettings(formDataWithLocale);
   if (useLegacyApi) {
     const endpointType = getLegacyEndpointType({ resultFormat, resultType });
-    url = getExploreUrl({
-      formData: formDataWithLocale,
-      endpointType,
-      force,
-      allowDomainSharding: false,
-      relative: true,
-    });
+    url = withExportLocaleQueryParam(
+      getExploreUrl({
+        formData: formDataWithLocale,
+        endpointType,
+        force,
+        allowDomainSharding: false,
+        relative: true,
+      }),
+      exportLocale,
+    );
     payload = formDataWithLocale;
   } else {
-    url = ensureAppRoot('/api/v1/chart/data');
+    url = withExportLocaleQueryParam(
+      ensureAppRoot('/api/v1/chart/data'),
+      exportLocale,
+    );
     payload = await buildV1ChartDataPayload({
       formData: formDataWithLocale,
       force,

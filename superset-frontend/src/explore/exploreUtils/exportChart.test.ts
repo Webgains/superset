@@ -286,6 +286,7 @@ test('exportChart includes locale from URL in v1 payload', async () => {
 
   const callArgs = onStartStreamingExport.mock.calls[0][0];
   expect(callArgs.payload.form_data.locale).toBe('de_DE');
+  expect(callArgs.url).toContain('locale=de_DE');
 });
 
 test('exportChart preserves explicit locale on formData', async () => {
