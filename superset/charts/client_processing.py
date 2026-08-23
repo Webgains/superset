@@ -36,6 +36,7 @@ from flask_babel import gettext as __
 from superset.common.chart_data import ChartDataResultFormat
 from superset.extensions import event_logger
 from superset.utils import csv
+from superset.utils import excel
 from superset.utils.core import (
     extract_dataframe_dtypes,
     get_column_names,
@@ -392,17 +393,27 @@ def apply_client_processing(  # noqa: C901
 
         if query["result_format"] == ChartDataResultFormat.JSON:
             query["data"] = processed_df.to_dict()
-        elif query["result_format"] == ChartDataResultFormat.CSV:
+        elif query["result_format"] in (
+            ChartDataResultFormat.CSV,
+            ChartDataResultFormat.XLSX,
+        ):
             locale_code = get_export_locale_from_form_data(form_data)
             export_df = apply_locale_number_formatting(
                 processed_df,
                 query["coltypes"],
                 locale_code,
             )
-            query["data"] = csv.df_to_escaped_csv(
-                export_df,
-                index=show_default_index,
-                **current_app.config["CSV_EXPORT"],
-            )
+            if query["result_format"] == ChartDataResultFormat.CSV:
+                query["data"] = csv.df_to_escaped_csv(
+                    export_df,
+                    index=show_default_index,
+                    **current_app.config["CSV_EXPORT"],
+                )
+            else:
+                query["data"] = excel.df_to_excel(
+                    export_df,
+                    index=show_default_index,
+                    **current_app.config["EXCEL_EXPORT"],
+                )
 
     return result

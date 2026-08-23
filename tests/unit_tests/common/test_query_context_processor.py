@@ -41,10 +41,10 @@ def processor(mock_query_context):
     from superset.models.helpers import ExploreMixin
 
     mock_query_context.datasource.data = MagicMock()
-    mock_query_context.datasource.data.get.return_value = {
-        "col1": "Column 1",
-        "col2": "Column 2",
-    }
+    mock_query_context.datasource.data.get.side_effect = (
+        lambda key, default=None: {} if key == "verbose_map" else default
+    )
+    mock_query_context.form_data = None
 
     # Create a processor instance
     processor = QueryContextProcessor(mock_query_context)

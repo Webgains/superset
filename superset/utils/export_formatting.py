@@ -23,16 +23,19 @@ import pandas as pd
 
 from superset.utils.core import GenericDataType
 from superset.utils.number_format_locale import (
+    NUMBER_FORMAT_LOCALES,
     format_number_for_locale,
     resolve_number_format_locale,
 )
 
 
 def get_export_locale_from_form_data(form_data: dict[str, Any] | None) -> str | None:
-    if not form_data:
+    if not isinstance(form_data, dict):
         return None
     locale = form_data.get("locale")
-    return str(locale) if locale else None
+    if not isinstance(locale, str) or locale not in NUMBER_FORMAT_LOCALES:
+        return None
+    return locale
 
 
 def is_formattable_number(value: object) -> bool:
@@ -40,6 +43,31 @@ def is_formattable_number(value: object) -> bool:
     if isinstance(value, bool):
         return False
     return isinstance(value, numbers.Real)
+
+
+def column_should_receive_locale_formatting(
+    column_type: GenericDataType,
+    series: pd.Series,
+) -> bool:
+    """
+    Decide whether a column should be locale-formatted on export.
+
+    Column metadata often marks computed metrics as STRING even when the query
+    returns numeric values, so dtype and sample values are used as fallbacks.
+    """
+    if column_type in (GenericDataType.TEMPORAL, GenericDataType.BOOLEAN):
+        return False
+    if column_type == GenericDataType.NUMERIC:
+        return True
+    if pd.api.types.is_numeric_dtype(series):
+        return True
+    if series.dtype == object:
+        sample = series.dropna().head(50)
+        if len(sample) > 0 and all(
+            is_formattable_number(value) for value in sample
+        ):
+            return True
+    return False
 
 
 def format_export_cell_value(value: Any, locale_code: str | None) -> Any:
@@ -70,10 +98,16 @@ def apply_locale_number_formatting(
 
     locale = resolve_number_format_locale(locale_code)
     out = df.copy()
-    for column, column_type in zip(out.columns, coltypes, strict=False):
-        if column_type != GenericDataType.NUMERIC:
+    for index, column in enumerate(out.columns):
+        column_type = (
+            coltypes[index]
+            if index < len(coltypes)
+            else GenericDataType.STRING
+        )
+        series = out[column]
+        if not column_should_receive_locale_formatting(column_type, series):
             continue
-        out[column] = out[column].map(
+        out[column] = series.map(
             lambda value: (
                 format_number_for_locale(float(value), locale)
                 if is_formattable_number(value) and not pd.isna(value)

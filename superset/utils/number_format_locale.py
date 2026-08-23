@@ -43,9 +43,6 @@ NUMBER_FORMAT_LOCALES: dict[str, NumberFormatLocale] = {
     },
 }
 
-_DE_SEPARATOR_TRANSLATION = str.maketrans({",": "X", ".": ",", "X": "."})
-
-
 def resolve_number_format_locale(locale: str | None) -> NumberFormatLocale:
     """Map a URL/form_data locale code to export formatting rules."""
     if locale in NUMBER_FORMAT_LOCALES:
@@ -63,4 +60,5 @@ def format_number_for_locale(value: float | int, locale: NumberFormatLocale) -> 
     formatted = f"{float(value):,.2f}"
     if locale["code"] == "en_US":
         return formatted
-    return formatted.translate(_DE_SEPARATOR_TRANSLATION)
+    integer_part, decimal_part = formatted.split(".")
+    return f"{integer_part.replace(',', '.')},{decimal_part}"
