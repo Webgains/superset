@@ -41,8 +41,8 @@ def processor(mock_query_context):
     from superset.models.helpers import ExploreMixin
 
     mock_query_context.datasource.data = MagicMock()
-    mock_query_context.datasource.data.get.side_effect = (
-        lambda key, default=None: {} if key == "verbose_map" else default
+    mock_query_context.datasource.data.get.side_effect = lambda key, default=None: (
+        {} if key == "verbose_map" else default
     )
     mock_query_context.form_data = None
 
@@ -143,8 +143,11 @@ def test_get_data_xlsx(
     mock_df_to_excel.return_value = b"binary data"
     result = processor.get_data(df, coltypes)
     assert result == b"binary data"
-    mock_apply_column_types.assert_called_once_with(df, coltypes)
-    mock_df_to_excel.assert_called_once_with(df, index=False)
+    mock_apply_column_types.assert_called_once()
+    apply_df, apply_coltypes = mock_apply_column_types.call_args[0]
+    pd.testing.assert_frame_equal(apply_df, df)
+    assert apply_coltypes == coltypes
+    mock_df_to_excel.assert_called_once_with(apply_df, index=False)
 
 
 def test_get_data_json(processor, mock_query_context):
@@ -218,8 +221,11 @@ def test_get_data_empty_dataframe_xlsx(
     mock_df_to_excel.return_value = b"binary data empty"
     result = processor.get_data(df, coltypes)
     assert result == b"binary data empty"
-    mock_apply_column_types.assert_called_once_with(df, coltypes)
-    mock_df_to_excel.assert_called_once_with(df, index=False)
+    mock_apply_column_types.assert_called_once()
+    apply_df, apply_coltypes = mock_apply_column_types.call_args[0]
+    pd.testing.assert_frame_equal(apply_df, df)
+    assert apply_coltypes == coltypes
+    mock_df_to_excel.assert_called_once_with(apply_df, index=False)
 
 
 def test_get_data_nan_values_json(processor, mock_query_context):

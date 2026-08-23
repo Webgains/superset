@@ -259,29 +259,26 @@ class QueryContextProcessor:
             locale_code = get_export_locale_from_form_data(
                 self._query_context.form_data
             )
-            export_df = apply_locale_number_formatting(df, coltypes, locale_code)
 
             result = None
             if self._query_context.result_format == ChartDataResultFormat.CSV:
+                export_df = apply_locale_number_formatting(df, coltypes, locale_code)
                 result = csv.df_to_escaped_csv(
                     export_df,
                     index=include_index,
                     **current_app.config["CSV_EXPORT"],
                 )
             elif self._query_context.result_format == ChartDataResultFormat.XLSX:
-                if locale_code:
-                    result = excel.df_to_excel(
-                        export_df,
-                        index=include_index,
-                        **current_app.config["EXCEL_EXPORT"],
-                    )
-                else:
-                    excel.apply_column_types(export_df, coltypes)
-                    result = excel.df_to_excel(
-                        export_df,
-                        index=include_index,
-                        **current_app.config["EXCEL_EXPORT"],
-                    )
+                excel_df = df.copy()
+                excel.apply_column_types(excel_df, coltypes)
+                export_df = apply_locale_number_formatting(
+                    excel_df, coltypes, locale_code
+                )
+                result = excel.df_to_excel(
+                    export_df,
+                    index=include_index,
+                    **current_app.config["EXCEL_EXPORT"],
+                )
             return result or ""
 
         return df.to_dict(orient="records")

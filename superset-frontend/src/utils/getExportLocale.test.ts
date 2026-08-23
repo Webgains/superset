@@ -30,7 +30,7 @@ test('returns locale from URL when present', () => {
   expect(getExportLocale()).toBe('de_DE');
 });
 
-test('returns en_US when locale param is absent', () => {
+test('returns undefined when locale param is absent', () => {
   getUrlParamMock.mockReturnValue(null);
-  expect(getExportLocale()).toBe('en_US');
+  expect(getExportLocale()).toBeUndefined();
 });

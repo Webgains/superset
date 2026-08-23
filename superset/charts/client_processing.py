@@ -25,7 +25,7 @@ In order to do that, we reproduce the post-processing in Python for these chart 
 """
 
 import logging
-from io import StringIO
+from io import BytesIO, StringIO
 from typing import Any, Optional, TYPE_CHECKING, Union
 
 import numpy as np
@@ -35,8 +35,7 @@ from flask_babel import gettext as __
 
 from superset.common.chart_data import ChartDataResultFormat
 from superset.extensions import event_logger
-from superset.utils import csv
-from superset.utils import excel
+from superset.utils import csv, excel
 from superset.utils.core import (
     extract_dataframe_dtypes,
     get_column_names,
@@ -356,6 +355,8 @@ def apply_client_processing(  # noqa: C901
                 keep_default_na=na_values is None,
                 na_values=na_values,
             )
+        elif query["result_format"] == ChartDataResultFormat.XLSX:
+            df = pd.read_excel(BytesIO(data))
 
         # convert all columns to verbose (label) name
         if datasource:

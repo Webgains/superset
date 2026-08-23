@@ -46,3 +46,9 @@ def test_format_number_for_locale_de_de() -> None:
     locale = resolve_number_format_locale("de_DE")
     assert format_number_for_locale(1234.5, locale) == "1.234,50"
     assert format_number_for_locale(2935, locale) == "2.935,00"
+
+
+def test_format_number_for_locale_non_finite_de_de() -> None:
+    locale = resolve_number_format_locale("de_DE")
+    assert format_number_for_locale(float("inf"), locale) == "inf"
+    assert format_number_for_locale(float("nan"), locale) == "nan"

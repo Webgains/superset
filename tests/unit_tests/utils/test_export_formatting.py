@@ -49,6 +49,22 @@ def test_apply_locale_number_formatting_numeric_dtype_with_string_coltype() -> N
     assert formatted["Publisher"].tolist() == ["Cremin", "Brekke"]
 
 
+def test_apply_locale_number_formatting_decimal_values() -> None:
+    from decimal import Decimal
+
+    df = pd.DataFrame(
+        {
+            "product_line": ["Classic Cars"],
+            "# of Products Sold": [Decimal("33992")],
+        }
+    )
+    coltypes = [GenericDataType.STRING, GenericDataType.NUMERIC]
+
+    formatted = apply_locale_number_formatting(df, coltypes, "de_DE")
+
+    assert formatted["# of Products Sold"].tolist() == ["33.992,00"]
+
+
 def test_apply_locale_number_formatting_without_locale_is_noop() -> None:
     df = pd.DataFrame({"amount": [1234.5]})
     coltypes = [GenericDataType.NUMERIC]

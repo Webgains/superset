@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import numbers
+from decimal import Decimal
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
@@ -24,8 +25,8 @@ import pandas as pd
 
 from superset.utils.core import GenericDataType
 from superset.utils.number_format_locale import (
-    NUMBER_FORMAT_LOCALES,
     format_number_for_locale,
+    NUMBER_FORMAT_LOCALES,
     resolve_number_format_locale,
 )
 
@@ -69,10 +70,20 @@ def get_export_locale_from_form_data(form_data: dict[str, Any] | None) -> str | 
     return None
 
 
+def _to_export_float(value: object) -> float:
+    if isinstance(value, Decimal):
+        return float(value)
+    if isinstance(value, numbers.Real) and not isinstance(value, bool):
+        return float(value)
+    raise TypeError(f"Expected numeric export value, got {type(value)!r}")
+
+
 def is_formattable_number(value: object) -> bool:
     """Return True when a value should receive locale number formatting."""
     if isinstance(value, bool):
         return False
+    if isinstance(value, Decimal):
+        return True
     return isinstance(value, numbers.Real)
 
 
@@ -94,9 +105,7 @@ def column_should_receive_locale_formatting(
         return True
     if series.dtype == object:
         sample = series.dropna().head(50)
-        if len(sample) > 0 and all(
-            is_formattable_number(value) for value in sample
-        ):
+        if len(sample) > 0 and all(is_formattable_number(value) for value in sample):
             return True
     return False
 
@@ -111,7 +120,7 @@ def format_export_cell_value(value: Any, locale_code: str | None) -> Any:
         return value
 
     locale = resolve_number_format_locale(locale_code)
-    return format_number_for_locale(float(value), locale)
+    return format_number_for_locale(_to_export_float(value), locale)
 
 
 def apply_locale_number_formatting(
@@ -131,16 +140,14 @@ def apply_locale_number_formatting(
     out = df.copy()
     for index, column in enumerate(out.columns):
         column_type = (
-            coltypes[index]
-            if index < len(coltypes)
-            else GenericDataType.STRING
+            coltypes[index] if index < len(coltypes) else GenericDataType.STRING
         )
         series = out[column]
         if not column_should_receive_locale_formatting(column_type, series):
             continue
         out[column] = series.map(
             lambda value: (
-                format_number_for_locale(float(value), locale)
+                format_number_for_locale(_to_export_float(value), locale)
                 if is_formattable_number(value) and not pd.isna(value)
                 else value
             )

@@ -43,6 +43,7 @@ NUMBER_FORMAT_LOCALES: dict[str, NumberFormatLocale] = {
     },
 }
 
+
 def resolve_number_format_locale(locale: str | None) -> NumberFormatLocale:
     """Map a URL/form_data locale code to export formatting rules."""
     if locale in NUMBER_FORMAT_LOCALES:
@@ -60,5 +61,7 @@ def format_number_for_locale(value: float | int, locale: NumberFormatLocale) -> 
     formatted = f"{float(value):,.2f}"
     if locale["code"] == "en_US":
         return formatted
-    integer_part, decimal_part = formatted.split(".")
+    if "." not in formatted:
+        return formatted
+    integer_part, decimal_part = formatted.split(".", 1)
     return f"{integer_part.replace(',', '.')},{decimal_part}"
