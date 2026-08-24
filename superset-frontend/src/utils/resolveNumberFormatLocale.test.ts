@@ -20,6 +20,7 @@ import { DEFAULT_D3_FORMAT } from '@superset-ui/core';
 import {
   resolveNumberFormatLocale,
   NUMBER_FORMAT_LOCALES,
+  NumberFormatLocaleCode,
 } from './resolveNumberFormatLocale';
 
 test('defaults to server d3_format when locale is missing', () => {
@@ -36,21 +37,25 @@ test('defaults to server d3_format when locale is missing', () => {
 
 test('defaults to server d3_format when locale is unsupported', () => {
   const d3Format = { decimal: ',', thousands: '.' };
-  expect(resolveNumberFormatLocale('fr_FR', d3Format)).toEqual({
+  expect(resolveNumberFormatLocale('zh_CN', d3Format)).toEqual({
     ...DEFAULT_D3_FORMAT,
     ...d3Format,
   });
 });
 
-test('resolves en_US', () => {
-  expect(resolveNumberFormatLocale('en_US')).toEqual({
-    ...NUMBER_FORMAT_LOCALES.en_US,
+test.each<[NumberFormatLocaleCode, string, string]>([
+  ['en_US', '.', ','],
+  ['en_GB', '.', ','],
+  ['de_DE', ',', '.'],
+  ['es_ES', ',', '.'],
+  ['it_IT', ',', '.'],
+  ['nl_NL', ',', '.'],
+  ['fr_FR', ',', ' '],
+  ['pl_PL', ',', ' '],
+])('resolves %s separators', (locale, decimal, thousands) => {
+  expect(resolveNumberFormatLocale(locale)).toEqual({
+    ...NUMBER_FORMAT_LOCALES[locale],
   });
-  expect(resolveNumberFormatLocale('en_US').decimal).toBe('.');
-  expect(resolveNumberFormatLocale('en_US').thousands).toBe(',');
-});
-
-test('resolves de_DE', () => {
-  expect(resolveNumberFormatLocale('de_DE').decimal).toBe(',');
-  expect(resolveNumberFormatLocale('de_DE').thousands).toBe('.');
+  expect(resolveNumberFormatLocale(locale).decimal).toBe(decimal);
+  expect(resolveNumberFormatLocale(locale).thousands).toBe(thousands);
 });

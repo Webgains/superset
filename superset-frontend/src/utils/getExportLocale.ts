@@ -21,7 +21,8 @@ import { getUrlParam } from 'src/utils/urlUtils';
 
 /**
  * Read the number-format locale from the page URL for chart exports.
- * Supported values: en_US, de_DE. Returns undefined when absent.
+ * Supported values: en_US, en_GB, de_DE, es_ES, fr_FR, it_IT, nl_NL, pl_PL.
+ * Returns undefined when absent.
  */
 export function getExportLocale(): string | undefined {
   return getUrlParam(URL_PARAMS.locale) || undefined;

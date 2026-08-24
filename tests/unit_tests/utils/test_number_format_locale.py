@@ -14,8 +14,11 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import pytest
+
 from superset.utils.number_format_locale import (
     format_number_for_locale,
+    NUMBER_FORMAT_LOCALES,
     resolve_number_format_locale,
 )
 
@@ -26,29 +29,70 @@ def test_resolve_number_format_locale_defaults_to_en_us() -> None:
     assert locale["decimal"] == "."
     assert locale["thousands"] == ","
 
-    assert resolve_number_format_locale("fr_FR")["code"] == "en_US"
+    assert resolve_number_format_locale("zh_CN")["code"] == "en_US"
 
 
-def test_resolve_number_format_locale_de_de() -> None:
-    locale = resolve_number_format_locale("de_DE")
-    assert locale["code"] == "de_DE"
-    assert locale["decimal"] == ","
-    assert locale["thousands"] == "."
+@pytest.mark.parametrize(
+    ("locale_code", "decimal", "thousands"),
+    [
+        ("en_US", ".", ","),
+        ("en_GB", ".", ","),
+        ("de_DE", ",", "."),
+        ("es_ES", ",", "."),
+        ("it_IT", ",", "."),
+        ("nl_NL", ",", "."),
+        ("fr_FR", ",", " "),
+        ("pl_PL", ",", " "),
+    ],
+)
+def test_resolve_number_format_locale_supported_codes(
+    locale_code: str, decimal: str, thousands: str
+) -> None:
+    locale = resolve_number_format_locale(locale_code)
+    assert locale["code"] == locale_code
+    assert locale["decimal"] == decimal
+    assert locale["thousands"] == thousands
 
 
-def test_format_number_for_locale_en_us() -> None:
+@pytest.mark.parametrize(
+    ("locale_code", "expected"),
+    [
+        ("en_US", "1,234.50"),
+        ("en_GB", "1,234.50"),
+        ("de_DE", "1.234,50"),
+        ("es_ES", "1.234,50"),
+        ("it_IT", "1.234,50"),
+        ("nl_NL", "1.234,50"),
+        ("fr_FR", "1 234,50"),
+        ("pl_PL", "1 234,50"),
+    ],
+)
+def test_format_number_for_locale_supported_codes(
+    locale_code: str, expected: str
+) -> None:
+    locale = resolve_number_format_locale(locale_code)
+    assert format_number_for_locale(1234.5, locale) == expected
+
+
+def test_format_number_for_locale_en_us_zero() -> None:
     locale = resolve_number_format_locale("en_US")
-    assert format_number_for_locale(1234.5, locale) == "1,234.50"
     assert format_number_for_locale(0, locale) == "0.00"
-
-
-def test_format_number_for_locale_de_de() -> None:
-    locale = resolve_number_format_locale("de_DE")
-    assert format_number_for_locale(1234.5, locale) == "1.234,50"
-    assert format_number_for_locale(2935, locale) == "2.935,00"
 
 
 def test_format_number_for_locale_non_finite_de_de() -> None:
     locale = resolve_number_format_locale("de_DE")
     assert format_number_for_locale(float("inf"), locale) == "inf"
     assert format_number_for_locale(float("nan"), locale) == "nan"
+
+
+def test_number_format_locales_cover_product_codes() -> None:
+    assert set(NUMBER_FORMAT_LOCALES) == {
+        "en_US",
+        "en_GB",
+        "de_DE",
+        "es_ES",
+        "fr_FR",
+        "it_IT",
+        "nl_NL",
+        "pl_PL",
+    }

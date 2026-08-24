@@ -18,7 +18,16 @@ from __future__ import annotations
 
 from typing import Literal, TypedDict
 
-NumberFormatLocaleCode = Literal["en_US", "de_DE"]
+NumberFormatLocaleCode = Literal[
+    "en_US",
+    "en_GB",
+    "de_DE",
+    "es_ES",
+    "fr_FR",
+    "it_IT",
+    "nl_NL",
+    "pl_PL",
+]
 
 
 class NumberFormatLocale(TypedDict):
@@ -28,19 +37,28 @@ class NumberFormatLocale(TypedDict):
     csv_sep: str | None
 
 
+def _locale(
+    code: NumberFormatLocaleCode, decimal: str, thousands: str
+) -> NumberFormatLocale:
+    return {
+        "code": code,
+        "decimal": decimal,
+        "thousands": thousands,
+        "csv_sep": None,
+    }
+
+
+# en_GB shares US separators; DE/ES/IT/NL share continental separators;
+# FR/PL use a space as the thousands separator.
 NUMBER_FORMAT_LOCALES: dict[str, NumberFormatLocale] = {
-    "en_US": {
-        "code": "en_US",
-        "decimal": ".",
-        "thousands": ",",
-        "csv_sep": None,
-    },
-    "de_DE": {
-        "code": "de_DE",
-        "decimal": ",",
-        "thousands": ".",
-        "csv_sep": None,
-    },
+    "en_US": _locale("en_US", ".", ","),
+    "en_GB": _locale("en_GB", ".", ","),
+    "de_DE": _locale("de_DE", ",", "."),
+    "es_ES": _locale("es_ES", ",", "."),
+    "it_IT": _locale("it_IT", ",", "."),
+    "nl_NL": _locale("nl_NL", ",", "."),
+    "fr_FR": _locale("fr_FR", ",", " "),
+    "pl_PL": _locale("pl_PL", ",", " "),
 }
 
 
@@ -55,13 +73,16 @@ def format_number_for_locale(value: float | int, locale: NumberFormatLocale) -> 
     """
     Format a number with thousands separators matching the chart UI.
 
-    en_US → 1,234.56
-    de_DE → 1.234,56
+    en_US / en_GB → 1,234.56
+    de_DE / es_ES / it_IT / nl_NL → 1.234,56
+    fr_FR / pl_PL → 1 234,56
     """
     formatted = f"{float(value):,.2f}"
-    if locale["code"] == "en_US":
+    if formatted.lower() in {"inf", "-inf", "nan"}:
         return formatted
-    if "." not in formatted:
-        return formatted
-    integer_part, decimal_part = formatted.split(".", 1)
-    return f"{integer_part.replace(',', '.')},{decimal_part}"
+
+    integer_part, _, decimal_part = formatted.partition(".")
+    integer_part = integer_part.replace(",", locale["thousands"])
+    if not decimal_part:
+        return integer_part
+    return f"{integer_part}{locale['decimal']}{decimal_part}"

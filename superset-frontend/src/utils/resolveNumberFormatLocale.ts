@@ -19,24 +19,32 @@
 import { FormatLocaleDefinition } from 'd3-format';
 import { DEFAULT_D3_FORMAT } from '@superset-ui/core';
 
-export type NumberFormatLocaleCode = 'en_US' | 'de_DE';
+export type NumberFormatLocaleCode =
+  | 'en_US'
+  | 'en_GB'
+  | 'de_DE'
+  | 'es_ES'
+  | 'fr_FR'
+  | 'it_IT'
+  | 'nl_NL'
+  | 'pl_PL';
+
+const US_SEPARATORS = { decimal: '.', thousands: ',', grouping: [3] };
+const CONTINENTAL_SEPARATORS = { decimal: ',', thousands: '.', grouping: [3] };
+const SPACE_SEPARATORS = { decimal: ',', thousands: ' ', grouping: [3] };
 
 export const NUMBER_FORMAT_LOCALES: Record<
   NumberFormatLocaleCode,
   FormatLocaleDefinition
 > = {
-  en_US: {
-    ...DEFAULT_D3_FORMAT,
-    decimal: '.',
-    thousands: ',',
-    grouping: [3],
-  },
-  de_DE: {
-    ...DEFAULT_D3_FORMAT,
-    decimal: ',',
-    thousands: '.',
-    grouping: [3],
-  },
+  en_US: { ...DEFAULT_D3_FORMAT, ...US_SEPARATORS },
+  en_GB: { ...DEFAULT_D3_FORMAT, ...US_SEPARATORS },
+  de_DE: { ...DEFAULT_D3_FORMAT, ...CONTINENTAL_SEPARATORS },
+  es_ES: { ...DEFAULT_D3_FORMAT, ...CONTINENTAL_SEPARATORS },
+  it_IT: { ...DEFAULT_D3_FORMAT, ...CONTINENTAL_SEPARATORS },
+  nl_NL: { ...DEFAULT_D3_FORMAT, ...CONTINENTAL_SEPARATORS },
+  fr_FR: { ...DEFAULT_D3_FORMAT, ...SPACE_SEPARATORS },
+  pl_PL: { ...DEFAULT_D3_FORMAT, ...SPACE_SEPARATORS },
 };
 
 /**
