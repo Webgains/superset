@@ -50,8 +50,8 @@ test.each<[NumberFormatLocaleCode, string, string]>([
   ['es_ES', ',', '.'],
   ['it_IT', ',', '.'],
   ['nl_NL', ',', '.'],
-  ['fr_FR', ',', ' '],
-  ['pl_PL', ',', ' '],
+  ['fr_FR', ',', '.'],
+  ['pl_PL', ',', '.'],
 ])('resolves %s separators', (locale, decimal, thousands) => {
   expect(resolveNumberFormatLocale(locale)).toEqual({
     ...NUMBER_FORMAT_LOCALES[locale],

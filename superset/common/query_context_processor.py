@@ -271,11 +271,8 @@ class QueryContextProcessor:
             elif self._query_context.result_format == ChartDataResultFormat.XLSX:
                 excel_df = df.copy()
                 excel.apply_column_types(excel_df, coltypes)
-                export_df = apply_locale_number_formatting(
-                    excel_df, coltypes, locale_code
-                )
                 result = excel.df_to_excel(
-                    export_df,
+                    excel_df,
                     index=include_index,
                     **current_app.config["EXCEL_EXPORT"],
                 )

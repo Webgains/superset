@@ -41,8 +41,8 @@ def test_resolve_number_format_locale_defaults_to_en_us() -> None:
         ("es_ES", ",", "."),
         ("it_IT", ",", "."),
         ("nl_NL", ",", "."),
-        ("fr_FR", ",", " "),
-        ("pl_PL", ",", " "),
+        ("fr_FR", ",", "."),
+        ("pl_PL", ",", "."),
     ],
 )
 def test_resolve_number_format_locale_supported_codes(
@@ -63,8 +63,8 @@ def test_resolve_number_format_locale_supported_codes(
         ("es_ES", "1.234,50"),
         ("it_IT", "1.234,50"),
         ("nl_NL", "1.234,50"),
-        ("fr_FR", "1 234,50"),
-        ("pl_PL", "1 234,50"),
+        ("fr_FR", "1.234,50"),
+        ("pl_PL", "1.234,50"),
     ],
 )
 def test_format_number_for_locale_supported_codes(

@@ -133,6 +133,24 @@ def test_get_data_csv(mock_df_to_escaped_csv, processor, mock_query_context):
 
 @patch("superset.common.query_context_processor.excel.df_to_excel")
 @patch("superset.common.query_context_processor.excel.apply_column_types")
+def test_get_data_xlsx_skips_locale_formatting(
+    mock_apply_column_types, mock_df_to_excel, processor, mock_query_context
+):
+    df = pd.DataFrame({"col1": [1234.5], "col2": ["a"]})
+    coltypes = [GenericDataType.NUMERIC, GenericDataType.STRING]
+    mock_query_context.result_format = ChartDataResultFormat.XLSX
+    mock_query_context.form_data = {"locale": "de_DE"}
+    mock_df_to_excel.return_value = b"binary data"
+
+    processor.get_data(df, coltypes)
+
+    excel_df = mock_df_to_excel.call_args[0][0]
+    assert excel_df["col1"].tolist() == [1234.5]
+    assert excel_df["col2"].tolist() == ["a"]
+
+
+@patch("superset.common.query_context_processor.excel.df_to_excel")
+@patch("superset.common.query_context_processor.excel.apply_column_types")
 def test_get_data_xlsx(
     mock_apply_column_types, mock_df_to_excel, processor, mock_query_context
 ):

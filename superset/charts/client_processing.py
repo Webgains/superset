@@ -394,27 +394,23 @@ def apply_client_processing(  # noqa: C901
 
         if query["result_format"] == ChartDataResultFormat.JSON:
             query["data"] = processed_df.to_dict()
-        elif query["result_format"] in (
-            ChartDataResultFormat.CSV,
-            ChartDataResultFormat.XLSX,
-        ):
+        elif query["result_format"] == ChartDataResultFormat.CSV:
             locale_code = get_export_locale_from_form_data(form_data)
             export_df = apply_locale_number_formatting(
                 processed_df,
                 query["coltypes"],
                 locale_code,
             )
-            if query["result_format"] == ChartDataResultFormat.CSV:
-                query["data"] = csv.df_to_escaped_csv(
-                    export_df,
-                    index=show_default_index,
-                    **current_app.config["CSV_EXPORT"],
-                )
-            else:
-                query["data"] = excel.df_to_excel(
-                    export_df,
-                    index=show_default_index,
-                    **current_app.config["EXCEL_EXPORT"],
-                )
+            query["data"] = csv.df_to_escaped_csv(
+                export_df,
+                index=show_default_index,
+                **current_app.config["CSV_EXPORT"],
+            )
+        elif query["result_format"] == ChartDataResultFormat.XLSX:
+            query["data"] = excel.df_to_excel(
+                processed_df,
+                index=show_default_index,
+                **current_app.config["EXCEL_EXPORT"],
+            )
 
     return result

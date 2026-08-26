@@ -31,7 +31,6 @@ export type NumberFormatLocaleCode =
 
 const US_SEPARATORS = { decimal: '.', thousands: ',', grouping: [3] };
 const CONTINENTAL_SEPARATORS = { decimal: ',', thousands: '.', grouping: [3] };
-const SPACE_SEPARATORS = { decimal: ',', thousands: ' ', grouping: [3] };
 
 export const NUMBER_FORMAT_LOCALES: Record<
   NumberFormatLocaleCode,
@@ -43,8 +42,8 @@ export const NUMBER_FORMAT_LOCALES: Record<
   es_ES: { ...DEFAULT_D3_FORMAT, ...CONTINENTAL_SEPARATORS },
   it_IT: { ...DEFAULT_D3_FORMAT, ...CONTINENTAL_SEPARATORS },
   nl_NL: { ...DEFAULT_D3_FORMAT, ...CONTINENTAL_SEPARATORS },
-  fr_FR: { ...DEFAULT_D3_FORMAT, ...SPACE_SEPARATORS },
-  pl_PL: { ...DEFAULT_D3_FORMAT, ...SPACE_SEPARATORS },
+  fr_FR: { ...DEFAULT_D3_FORMAT, ...CONTINENTAL_SEPARATORS },
+  pl_PL: { ...DEFAULT_D3_FORMAT, ...CONTINENTAL_SEPARATORS },
 };
 
 /**

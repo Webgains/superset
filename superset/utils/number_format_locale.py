@@ -48,8 +48,7 @@ def _locale(
     }
 
 
-# en_GB shares US separators; DE/ES/IT/NL share continental separators;
-# FR/PL use a space as the thousands separator.
+# en_GB shares US separators; DE/ES/IT/NL/FR/PL share continental separators.
 NUMBER_FORMAT_LOCALES: dict[str, NumberFormatLocale] = {
     "en_US": _locale("en_US", ".", ","),
     "en_GB": _locale("en_GB", ".", ","),
@@ -57,8 +56,8 @@ NUMBER_FORMAT_LOCALES: dict[str, NumberFormatLocale] = {
     "es_ES": _locale("es_ES", ",", "."),
     "it_IT": _locale("it_IT", ",", "."),
     "nl_NL": _locale("nl_NL", ",", "."),
-    "fr_FR": _locale("fr_FR", ",", " "),
-    "pl_PL": _locale("pl_PL", ",", " "),
+    "fr_FR": _locale("fr_FR", ",", "."),
+    "pl_PL": _locale("pl_PL", ",", "."),
 }
 
 
@@ -74,8 +73,7 @@ def format_number_for_locale(value: float | int, locale: NumberFormatLocale) -> 
     Format a number with thousands separators matching the chart UI.
 
     en_US / en_GB → 1,234.56
-    de_DE / es_ES / it_IT / nl_NL → 1.234,56
-    fr_FR / pl_PL → 1 234,56
+    de_DE / es_ES / it_IT / nl_NL / fr_FR / pl_PL → 1.234,56
     """
     formatted = f"{float(value):,.2f}"
     if formatted.lower() in {"inf", "-inf", "nan"}:

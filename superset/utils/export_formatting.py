@@ -131,7 +131,8 @@ def apply_locale_number_formatting(
     """
     Format numeric columns as locale-aware strings for CSV/XLSX export.
 
-    Numeric cells become display strings (Strategy A) so downloads match chart UI.
+    Numeric cells become display strings (Strategy A) so CSV downloads match chart UI.
+    XLSX exports keep native numeric values so Excel can format them.
     """
     if not locale_code:
         return df
