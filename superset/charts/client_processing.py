@@ -344,6 +344,8 @@ def apply_client_processing(  # noqa: C901
             # do not try to process empty data
             continue
 
+        locale_code = get_export_locale_from_form_data(form_data)
+
         if query["result_format"] == ChartDataResultFormat.JSON:
             df = pd.DataFrame.from_dict(data)
         elif query["result_format"] == ChartDataResultFormat.CSV:
@@ -355,6 +357,7 @@ def apply_client_processing(  # noqa: C901
                 StringIO(data),
                 keep_default_na=na_values is None,
                 na_values=na_values,
+                sep=csv_export_kwargs(locale_code)["sep"],
             )
         elif query["result_format"] == ChartDataResultFormat.XLSX:
             df = pd.read_excel(BytesIO(data))
@@ -396,7 +399,6 @@ def apply_client_processing(  # noqa: C901
         if query["result_format"] == ChartDataResultFormat.JSON:
             query["data"] = processed_df.to_dict()
         elif query["result_format"] == ChartDataResultFormat.CSV:
-            locale_code = get_export_locale_from_form_data(form_data)
             export_df = apply_locale_number_formatting(
                 processed_df,
                 query["coltypes"],
