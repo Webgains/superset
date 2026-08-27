@@ -81,6 +81,16 @@ def csv_export_kwargs(locale_code: str | None) -> dict[str, Any]:
     }
 
 
+def csv_parse_kwargs(locale_code: str | None) -> dict[str, Any]:
+    """pandas ``read_csv`` kwargs matching locale export delimiters."""
+    kwargs: dict[str, Any] = {"sep": get_csv_separator(locale_code)}
+    if normalize_number_format_locale(locale_code):
+        loc = resolve_number_format_locale(locale_code)
+        kwargs["decimal"] = loc["decimal"]
+        kwargs["thousands"] = loc["thousands"]
+    return kwargs
+
+
 def _to_export_float(value: object) -> float:
     if isinstance(value, Decimal):
         return float(value)

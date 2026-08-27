@@ -19,6 +19,7 @@ import pandas as pd
 from superset.utils.core import GenericDataType
 from superset.utils.export_formatting import (
     apply_locale_number_formatting,
+    csv_parse_kwargs,
     format_export_cell_value,
 )
 
@@ -93,3 +94,17 @@ def test_get_export_locale_from_form_data_ignores_invalid_values() -> None:
     assert get_export_locale_from_form_data({"locale": "fr_FR"}) == "fr_FR"
     assert get_export_locale_from_form_data({"locale": "en_GB"}) == "en_GB"
     assert get_export_locale_from_form_data({"locale": "pl_PL"}) == "pl_PL"
+
+
+def test_csv_parse_kwargs_match_locale_delimiters() -> None:
+    assert csv_parse_kwargs(None) == {"sep": ","}
+    assert csv_parse_kwargs("en_GB") == {
+        "sep": ",",
+        "decimal": ".",
+        "thousands": ",",
+    }
+    assert csv_parse_kwargs("de_DE") == {
+        "sep": ";",
+        "decimal": ",",
+        "thousands": ".",
+    }

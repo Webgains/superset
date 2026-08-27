@@ -2152,7 +2152,23 @@ COUNT(is_software_dev)
     }
 
 
-def test_apply_client_processing_csv_format_empty_string():
+def test_apply_client_processing_csv_roundtrip_locale_delimiter():
+    result = {
+        "queries": [
+            {
+                "result_format": ChartDataResultFormat.CSV,
+                "data": "amount;name\n1.234,50;a\n",
+            }
+        ]
+    }
+    form_data = {"viz_type": "table", "locale": "de_DE"}
+
+    processed = apply_client_processing(result, form_data)
+    csv_data = processed["queries"][0]["data"]
+
+    assert csv_data.splitlines()[0] == "amount;name"
+    assert "1.234,50" in csv_data
+    assert processed["queries"][0]["rowcount"] == 1
     """
     It should be able to process csv results with no data
     """
