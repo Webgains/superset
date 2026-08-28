@@ -73,12 +73,14 @@ def csv_export_kwargs(locale_code: str | None) -> dict[str, Any]:
     """
     from flask import current_app
 
-    return {
+    kwargs: dict[str, Any] = {
         **current_app.config["CSV_EXPORT"],
         "sep": get_csv_separator(locale_code),
         "decimal": ".",
-        "float_format": "%.2f",
     }
+    if normalize_number_format_locale(locale_code):
+        kwargs["float_format"] = "%.2f"
+    return kwargs
 
 
 def csv_parse_kwargs(locale_code: str | None) -> dict[str, Any]:

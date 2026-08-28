@@ -135,7 +135,6 @@ def test_get_data_csv(mock_df_to_escaped_csv, processor, mock_query_context):
         encoding="utf-8-sig",
         sep=",",
         decimal=".",
-        float_format="%.2f",
     )
 
 
@@ -237,7 +236,6 @@ def test_get_data_empty_dataframe_csv(
         encoding="utf-8-sig",
         sep=",",
         decimal=".",
-        float_format="%.2f",
     )
 
 
