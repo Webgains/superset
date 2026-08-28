@@ -108,16 +108,16 @@ def test_get_data_csv_applies_locale_formatting(
     mock_query_context.result_format = ChartDataResultFormat.CSV
     mock_query_context.form_data = {"lang": "de_DE"}
 
-    mock_df_to_escaped_csv.return_value = "col1;col2\n1234.50;a\n"
+    mock_df_to_escaped_csv.return_value = "col1;col2\n1.234,50;a\n"
     result = processor.get_data(df, coltypes)
 
-    assert result == "col1;col2\n1234.50;a\n"
+    assert result == "col1;col2\n1.234,50;a\n"
     called_df = mock_df_to_escaped_csv.call_args[0][0]
-    assert called_df["col1"].tolist() == [1234.5]
+    assert called_df["col1"].tolist() == ["1.234,50"]
     assert called_df["col2"].tolist() == ["a"]
     assert mock_df_to_escaped_csv.call_args.kwargs["sep"] == ";"
-    assert mock_df_to_escaped_csv.call_args.kwargs["decimal"] == "."
-    assert mock_df_to_escaped_csv.call_args.kwargs["float_format"] == "%.2f"
+    assert "decimal" not in mock_df_to_escaped_csv.call_args.kwargs
+    assert "float_format" not in mock_df_to_escaped_csv.call_args.kwargs
 
 
 @patch("superset.common.query_context_processor.csv.df_to_escaped_csv")
@@ -130,12 +130,7 @@ def test_get_data_csv(mock_df_to_escaped_csv, processor, mock_query_context):
     result = processor.get_data(df, coltypes)
     assert result == "col1,col2\n1,a\n2,b\n3,c\n"
     mock_df_to_escaped_csv.assert_called_once_with(
-        df,
-        index=False,
-        encoding="utf-8-sig",
-        sep=",",
-        decimal=".",
-        float_format="%.2f",
+        df, index=False, encoding="utf-8-sig", sep=","
     )
 
 
@@ -232,12 +227,7 @@ def test_get_data_empty_dataframe_csv(
     result = processor.get_data(df, coltypes)
     assert result == "col1,col2\n"
     mock_df_to_escaped_csv.assert_called_once_with(
-        df,
-        index=False,
-        encoding="utf-8-sig",
-        sep=",",
-        decimal=".",
-        float_format="%.2f",
+        df, index=False, encoding="utf-8-sig", sep=","
     )
 
 

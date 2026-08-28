@@ -18,24 +18,41 @@ import pandas as pd
 
 from superset.utils.core import GenericDataType
 from superset.utils.export_formatting import (
-    coerce_csv_numeric_columns,
+    apply_locale_number_formatting,
     csv_parse_kwargs,
     format_export_cell_value,
 )
 
 
-def test_coerce_csv_numeric_columns_keeps_floats() -> None:
+def test_apply_locale_number_formatting_de_de() -> None:
     df = pd.DataFrame({"amount": [1234.5, 2935], "name": ["a", "b"]})
     coltypes = [GenericDataType.NUMERIC, GenericDataType.STRING]
 
-    coerced = coerce_csv_numeric_columns(df, coltypes)
+    formatted = apply_locale_number_formatting(df, coltypes, "de_DE")
 
-    assert coerced["amount"].tolist() == [1234.5, 2935]
-    assert coerced["name"].tolist() == ["a", "b"]
-    assert pd.api.types.is_numeric_dtype(coerced["amount"])
+    assert formatted["amount"].tolist() == ["1.234,50", "2.935,00"]
+    assert formatted["name"].tolist() == ["a", "b"]
 
 
-def test_coerce_csv_numeric_columns_object_metric_column() -> None:
+def test_apply_locale_number_formatting_fr_fr() -> None:
+    df = pd.DataFrame({"amount": [1483.78]})
+    coltypes = [GenericDataType.NUMERIC]
+
+    formatted = apply_locale_number_formatting(df, coltypes, "fr_FR")
+
+    assert formatted["amount"].tolist() == ["1.483,78"]
+
+
+def test_apply_locale_number_formatting_en_gb() -> None:
+    df = pd.DataFrame({"amount": [1483.78]})
+    coltypes = [GenericDataType.NUMERIC]
+
+    formatted = apply_locale_number_formatting(df, coltypes, "en_GB")
+
+    assert formatted["amount"].tolist() == ["1,483.78"]
+
+
+def test_apply_locale_number_formatting_numeric_dtype_with_string_coltype() -> None:
     df = pd.DataFrame(
         {
             "Total Sales Value": [1483.7768, 247448.6785],
@@ -44,14 +61,16 @@ def test_coerce_csv_numeric_columns_object_metric_column() -> None:
     )
     coltypes = [GenericDataType.STRING, GenericDataType.STRING]
 
-    coerced = coerce_csv_numeric_columns(df, coltypes)
+    formatted = apply_locale_number_formatting(df, coltypes, "de_DE")
 
-    assert coerced["Total Sales Value"].tolist() == [1483.7768, 247448.6785]
-    assert pd.api.types.is_numeric_dtype(coerced["Total Sales Value"])
+    assert formatted["Total Sales Value"].tolist() == ["1.483,78", "247.448,68"]
+    assert formatted["Publisher"].tolist() == ["Cremin", "Brekke"]
 
 
 def test_format_export_cell_value() -> None:
-    assert format_export_cell_value(1234.5, "de_DE") == "1234.50"
+    assert format_export_cell_value(1234.5, "de_DE") == "1.234,50"
+    assert format_export_cell_value(1234.5, "fr_FR") == "1.234,50"
+    assert format_export_cell_value(1234.5, "en_GB") == "1,234.50"
     assert format_export_cell_value("text", "de_DE") == "text"
     assert format_export_cell_value(None, "de_DE") is None
 
@@ -72,6 +91,19 @@ def test_get_export_locale_from_form_data_ignores_invalid_values() -> None:
 
 
 def test_csv_parse_kwargs_match_locale_delimiters() -> None:
-    assert csv_parse_kwargs(None) == {"sep": ",", "decimal": "."}
-    assert csv_parse_kwargs("en_GB") == {"sep": ",", "decimal": "."}
-    assert csv_parse_kwargs("de_DE") == {"sep": ";", "decimal": "."}
+    assert csv_parse_kwargs(None) == {"sep": ","}
+    assert csv_parse_kwargs("en_GB") == {
+        "sep": ",",
+        "decimal": ".",
+        "thousands": ",",
+    }
+    assert csv_parse_kwargs("de_DE") == {
+        "sep": ";",
+        "decimal": ",",
+        "thousands": ".",
+    }
+    assert csv_parse_kwargs("fr_FR") == {
+        "sep": ";",
+        "decimal": ",",
+        "thousands": ".",
+    }

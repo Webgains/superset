@@ -110,16 +110,3 @@ def format_number_for_locale(value: float | int, locale: NumberFormatLocale) -> 
     if not decimal_part:
         return integer_part
     return f"{integer_part}{locale['decimal']}{decimal_part}"
-
-
-def format_csv_number_for_excel(value: float | int) -> str:
-    """
-    Format a CSV number so Excel stores it as a numeric cell.
-
-    Always uses ``.`` as the decimal so Excel treats the cell as a number.
-    Locale only affects the column delimiter (``,`` vs ``;``), not decimals.
-    """
-    formatted = f"{float(value):.2f}"
-    if formatted.lower() in {"inf", "-inf", "nan"}:
-        return formatted
-    return formatted

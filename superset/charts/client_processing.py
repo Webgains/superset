@@ -42,7 +42,7 @@ from superset.utils.core import (
     get_metric_names,
 )
 from superset.utils.export_formatting import (
-    coerce_csv_numeric_columns,
+    apply_locale_number_formatting,
     csv_export_kwargs,
     csv_parse_kwargs,
     get_export_locale_from_form_data,
@@ -400,9 +400,10 @@ def apply_client_processing(  # noqa: C901
         if query["result_format"] == ChartDataResultFormat.JSON:
             query["data"] = processed_df.to_dict()
         elif query["result_format"] == ChartDataResultFormat.CSV:
-            export_df = coerce_csv_numeric_columns(
+            export_df = apply_locale_number_formatting(
                 processed_df,
                 query["coltypes"],
+                locale_code,
             )
             query["data"] = csv.df_to_escaped_csv(
                 export_df,

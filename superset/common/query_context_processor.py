@@ -53,7 +53,7 @@ from superset.utils.core import (
     is_adhoc_metric,
 )
 from superset.utils.export_formatting import (
-    coerce_csv_numeric_columns,
+    apply_locale_number_formatting,
     csv_export_kwargs,
     get_export_locale_from_form_data,
 )
@@ -263,7 +263,7 @@ class QueryContextProcessor:
 
             result = None
             if self._query_context.result_format == ChartDataResultFormat.CSV:
-                export_df = coerce_csv_numeric_columns(df, coltypes)
+                export_df = apply_locale_number_formatting(df, coltypes, locale_code)
                 result = csv.df_to_escaped_csv(
                     export_df,
                     index=include_index,
