@@ -137,6 +137,9 @@ def format_export_cell_value(value: Any, locale_code: str | None) -> Any:
     if not is_formattable_number(value):
         return value
 
+    if isinstance(value, numbers.Integral):
+        return str(int(value))
+
     locale = resolve_number_format_locale(locale_code)
     formatted = f"{_to_export_float(value):.2f}"
     if formatted.lower() in {"inf", "-inf", "nan"}:
