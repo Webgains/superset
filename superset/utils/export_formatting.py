@@ -27,7 +27,6 @@ from superset.utils.core import GenericDataType
 from superset.utils.number_format_locale import (
     get_csv_separator,
     normalize_number_format_locale,
-    resolve_number_format_locale,
 )
 
 
@@ -65,27 +64,26 @@ def get_export_locale_from_form_data(form_data: dict[str, Any] | None) -> str | 
 
 
 def csv_export_kwargs(locale_code: str | None) -> dict[str, Any]:
-    """CSV_EXPORT config plus locale delimiter and decimal (numeric cells)."""
+    """
+    CSV_EXPORT plus locale column delimiter.
+
+    Decimals are always ``.`` so Excel stores numeric cells. Comma decimals
+    are text in English Excel (the environment used to open these downloads).
+    """
     from flask import current_app
 
     kwargs: dict[str, Any] = {
         **current_app.config["CSV_EXPORT"],
         "sep": get_csv_separator(locale_code),
+        "decimal": ".",
+        "float_format": "%.2f",
     }
-    if normalize_number_format_locale(locale_code):
-        loc = resolve_number_format_locale(locale_code)
-        kwargs["decimal"] = loc["decimal"]
-        kwargs["float_format"] = "%.2f"
     return kwargs
 
 
 def csv_parse_kwargs(locale_code: str | None) -> dict[str, Any]:
-    """pandas ``read_csv`` kwargs matching locale CSV delimiters and decimals."""
-    kwargs: dict[str, Any] = {"sep": get_csv_separator(locale_code)}
-    if normalize_number_format_locale(locale_code):
-        loc = resolve_number_format_locale(locale_code)
-        kwargs["decimal"] = loc["decimal"]
-    return kwargs
+    """pandas ``read_csv`` kwargs matching locale column delimiters."""
+    return {"sep": get_csv_separator(locale_code), "decimal": "."}
 
 
 def _to_export_float(value: object) -> float:
@@ -128,20 +126,15 @@ def column_should_receive_locale_formatting(
     return False
 
 
-def format_export_cell_value(value: Any, locale_code: str | None) -> Any:
-    """Format a streaming CSV cell as a locale decimal number (no thousands)."""
+def format_export_cell_value(value: Any, _locale_code: str | None) -> Any:
+    """Keep streaming CSV cells numeric with ``.`` decimals for Excel."""
     if value is None or (isinstance(value, float) and pd.isna(value)):
         return value
     if pd.isna(value):
         return value
     if not is_formattable_number(value):
         return value
-
-    locale = resolve_number_format_locale(locale_code)
-    formatted = f"{_to_export_float(value):.2f}"
-    if formatted.lower() in {"inf", "-inf", "nan"}:
-        return formatted
-    return formatted.replace(".", locale["decimal"])
+    return f"{_to_export_float(value):.2f}"
 
 
 def coerce_csv_numeric_columns(
