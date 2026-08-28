@@ -26,6 +26,7 @@ from superset.utils.core import GenericDataType
 from superset.utils.csv import (
     df_to_escaped_csv,
     get_chart_dataframe,
+    strip_excel_separator_declaration,
 )
 
 
@@ -180,6 +181,25 @@ def test_df_to_escaped_csv():
 
     df = pa.array([1, None]).to_pandas(integer_object_nulls=True).to_frame()
     assert df_to_escaped_csv(df, encoding="utf8", index=False) == '0\n1\n""\n'
+
+
+def test_excel_separator_declaration_on_semicolon_csv():
+    df = pd.DataFrame({"a": [1], "b": [2]})
+    csv_text = df_to_escaped_csv(df, encoding="utf8", index=False, sep=";")
+    assert csv_text.startswith("sep=;\n")
+    assert "a;b" in csv_text
+
+
+def test_excel_separator_declaration_skipped_for_comma_csv():
+    df = pd.DataFrame({"a": [1]})
+    csv_text = df_to_escaped_csv(df, encoding="utf8", index=False, sep=",")
+    assert not csv_text.startswith("sep=")
+
+
+def test_strip_excel_separator_declaration():
+    assert strip_excel_separator_declaration("sep=;\na;b\n1;2\n") == "a;b\n1;2\n"
+    assert strip_excel_separator_declaration("\ufeffsep=;\na;b\n") == "\ufeffa;b\n"
+    assert strip_excel_separator_declaration("a,b\n") == "a,b\n"
 
 
 def test_get_chart_dataframe_returns_none_when_no_content(

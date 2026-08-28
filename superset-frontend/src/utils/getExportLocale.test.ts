@@ -26,21 +26,14 @@ jest.mock('src/utils/urlUtils', () => ({
 
 const getUrlParamMock = getUrlParam as jest.Mock;
 
-test('returns locale from URL when present', () => {
+test('returns lang from the iframe URL', () => {
   getUrlParamMock.mockImplementation(param =>
-    param === URL_PARAMS.locale ? 'de_DE' : null,
+    param === URL_PARAMS.language ? 'fr_FR' : null,
   );
-  expect(getExportLocale()).toBe('de_DE');
+  expect(getExportLocale()).toBe('fr_FR');
 });
 
-test('uses full locale codes from lang when locale is absent', () => {
-  getUrlParamMock.mockImplementation(param =>
-    param === URL_PARAMS.language ? 'en_GB' : null,
-  );
-  expect(getExportLocale()).toBe('en_GB');
-});
-
-test('returns undefined when locale and lang params are absent', () => {
+test('returns undefined when lang is absent', () => {
   getUrlParamMock.mockReturnValue(null);
   expect(getExportLocale()).toBeUndefined();
 });

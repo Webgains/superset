@@ -106,7 +106,7 @@ def test_get_data_csv_applies_locale_formatting(
     df = pd.DataFrame({"col1": [1234.5], "col2": ["a"]})
     coltypes = [GenericDataType.NUMERIC, GenericDataType.STRING]
     mock_query_context.result_format = ChartDataResultFormat.CSV
-    mock_query_context.form_data = {"locale": "de_DE"}
+    mock_query_context.form_data = {"lang": "de_DE"}
 
     mock_df_to_escaped_csv.return_value = "col1,col2\n1.234,50,a\n"
     result = processor.get_data(df, coltypes)
@@ -140,7 +140,7 @@ def test_get_data_xlsx_skips_locale_formatting(
     df = pd.DataFrame({"col1": [1234.5], "col2": ["a"]})
     coltypes = [GenericDataType.NUMERIC, GenericDataType.STRING]
     mock_query_context.result_format = ChartDataResultFormat.XLSX
-    mock_query_context.form_data = {"locale": "de_DE"}
+    mock_query_context.form_data = {"lang": "de_DE"}
     mock_df_to_excel.return_value = b"binary data"
 
     processor.get_data(df, coltypes)

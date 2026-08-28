@@ -34,15 +34,15 @@ from superset.utils.number_format_locale import (
 
 def get_export_locale_from_form_data(form_data: dict[str, Any] | None) -> str | None:
     """
-    Resolve export locale for CSV downloads (XLSX keeps native numbers).
+    Resolve export locale from the embed ``lang`` query param (e.g. ``fr_FR``).
 
     Checks, in order:
-    1. ``locale`` on chart ``form_data`` (set by the export request payload)
-    2. ``locale`` or ``lang`` query param on the export HTTP request
-    3. ``locale`` or ``lang`` query param on the Referer URL
+    1. ``lang`` on chart ``form_data`` (copied from the iframe URL on export)
+    2. ``lang`` on the export HTTP request
+    3. ``lang`` on the Referer URL
     """
     if isinstance(form_data, dict):
-        if locale := normalize_number_format_locale(form_data.get("locale")):
+        if locale := normalize_number_format_locale(form_data.get("lang")):
             return locale
 
     try:
@@ -51,18 +51,12 @@ def get_export_locale_from_form_data(form_data: dict[str, Any] | None) -> str | 
         if not has_request_context():
             return None
 
-        if locale := normalize_number_format_locale(request.args.get("locale")):
-            return locale
         if locale := normalize_number_format_locale(request.args.get("lang")):
             return locale
 
         referer = request.headers.get("Referer")
         if referer:
-            query = parse_qs(urlparse(referer).query)
-            referer_locale = query.get("locale", [None])[0]
-            if locale := normalize_number_format_locale(referer_locale):
-                return locale
-            referer_lang = query.get("lang", [None])[0]
+            referer_lang = parse_qs(urlparse(referer).query).get("lang", [None])[0]
             if locale := normalize_number_format_locale(referer_lang):
                 return locale
     except RuntimeError:

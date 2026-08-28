@@ -272,7 +272,7 @@ test('exportChart legacy API includes force param when force=true', async () => 
   expect(callArgs.url).toBe('/superset/explore_json/?force=true&csv=true');
 });
 
-test('exportChart includes locale from URL in v1 payload', async () => {
+test('exportChart includes lang from URL in v1 payload', async () => {
   const { getExportLocale } = jest.requireMock('src/utils/getExportLocale');
   getExportLocale.mockReturnValue('de_DE');
 
@@ -285,22 +285,22 @@ test('exportChart includes locale from URL in v1 payload', async () => {
   });
 
   const callArgs = onStartStreamingExport.mock.calls[0][0];
-  expect(callArgs.payload.form_data.locale).toBe('de_DE');
-  expect(callArgs.url).toContain('locale=de_DE');
+  expect(callArgs.payload.form_data.lang).toBe('de_DE');
+  expect(callArgs.url).toContain('lang=de_DE');
 });
 
-test('exportChart preserves explicit locale on formData', async () => {
+test('exportChart preserves explicit lang on formData', async () => {
   const { getExportLocale } = jest.requireMock('src/utils/getExportLocale');
   getExportLocale.mockReturnValue('de_DE');
 
   const onStartStreamingExport = jest.fn();
 
   await exportChart({
-    formData: { ...baseFormData, locale: 'en_US' },
+    formData: { ...baseFormData, lang: 'en_US' },
     resultFormat: 'csv',
     onStartStreamingExport: onStartStreamingExport as unknown as null,
   });
 
   const callArgs = onStartStreamingExport.mock.calls[0][0];
-  expect(callArgs.payload.form_data.locale).toBe('en_US');
+  expect(callArgs.payload.form_data.lang).toBe('en_US');
 });

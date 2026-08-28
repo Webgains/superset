@@ -67,27 +67,23 @@ export function canonicalizeNumberFormatLocale(
 }
 
 /**
- * Resolve URL `locale` or embed `lang` (en_GB, fr_FR, …).
+ * Resolve embed `lang` (en_GB, fr_FR, …).
  */
 export function resolveNumberFormatLocaleCode(
-  localeParam?: string | null,
   langParam?: string | null,
 ): NumberFormatLocaleCode | undefined {
-  return (
-    canonicalizeNumberFormatLocale(localeParam) ||
-    canonicalizeNumberFormatLocale(langParam)
-  );
+  return canonicalizeNumberFormatLocale(langParam);
 }
 
 /**
- * Resolve a URL `locale` value to a d3-format locale definition.
+ * Resolve a URL `lang` value to a d3-format locale definition.
  * Missing / unsupported values fall back to the server d3_format config.
  */
 export function resolveNumberFormatLocale(
-  localeParam?: string | null,
+  langParam?: string | null,
   d3Format?: Partial<FormatLocaleDefinition>,
 ): FormatLocaleDefinition {
-  const localeCode = resolveNumberFormatLocaleCode(localeParam);
+  const localeCode = resolveNumberFormatLocaleCode(langParam);
   if (localeCode) {
     return NUMBER_FORMAT_LOCALES[localeCode];
   }

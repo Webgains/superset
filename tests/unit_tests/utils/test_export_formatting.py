@@ -88,12 +88,12 @@ def test_get_export_locale_from_form_data_ignores_invalid_values() -> None:
 
     assert get_export_locale_from_form_data(None) is None
     assert get_export_locale_from_form_data({}) is None
-    assert get_export_locale_from_form_data({"locale": "zh_CN"}) is None
+    assert get_export_locale_from_form_data({"lang": "zh_CN"}) is None
     assert get_export_locale_from_form_data(MagicMock()) is None
-    assert get_export_locale_from_form_data({"locale": "de_DE"}) == "de_DE"
-    assert get_export_locale_from_form_data({"locale": "fr_FR"}) == "fr_FR"
-    assert get_export_locale_from_form_data({"locale": "en_GB"}) == "en_GB"
-    assert get_export_locale_from_form_data({"locale": "pl_PL"}) == "pl_PL"
+    assert get_export_locale_from_form_data({"lang": "de_DE"}) == "de_DE"
+    assert get_export_locale_from_form_data({"lang": "fr_FR"}) == "fr_FR"
+    assert get_export_locale_from_form_data({"lang": "en_GB"}) == "en_GB"
+    assert get_export_locale_from_form_data({"lang": "pl_PL"}) == "pl_PL"
 
 
 def test_csv_parse_kwargs_match_locale_delimiters() -> None:

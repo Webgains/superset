@@ -2161,82 +2161,16 @@ def test_apply_client_processing_csv_roundtrip_locale_delimiter():
             }
         ]
     }
-    form_data = {"viz_type": "table", "locale": "de_DE"}
+    form_data = {"viz_type": "table", "lang": "de_DE"}
 
     processed = apply_client_processing(result, form_data)
     csv_data = processed["queries"][0]["data"]
+    body = csv_data.lstrip("\ufeff")
 
-    assert csv_data.splitlines()[0] == "amount;name"
+    assert body.startswith("sep=;\n")
+    assert "amount;name" in csv_data
     assert "1.234,50" in csv_data
     assert processed["queries"][0]["rowcount"] == 1
-    """
-    It should be able to process csv results with no data
-    """
-
-    result = {"queries": [{"result_format": ChartDataResultFormat.CSV, "data": ""}]}
-    form_data = {
-        "datasource": "19__table",
-        "viz_type": "pivot_table_v2",
-        "slice_id": 69,
-        "url_params": {},
-        "granularity_sqla": "time_start",
-        "time_grain_sqla": "P1D",
-        "time_range": "No filter",
-        "groupbyColumns": [],
-        "groupbyRows": [],
-        "metrics": [
-            {
-                "aggregate": "COUNT",
-                "column": {
-                    "column_name": "is_software_dev",
-                    "description": None,
-                    "expression": None,
-                    "filterable": True,
-                    "groupby": True,
-                    "id": 1463,
-                    "is_dttm": False,
-                    "python_date_format": None,
-                    "type": "DOUBLE PRECISION",
-                    "verbose_name": None,
-                },
-                "expressionType": "SIMPLE",
-                "hasCustomLabel": False,
-                "isNew": False,
-                "label": "COUNT(is_software_dev)",
-                "optionName": "metric_9i1kctig9yr_sizo6ihd2o",
-                "sqlExpression": None,
-            }
-        ],
-        "metricsLayout": "COLUMNS",
-        "adhoc_filters": [
-            {
-                "clause": "WHERE",
-                "comparator": "Currently A Developer",
-                "expressionType": "SIMPLE",
-                "filterOptionName": "filter_fvi0jg9aii_2lekqrhy7qk",
-                "isExtra": False,
-                "isNew": False,
-                "operator": "==",
-                "sqlExpression": None,
-                "subject": "developer_type",
-            }
-        ],
-        "row_limit": 10000,
-        "order_desc": True,
-        "aggregateFunction": "Sum",
-        "valueFormat": "SMART_NUMBER",
-        "date_format": "smart_date",
-        "rowOrder": "key_a_to_z",
-        "colOrder": "key_a_to_z",
-        "extra_form_data": {},
-        "force": False,
-        "result_format": "json",
-        "result_type": "results",
-    }
-
-    assert apply_client_processing(result, form_data) == {
-        "queries": [{"result_format": ChartDataResultFormat.CSV, "data": ""}]
-    }
 
 
 @pytest.mark.parametrize("data", [None, "", "\n"])

@@ -111,10 +111,6 @@ export const URL_PARAMS = {
     name: 'currency',
     type: 'string',
   },
-  locale: {
-    name: 'locale',
-    type: 'string',
-  },
   editMode: {
     name: 'edit',
     type: 'boolean',

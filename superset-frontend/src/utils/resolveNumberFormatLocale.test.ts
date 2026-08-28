@@ -62,12 +62,12 @@ test.each<[NumberFormatLocaleCode, string, string]>([
 });
 
 test('ignores short lang codes', () => {
-  expect(resolveNumberFormatLocaleCode(null, 'de')).toBeUndefined();
-  expect(resolveNumberFormatLocaleCode(null, 'zh')).toBeUndefined();
+  expect(resolveNumberFormatLocaleCode('de')).toBeUndefined();
+  expect(resolveNumberFormatLocaleCode('zh')).toBeUndefined();
 });
 
 test('accepts full locale codes on lang', () => {
-  expect(resolveNumberFormatLocaleCode(null, 'en_GB')).toBe('en_GB');
-  expect(resolveNumberFormatLocaleCode(null, 'fr_FR')).toBe('fr_FR');
-  expect(resolveNumberFormatLocaleCode(null, 'fr-fr')).toBe('fr_FR');
+  expect(resolveNumberFormatLocaleCode('en_GB')).toBe('en_GB');
+  expect(resolveNumberFormatLocaleCode('fr_FR')).toBe('fr_FR');
+  expect(resolveNumberFormatLocaleCode('fr-fr')).toBe('fr_FR');
 });

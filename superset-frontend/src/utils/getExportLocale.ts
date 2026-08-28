@@ -21,12 +21,8 @@ import { getUrlParam } from 'src/utils/urlUtils';
 import { resolveNumberFormatLocaleCode } from './resolveNumberFormatLocale';
 
 /**
- * Read the number-format locale from the page URL for chart exports.
- * Prefers ``locale``, then embed ``lang`` (en_GB, fr_FR, …).
+ * Read embed ``lang`` (en_GB, fr_FR, …) from the page URL for chart exports.
  */
 export function getExportLocale(): string | undefined {
-  return resolveNumberFormatLocaleCode(
-    getUrlParam(URL_PARAMS.locale),
-    getUrlParam(URL_PARAMS.language),
-  );
+  return resolveNumberFormatLocaleCode(getUrlParam(URL_PARAMS.language));
 }

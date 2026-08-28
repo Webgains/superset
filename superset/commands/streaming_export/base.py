@@ -195,11 +195,16 @@ class BaseStreamingCSVExportCommand(BaseCommand):
 
                     # Use StringIO with csv.writer for proper escaping
                     buffer = io.StringIO()
+                    sep = get_csv_separator(self._export_locale)
                     csv_writer = csv.writer(
                         buffer,
                         quoting=csv.QUOTE_MINIMAL,
-                        delimiter=get_csv_separator(self._export_locale),
+                        delimiter=sep,
                     )
+                    if sep != ",":
+                        declaration = f"sep={sep}\n"
+                        total_bytes += len(declaration.encode("utf-8"))
+                        yield declaration
 
                     # Write CSV header
                     header_data, header_bytes = self._write_csv_header(

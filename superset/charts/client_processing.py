@@ -339,7 +339,7 @@ def apply_client_processing(  # noqa: C901
         data = query["data"]
 
         if isinstance(data, str):
-            data = data.strip()
+            data = csv.strip_excel_separator_declaration(data.strip())
 
         if not data:
             # do not try to process empty data
