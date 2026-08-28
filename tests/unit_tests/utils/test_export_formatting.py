@@ -14,72 +14,38 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+from unittest.mock import MagicMock
+
 import pandas as pd
 
 from superset.utils.core import GenericDataType
 from superset.utils.export_formatting import (
-    apply_locale_number_formatting,
+    coerce_csv_numeric_columns,
     csv_parse_kwargs,
     format_export_cell_value,
+    get_export_locale_from_form_data,
 )
 
 
-def test_apply_locale_number_formatting_de_de() -> None:
+def test_coerce_csv_numeric_columns_keeps_floats() -> None:
     df = pd.DataFrame({"amount": [1234.5, 2935], "name": ["a", "b"]})
     coltypes = [GenericDataType.NUMERIC, GenericDataType.STRING]
 
-    formatted = apply_locale_number_formatting(df, coltypes, "de_DE")
+    coerced = coerce_csv_numeric_columns(df, coltypes)
 
-    assert formatted["amount"].tolist() == ["1.234,50", "2.935,00"]
-    assert formatted["name"].tolist() == ["a", "b"]
-
-
-def test_apply_locale_number_formatting_fr_fr() -> None:
-    df = pd.DataFrame({"amount": [1483.78]})
-    coltypes = [GenericDataType.NUMERIC]
-
-    formatted = apply_locale_number_formatting(df, coltypes, "fr_FR")
-
-    assert formatted["amount"].tolist() == ["1.483,78"]
-
-
-def test_apply_locale_number_formatting_en_gb() -> None:
-    df = pd.DataFrame({"amount": [1483.78]})
-    coltypes = [GenericDataType.NUMERIC]
-
-    formatted = apply_locale_number_formatting(df, coltypes, "en_GB")
-
-    assert formatted["amount"].tolist() == ["1,483.78"]
-
-
-def test_apply_locale_number_formatting_numeric_dtype_with_string_coltype() -> None:
-    df = pd.DataFrame(
-        {
-            "Total Sales Value": [1483.7768, 247448.6785],
-            "Publisher": ["Cremin", "Brekke"],
-        }
-    )
-    coltypes = [GenericDataType.STRING, GenericDataType.STRING]
-
-    formatted = apply_locale_number_formatting(df, coltypes, "de_DE")
-
-    assert formatted["Total Sales Value"].tolist() == ["1.483,78", "247.448,68"]
-    assert formatted["Publisher"].tolist() == ["Cremin", "Brekke"]
+    assert coerced["amount"].tolist() == [1234.5, 2935]
+    assert pd.api.types.is_numeric_dtype(coerced["amount"])
 
 
 def test_format_export_cell_value() -> None:
-    assert format_export_cell_value(1234.5, "de_DE") == "1.234,50"
-    assert format_export_cell_value(1234.5, "fr_FR") == "1.234,50"
-    assert format_export_cell_value(1234.5, "en_GB") == "1,234.50"
+    assert format_export_cell_value(1234.5, "de_DE") == "1234,50"
+    assert format_export_cell_value(1234.5, "fr_FR") == "1234,50"
+    assert format_export_cell_value(1234.5, "en_GB") == "1234.50"
     assert format_export_cell_value("text", "de_DE") == "text"
     assert format_export_cell_value(None, "de_DE") is None
 
 
 def test_get_export_locale_from_form_data_ignores_invalid_values() -> None:
-    from unittest.mock import MagicMock
-
-    from superset.utils.export_formatting import get_export_locale_from_form_data
-
     assert get_export_locale_from_form_data(None) is None
     assert get_export_locale_from_form_data({}) is None
     assert get_export_locale_from_form_data({"lang": "zh_CN"}) is None
@@ -92,18 +58,6 @@ def test_get_export_locale_from_form_data_ignores_invalid_values() -> None:
 
 def test_csv_parse_kwargs_match_locale_delimiters() -> None:
     assert csv_parse_kwargs(None) == {"sep": ","}
-    assert csv_parse_kwargs("en_GB") == {
-        "sep": ",",
-        "decimal": ".",
-        "thousands": ",",
-    }
-    assert csv_parse_kwargs("de_DE") == {
-        "sep": ";",
-        "decimal": ",",
-        "thousands": ".",
-    }
-    assert csv_parse_kwargs("fr_FR") == {
-        "sep": ";",
-        "decimal": ",",
-        "thousands": ".",
-    }
+    assert csv_parse_kwargs("en_GB") == {"sep": ",", "decimal": "."}
+    assert csv_parse_kwargs("de_DE") == {"sep": ";", "decimal": ","}
+    assert csv_parse_kwargs("fr_FR") == {"sep": ";", "decimal": ","}

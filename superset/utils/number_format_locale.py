@@ -92,21 +92,3 @@ def get_csv_separator(locale_code: str | None) -> str:
     if normalized := normalize_number_format_locale(locale_code):
         return NUMBER_FORMAT_LOCALES[normalized]["csv_sep"]
     return ","
-
-
-def format_number_for_locale(value: float | int, locale: NumberFormatLocale) -> str:
-    """
-    Format a number with thousands separators matching the chart UI.
-
-    en_US / en_GB → 1,234.56
-    de_DE / es_ES / it_IT / nl_NL / fr_FR / pl_PL → 1.234,56
-    """
-    formatted = f"{float(value):,.2f}"
-    if formatted.lower() in {"inf", "-inf", "nan"}:
-        return formatted
-
-    integer_part, _, decimal_part = formatted.partition(".")
-    integer_part = integer_part.replace(",", locale["thousands"])
-    if not decimal_part:
-        return integer_part
-    return f"{integer_part}{locale['decimal']}{decimal_part}"

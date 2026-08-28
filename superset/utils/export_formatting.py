@@ -25,7 +25,6 @@ import pandas as pd
 
 from superset.utils.core import GenericDataType
 from superset.utils.number_format_locale import (
-    format_number_for_locale,
     get_csv_separator,
     normalize_number_format_locale,
     resolve_number_format_locale,
@@ -66,22 +65,26 @@ def get_export_locale_from_form_data(form_data: dict[str, Any] | None) -> str | 
 
 
 def csv_export_kwargs(locale_code: str | None) -> dict[str, Any]:
-    """CSV_EXPORT config plus the locale-specific column delimiter."""
+    """CSV_EXPORT config plus locale delimiter and decimal (numeric cells)."""
     from flask import current_app
 
-    return {
+    kwargs: dict[str, Any] = {
         **current_app.config["CSV_EXPORT"],
         "sep": get_csv_separator(locale_code),
     }
+    if normalize_number_format_locale(locale_code):
+        loc = resolve_number_format_locale(locale_code)
+        kwargs["decimal"] = loc["decimal"]
+        kwargs["float_format"] = "%.2f"
+    return kwargs
 
 
 def csv_parse_kwargs(locale_code: str | None) -> dict[str, Any]:
-    """pandas ``read_csv`` kwargs matching locale CSV delimiters and number format."""
+    """pandas ``read_csv`` kwargs matching locale CSV delimiters and decimals."""
     kwargs: dict[str, Any] = {"sep": get_csv_separator(locale_code)}
     if normalize_number_format_locale(locale_code):
         loc = resolve_number_format_locale(locale_code)
         kwargs["decimal"] = loc["decimal"]
-        kwargs["thousands"] = loc["thousands"]
     return kwargs
 
 
@@ -126,7 +129,7 @@ def column_should_receive_locale_formatting(
 
 
 def format_export_cell_value(value: Any, locale_code: str | None) -> Any:
-    """Format a streaming CSV cell with the embed lang number format."""
+    """Format a streaming CSV cell as a locale decimal number (no thousands)."""
     if value is None or (isinstance(value, float) and pd.isna(value)):
         return value
     if pd.isna(value):
@@ -135,24 +138,17 @@ def format_export_cell_value(value: Any, locale_code: str | None) -> Any:
         return value
 
     locale = resolve_number_format_locale(locale_code)
-    return format_number_for_locale(_to_export_float(value), locale)
+    formatted = f"{_to_export_float(value):.2f}"
+    if formatted.lower() in {"inf", "-inf", "nan"}:
+        return formatted
+    return formatted.replace(".", locale["decimal"])
 
 
-def apply_locale_number_formatting(
+def coerce_csv_numeric_columns(
     df: pd.DataFrame,
     coltypes: list[GenericDataType],
-    locale_code: str | None,
 ) -> pd.DataFrame:
-    """
-    Format numeric columns as locale-aware strings for CSV export.
-
-    Charts and CSV share the same display (en_US ``1,234.50``, fr_FR ``1.234,50``).
-    XLSX keeps native numeric values.
-    """
-    if not locale_code:
-        return df
-
-    locale = resolve_number_format_locale(locale_code)
+    """Coerce metric columns to numeric dtypes so CSV writes real numbers."""
     out = df.copy()
     for index, column in enumerate(out.columns):
         column_type = (
@@ -161,11 +157,7 @@ def apply_locale_number_formatting(
         series = out[column]
         if not column_should_receive_locale_formatting(column_type, series):
             continue
-        out[column] = series.map(
-            lambda value: (
-                format_number_for_locale(_to_export_float(value), locale)
-                if is_formattable_number(value) and not pd.isna(value)
-                else value
-            )
-        )
+        if pd.api.types.is_numeric_dtype(series) and series.dtype != object:
+            continue
+        out[column] = pd.to_numeric(series, errors="coerce")
     return out
