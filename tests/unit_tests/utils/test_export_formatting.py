@@ -51,7 +51,7 @@ def test_coerce_csv_numeric_columns_object_metric_column() -> None:
 
 
 def test_format_export_cell_value() -> None:
-    assert format_export_cell_value(1234.5, "de_DE") == "1234,50"
+    assert format_export_cell_value(1234.5, "de_DE") == "1234.50"
     assert format_export_cell_value("text", "de_DE") == "text"
     assert format_export_cell_value(None, "de_DE") is None
 
@@ -72,14 +72,6 @@ def test_get_export_locale_from_form_data_ignores_invalid_values() -> None:
 
 
 def test_csv_parse_kwargs_match_locale_delimiters() -> None:
-    assert csv_parse_kwargs(None) == {"sep": ","}
-    assert csv_parse_kwargs("en_GB") == {
-        "sep": ",",
-        "decimal": ".",
-        "thousands": ",",
-    }
-    assert csv_parse_kwargs("de_DE") == {
-        "sep": ";",
-        "decimal": ",",
-        "thousands": ".",
-    }
+    assert csv_parse_kwargs(None) == {"sep": ",", "decimal": "."}
+    assert csv_parse_kwargs("en_GB") == {"sep": ",", "decimal": "."}
+    assert csv_parse_kwargs("de_DE") == {"sep": ";", "decimal": "."}

@@ -112,13 +112,14 @@ def format_number_for_locale(value: float | int, locale: NumberFormatLocale) -> 
     return f"{integer_part}{locale['decimal']}{decimal_part}"
 
 
-def format_csv_number_for_excel(value: float | int, locale: NumberFormatLocale) -> str:
+def format_csv_number_for_excel(value: float | int) -> str:
     """
     Format a CSV number so Excel stores it as a numeric cell.
 
-    Thousands grouping is omitted; a grouped value like ``1.234,50`` is text in Excel.
+    Always uses ``.`` as the decimal so Excel treats the cell as a number.
+    Locale only affects the column delimiter (``,`` vs ``;``), not decimals.
     """
     formatted = f"{float(value):.2f}"
     if formatted.lower() in {"inf", "-inf", "nan"}:
         return formatted
-    return formatted.replace(".", locale["decimal"])
+    return formatted

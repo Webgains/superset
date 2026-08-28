@@ -77,11 +77,8 @@ def test_format_number_for_locale_supported_codes(
     assert format_number_for_locale(1234.5, locale) == expected
 
 
-def test_format_csv_number_for_excel_omits_thousands() -> None:
-    locale = resolve_number_format_locale("de_DE")
-    assert format_csv_number_for_excel(1234.5, locale) == "1234,50"
-    locale_us = resolve_number_format_locale("en_US")
-    assert format_csv_number_for_excel(1234.5, locale_us) == "1234.50"
+def test_format_csv_number_for_excel_uses_dot_decimal() -> None:
+    assert format_csv_number_for_excel(1234.5) == "1234.50"
 
 
 def test_format_number_for_locale_en_us_zero() -> None:

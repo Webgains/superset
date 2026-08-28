@@ -28,7 +28,6 @@ from superset.utils.number_format_locale import (
     format_csv_number_for_excel,
     get_csv_separator,
     normalize_number_format_locale,
-    resolve_number_format_locale,
 )
 
 
@@ -66,28 +65,25 @@ def get_export_locale_from_form_data(form_data: dict[str, Any] | None) -> str | 
 
 
 def csv_export_kwargs(locale_code: str | None) -> dict[str, Any]:
-    """CSV_EXPORT config plus locale delimiter and Excel-parseable decimals."""
+    """
+    CSV_EXPORT config plus locale column delimiter.
+
+    Decimals are always ``.`` so Excel stores numeric cells. Comma decimals
+    (``1483,78``) are text in English Excel even with ``sep=;``.
+    """
     from flask import current_app
 
-    kwargs: dict[str, Any] = {
+    return {
         **current_app.config["CSV_EXPORT"],
         "sep": get_csv_separator(locale_code),
+        "decimal": ".",
+        "float_format": "%.2f",
     }
-    if normalize_number_format_locale(locale_code):
-        loc = resolve_number_format_locale(locale_code)
-        kwargs["decimal"] = loc["decimal"]
-        kwargs["float_format"] = "%.2f"
-    return kwargs
 
 
 def csv_parse_kwargs(locale_code: str | None) -> dict[str, Any]:
-    """pandas ``read_csv`` kwargs matching locale export delimiters."""
-    kwargs: dict[str, Any] = {"sep": get_csv_separator(locale_code)}
-    if normalize_number_format_locale(locale_code):
-        loc = resolve_number_format_locale(locale_code)
-        kwargs["decimal"] = loc["decimal"]
-        kwargs["thousands"] = loc["thousands"]
-    return kwargs
+    """pandas ``read_csv`` kwargs matching locale column delimiters."""
+    return {"sep": get_csv_separator(locale_code), "decimal": "."}
 
 
 def _to_export_float(value: object) -> float:
@@ -139,8 +135,7 @@ def format_export_cell_value(value: Any, locale_code: str | None) -> Any:
     if not is_formattable_number(value):
         return value
 
-    locale = resolve_number_format_locale(locale_code)
-    return format_csv_number_for_excel(_to_export_float(value), locale)
+    return format_csv_number_for_excel(_to_export_float(value))
 
 
 def coerce_csv_numeric_columns(
