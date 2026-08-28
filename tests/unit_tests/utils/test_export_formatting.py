@@ -18,24 +18,24 @@ import pandas as pd
 
 from superset.utils.core import GenericDataType
 from superset.utils.export_formatting import (
-    apply_locale_number_formatting,
+    coerce_csv_numeric_columns,
     csv_parse_kwargs,
     format_export_cell_value,
 )
 
 
-def test_apply_locale_number_formatting_de_de() -> None:
+def test_coerce_csv_numeric_columns_keeps_floats() -> None:
     df = pd.DataFrame({"amount": [1234.5, 2935], "name": ["a", "b"]})
     coltypes = [GenericDataType.NUMERIC, GenericDataType.STRING]
 
-    formatted = apply_locale_number_formatting(df, coltypes, "de_DE")
+    coerced = coerce_csv_numeric_columns(df, coltypes)
 
-    assert formatted["amount"].tolist() == ["1.234,50", "2.935,00"]
-    assert formatted["name"].tolist() == ["a", "b"]
+    assert coerced["amount"].tolist() == [1234.5, 2935]
+    assert coerced["name"].tolist() == ["a", "b"]
+    assert pd.api.types.is_numeric_dtype(coerced["amount"])
 
 
-def test_apply_locale_number_formatting_numeric_dtype_with_string_coltype() -> None:
-    """Metrics from virtual datasets are often typed STRING despite float values."""
+def test_coerce_csv_numeric_columns_object_metric_column() -> None:
     df = pd.DataFrame(
         {
             "Total Sales Value": [1483.7768, 247448.6785],
@@ -44,39 +44,14 @@ def test_apply_locale_number_formatting_numeric_dtype_with_string_coltype() -> N
     )
     coltypes = [GenericDataType.STRING, GenericDataType.STRING]
 
-    formatted = apply_locale_number_formatting(df, coltypes, "de_DE")
+    coerced = coerce_csv_numeric_columns(df, coltypes)
 
-    assert formatted["Total Sales Value"].tolist() == ["1.483,78", "247.448,68"]
-    assert formatted["Publisher"].tolist() == ["Cremin", "Brekke"]
-
-
-def test_apply_locale_number_formatting_decimal_values() -> None:
-    from decimal import Decimal
-
-    df = pd.DataFrame(
-        {
-            "product_line": ["Classic Cars"],
-            "# of Products Sold": [Decimal("33992")],
-        }
-    )
-    coltypes = [GenericDataType.STRING, GenericDataType.NUMERIC]
-
-    formatted = apply_locale_number_formatting(df, coltypes, "de_DE")
-
-    assert formatted["# of Products Sold"].tolist() == ["33.992,00"]
-
-
-def test_apply_locale_number_formatting_without_locale_is_noop() -> None:
-    df = pd.DataFrame({"amount": [1234.5]})
-    coltypes = [GenericDataType.NUMERIC]
-
-    result = apply_locale_number_formatting(df, coltypes, None)
-
-    assert result["amount"].tolist() == [1234.5]
+    assert coerced["Total Sales Value"].tolist() == [1483.7768, 247448.6785]
+    assert pd.api.types.is_numeric_dtype(coerced["Total Sales Value"])
 
 
 def test_format_export_cell_value() -> None:
-    assert format_export_cell_value(1234.5, "de_DE") == "1.234,50"
+    assert format_export_cell_value(1234.5, "de_DE") == "1234,50"
     assert format_export_cell_value("text", "de_DE") == "text"
     assert format_export_cell_value(None, "de_DE") is None
 
