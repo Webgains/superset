@@ -28,7 +28,9 @@ from superset.utils.core import GenericDataType
 
 logger = logging.getLogger(__name__)
 
-negative_number_re = re.compile(r"^-[0-9.]+$")
+# Digits, dots and commas only, so both `-1,234.50` and `-1.234,50` are recognised
+# as plain negative numbers rather than potential formulas.
+negative_number_re = re.compile(r"^-[0-9.,]+$")
 
 # This regex will match if the string starts with:
 #

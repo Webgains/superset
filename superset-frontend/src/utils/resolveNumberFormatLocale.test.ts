@@ -17,11 +17,42 @@
  * under the License.
  */
 import { DEFAULT_D3_FORMAT } from '@superset-ui/core';
+import { getUrlParam } from 'src/utils/urlUtils';
 import {
+  getNumberFormatLocaleParam,
   resolveNumberFormatLocale,
   NUMBER_FORMAT_LOCALES,
   NumberFormatLocaleCode,
 } from './resolveNumberFormatLocale';
+
+jest.mock('src/utils/urlUtils', () => ({
+  getUrlParam: jest.fn(),
+}));
+
+const getUrlParamMock = getUrlParam as jest.Mock;
+
+beforeEach(() => {
+  getUrlParamMock.mockReset();
+});
+
+test('reads the locale URL parameter before the embedded lang parameter', () => {
+  getUrlParamMock.mockReturnValueOnce('de_DE').mockReturnValueOnce('es_ES');
+
+  expect(getNumberFormatLocaleParam()).toBe('de_DE');
+});
+
+test('reads the embedded lang parameter when locale is absent or unsupported', () => {
+  getUrlParamMock.mockReturnValueOnce(null).mockReturnValueOnce('es_ES');
+  expect(getNumberFormatLocaleParam()).toBe('es_ES');
+
+  getUrlParamMock.mockReturnValueOnce('zh_CN').mockReturnValueOnce('fr_FR');
+  expect(getNumberFormatLocaleParam()).toBe('fr_FR');
+});
+
+test('ignores bare and unsupported URL locale codes', () => {
+  getUrlParamMock.mockReturnValueOnce(null).mockReturnValueOnce('es');
+  expect(getNumberFormatLocaleParam()).toBeUndefined();
+});
 
 test('defaults to server d3_format when locale is missing', () => {
   const d3Format = { decimal: ',', thousands: '.' };

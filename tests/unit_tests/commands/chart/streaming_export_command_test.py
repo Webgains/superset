@@ -160,6 +160,38 @@ def test_csv_generation_with_special_characters(mocker: MockerFixture) -> None:
     assert '"Comma,Value"' in csv_data
 
 
+def test_csv_generation_uses_locale_delimiter(mocker: MockerFixture) -> None:
+    """Continental exports use semicolons so comma decimals remain numeric."""
+    mock_db, query_context, datasource = _setup_chart_mocks(mocker)
+    query_context.form_data = {"locale": "es_ES"}
+    query_context.queries[0].metrics = ["Total Sales"]
+
+    mock_result = mocker.MagicMock()
+    mock_result.keys.return_value = ["Publisher", "Total Sales"]
+    mock_result.fetchmany.side_effect = [
+        [("Cremin, Terry and Satterfield", 247448.6785)],
+        [],
+    ]
+
+    mock_connection = mocker.MagicMock()
+    mock_connection.execution_options.return_value.execute.return_value = mock_result
+    mock_connection.__enter__.return_value = mock_connection
+    mock_connection.__exit__.return_value = None
+
+    mock_engine = mocker.MagicMock()
+    mock_engine.connect.return_value = mock_connection
+    datasource.database.get_sqla_engine.return_value.__enter__.return_value = (
+        mock_engine
+    )
+
+    command = StreamingCSVExportCommand(query_context, chunk_size=10)
+    csv_data = "".join(command.run()())
+
+    assert csv_data == (
+        "Publisher;Total Sales\r\nCremin, Terry and Satterfield;247.448,68\r\n"
+    )
+
+
 def test_streaming_with_null_values(mocker: MockerFixture) -> None:
     """Test CSV generation handles NULL values correctly."""
     mock_db, query_context, datasource = _setup_chart_mocks(mocker)

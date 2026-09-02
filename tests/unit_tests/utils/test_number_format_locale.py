@@ -33,25 +33,31 @@ def test_resolve_number_format_locale_defaults_to_en_us() -> None:
 
 
 @pytest.mark.parametrize(
-    ("locale_code", "decimal", "thousands"),
+    ("locale_code", "decimal", "thousands", "csv_sep"),
     [
-        ("en_US", ".", ","),
-        ("en_GB", ".", ","),
-        ("de_DE", ",", "."),
-        ("es_ES", ",", "."),
-        ("it_IT", ",", "."),
-        ("nl_NL", ",", "."),
-        ("fr_FR", ",", "."),
-        ("pl_PL", ",", "."),
+        ("en_US", ".", ",", ","),
+        ("en_GB", ".", ",", ","),
+        ("de_DE", ",", ".", ";"),
+        ("es_ES", ",", ".", ";"),
+        ("it_IT", ",", ".", ";"),
+        ("nl_NL", ",", ".", ";"),
+        ("fr_FR", ",", ".", ";"),
+        ("pl_PL", ",", ".", ";"),
     ],
 )
 def test_resolve_number_format_locale_supported_codes(
-    locale_code: str, decimal: str, thousands: str
+    locale_code: str, decimal: str, thousands: str, csv_sep: str
 ) -> None:
     locale = resolve_number_format_locale(locale_code)
     assert locale["code"] == locale_code
     assert locale["decimal"] == decimal
     assert locale["thousands"] == thousands
+    assert locale["csv_sep"] == csv_sep
+
+
+def test_csv_sep_never_collides_with_the_decimal_mark() -> None:
+    for locale in NUMBER_FORMAT_LOCALES.values():
+        assert locale["csv_sep"] != locale["decimal"]
 
 
 @pytest.mark.parametrize(
