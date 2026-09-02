@@ -78,7 +78,38 @@ def df_to_escaped_csv(df: pd.DataFrame, **kwargs: Any) -> Any:
                 if isinstance(value, str):
                     df.at[idx, name] = escape_value(value)
 
-    return df.to_csv(escapechar="\\", **kwargs)
+    csv_output = df.to_csv(escapechar="\\", **kwargs)
+    if not isinstance(csv_output, str):
+        return csv_output
+    return apply_excel_separator_declaration(
+        csv_output,
+        str(kwargs.get("sep", ",")),
+    )
+
+
+def apply_excel_separator_declaration(csv_text: str, sep: str) -> str:
+    """
+    Tell Excel which delimiter to use, independent of Windows regional settings.
+
+    Without this line, English Excel splits continental CSVs on decimal commas.
+    """
+    if sep == "," or not csv_text:
+        return csv_text
+    declaration = f"sep={sep}\n"
+    if csv_text.startswith("\ufeff"):
+        return f"\ufeff{declaration}{csv_text[1:]}"
+    return f"{declaration}{csv_text}"
+
+
+def strip_excel_separator_declaration(csv_text: str) -> str:
+    """Remove a leading Excel ``sep=`` line so pandas can parse the table."""
+    had_bom = csv_text.startswith("\ufeff")
+    body = csv_text[1:] if had_bom else csv_text
+    if body.startswith("sep=") and "\n" in body:
+        body = body.split("\n", 1)[1]
+    if had_bom:
+        return f"\ufeff{body}"
+    return body
 
 
 def get_chart_csv_data(

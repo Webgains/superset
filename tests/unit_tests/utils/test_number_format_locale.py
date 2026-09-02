@@ -17,7 +17,8 @@
 import pytest
 
 from superset.utils.number_format_locale import (
-    format_number_for_locale,
+    get_csv_separator,
+    normalize_number_format_locale,
     NUMBER_FORMAT_LOCALES,
     resolve_number_format_locale,
 )
@@ -54,37 +55,6 @@ def test_resolve_number_format_locale_supported_codes(
     assert locale["thousands"] == thousands
 
 
-@pytest.mark.parametrize(
-    ("locale_code", "expected"),
-    [
-        ("en_US", "1,234.50"),
-        ("en_GB", "1,234.50"),
-        ("de_DE", "1.234,50"),
-        ("es_ES", "1.234,50"),
-        ("it_IT", "1.234,50"),
-        ("nl_NL", "1.234,50"),
-        ("fr_FR", "1.234,50"),
-        ("pl_PL", "1.234,50"),
-    ],
-)
-def test_format_number_for_locale_supported_codes(
-    locale_code: str, expected: str
-) -> None:
-    locale = resolve_number_format_locale(locale_code)
-    assert format_number_for_locale(1234.5, locale) == expected
-
-
-def test_format_number_for_locale_en_us_zero() -> None:
-    locale = resolve_number_format_locale("en_US")
-    assert format_number_for_locale(0, locale) == "0.00"
-
-
-def test_format_number_for_locale_non_finite_de_de() -> None:
-    locale = resolve_number_format_locale("de_DE")
-    assert format_number_for_locale(float("inf"), locale) == "inf"
-    assert format_number_for_locale(float("nan"), locale) == "nan"
-
-
 def test_number_format_locales_cover_product_codes() -> None:
     assert set(NUMBER_FORMAT_LOCALES) == {
         "en_US",
@@ -96,3 +66,29 @@ def test_number_format_locales_cover_product_codes() -> None:
         "nl_NL",
         "pl_PL",
     }
+
+
+@pytest.mark.parametrize(
+    ("locale_code", "csv_sep"),
+    [
+        (None, ","),
+        ("en_US", ","),
+        ("en_GB", ","),
+        ("de_DE", ";"),
+        ("es_ES", ";"),
+        ("fr_FR", ";"),
+        ("it_IT", ";"),
+        ("nl_NL", ";"),
+        ("pl_PL", ";"),
+    ],
+)
+def test_get_csv_separator(locale_code: str | None, csv_sep: str) -> None:
+    assert get_csv_separator(locale_code) == csv_sep
+
+
+def test_normalize_number_format_locale() -> None:
+    assert normalize_number_format_locale("zh") is None
+    assert normalize_number_format_locale("de") is None
+    assert normalize_number_format_locale("en_GB") == "en_GB"
+    assert normalize_number_format_locale("fr_FR") == "fr_FR"
+    assert normalize_number_format_locale("fr-fr") == "fr_FR"

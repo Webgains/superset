@@ -46,16 +46,46 @@ export const NUMBER_FORMAT_LOCALES: Record<
   pl_PL: { ...DEFAULT_D3_FORMAT, ...CONTINENTAL_SEPARATORS },
 };
 
+export function canonicalizeNumberFormatLocale(
+  value?: string | null,
+): NumberFormatLocaleCode | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const raw = value.trim().replace(/-/g, '_');
+  if (raw in NUMBER_FORMAT_LOCALES) {
+    return raw as NumberFormatLocaleCode;
+  }
+  const parts = raw.split('_');
+  if (parts.length >= 2 && parts[1].length === 2) {
+    const canonical = `${parts[0].toLowerCase()}_${parts[1].toUpperCase()}`;
+    if (canonical in NUMBER_FORMAT_LOCALES) {
+      return canonical as NumberFormatLocaleCode;
+    }
+  }
+  return undefined;
+}
+
 /**
- * Resolve a URL `locale` value to a d3-format locale definition.
+ * Resolve embed `lang` (en_GB, fr_FR, …).
+ */
+export function resolveNumberFormatLocaleCode(
+  langParam?: string | null,
+): NumberFormatLocaleCode | undefined {
+  return canonicalizeNumberFormatLocale(langParam);
+}
+
+/**
+ * Resolve a URL `lang` value to a d3-format locale definition.
  * Missing / unsupported values fall back to the server d3_format config.
  */
 export function resolveNumberFormatLocale(
-  localeParam?: string | null,
+  langParam?: string | null,
   d3Format?: Partial<FormatLocaleDefinition>,
 ): FormatLocaleDefinition {
-  if (localeParam && localeParam in NUMBER_FORMAT_LOCALES) {
-    return NUMBER_FORMAT_LOCALES[localeParam as NumberFormatLocaleCode];
+  const localeCode = resolveNumberFormatLocaleCode(langParam);
+  if (localeCode) {
+    return NUMBER_FORMAT_LOCALES[localeCode];
   }
   return { ...DEFAULT_D3_FORMAT, ...d3Format };
 }

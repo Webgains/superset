@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { URL_PARAMS } from 'src/constants';
 import { getUrlParam } from 'src/utils/urlUtils';
 import { getExportLocale } from './getExportLocale';
 
@@ -25,12 +26,14 @@ jest.mock('src/utils/urlUtils', () => ({
 
 const getUrlParamMock = getUrlParam as jest.Mock;
 
-test('returns locale from URL when present', () => {
-  getUrlParamMock.mockReturnValue('de_DE');
-  expect(getExportLocale()).toBe('de_DE');
+test('returns lang from the iframe URL', () => {
+  getUrlParamMock.mockImplementation(param =>
+    param === URL_PARAMS.language ? 'fr_FR' : null,
+  );
+  expect(getExportLocale()).toBe('fr_FR');
 });
 
-test('returns undefined when locale param is absent', () => {
+test('returns undefined when lang is absent', () => {
   getUrlParamMock.mockReturnValue(null);
   expect(getExportLocale()).toBeUndefined();
 });

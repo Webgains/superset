@@ -59,7 +59,7 @@ export default function initPreamble(): Promise<void> {
     const bootstrapData = getBootstrapData();
 
     const numberFormatLocale = resolveNumberFormatLocale(
-      getUrlParam(URL_PARAMS.locale),
+      getUrlParam(URL_PARAMS.language),
       bootstrapData.common.d3_format,
     );
 

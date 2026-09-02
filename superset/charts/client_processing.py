@@ -42,7 +42,9 @@ from superset.utils.core import (
     get_metric_names,
 )
 from superset.utils.export_formatting import (
-    apply_locale_number_formatting,
+    coerce_csv_numeric_columns,
+    csv_export_kwargs,
+    csv_parse_kwargs,
     get_export_locale_from_form_data,
 )
 
@@ -337,11 +339,13 @@ def apply_client_processing(  # noqa: C901
         data = query["data"]
 
         if isinstance(data, str):
-            data = data.strip()
+            data = csv.strip_excel_separator_declaration(data.strip())
 
         if not data:
             # do not try to process empty data
             continue
+
+        locale_code = get_export_locale_from_form_data(form_data)
 
         if query["result_format"] == ChartDataResultFormat.JSON:
             df = pd.DataFrame.from_dict(data)
@@ -354,6 +358,7 @@ def apply_client_processing(  # noqa: C901
                 StringIO(data),
                 keep_default_na=na_values is None,
                 na_values=na_values,
+                **csv_parse_kwargs(locale_code),
             )
         elif query["result_format"] == ChartDataResultFormat.XLSX:
             df = pd.read_excel(BytesIO(data))
@@ -395,16 +400,14 @@ def apply_client_processing(  # noqa: C901
         if query["result_format"] == ChartDataResultFormat.JSON:
             query["data"] = processed_df.to_dict()
         elif query["result_format"] == ChartDataResultFormat.CSV:
-            locale_code = get_export_locale_from_form_data(form_data)
-            export_df = apply_locale_number_formatting(
+            export_df = coerce_csv_numeric_columns(
                 processed_df,
                 query["coltypes"],
-                locale_code,
             )
             query["data"] = csv.df_to_escaped_csv(
                 export_df,
                 index=show_default_index,
-                **current_app.config["CSV_EXPORT"],
+                **csv_export_kwargs(locale_code),
             )
         elif query["result_format"] == ChartDataResultFormat.XLSX:
             query["data"] = excel.df_to_excel(
