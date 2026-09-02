@@ -24,13 +24,14 @@ import setupClient from './setup/setupClient';
 import setupColors from './setup/setupColors';
 import setupFormatters from './setup/setupFormatters';
 import setupDashboardComponents from './setup/setupDashboardComponents';
-import { URL_PARAMS } from './constants';
 import { User } from './types/bootstrapTypes';
 import getBootstrapData, { applicationRoot } from './utils/getBootstrapData';
 import { makeUrl } from './utils/pathUtils';
 import { resolveAppLocale } from './utils/resolveAppLocale';
-import { resolveNumberFormatLocale } from './utils/resolveNumberFormatLocale';
-import { getUrlParam } from './utils/urlUtils';
+import {
+  getNumberFormatLocaleParam,
+  resolveNumberFormatLocale,
+} from './utils/resolveNumberFormatLocale';
 import './hooks/useLocale';
 
 // Import dayjs plugin types for global TypeScript support
@@ -59,7 +60,7 @@ export default function initPreamble(): Promise<void> {
     const bootstrapData = getBootstrapData();
 
     const numberFormatLocale = resolveNumberFormatLocale(
-      getUrlParam(URL_PARAMS.locale),
+      getNumberFormatLocaleParam(),
       bootstrapData.common.d3_format,
     );
 

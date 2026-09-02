@@ -30,21 +30,27 @@ NumberFormatLocaleCode = Literal[
 ]
 
 
+DEFAULT_CSV_SEP = ","
+
+
 class NumberFormatLocale(TypedDict):
     code: NumberFormatLocaleCode
     decimal: str
     thousands: str
-    csv_sep: str | None
+    csv_sep: str
 
 
 def _locale(
     code: NumberFormatLocaleCode, decimal: str, thousands: str
 ) -> NumberFormatLocale:
+    # A comma decimal mark collides with the default CSV field delimiter, so those
+    # locales are exported as semicolon separated values, which is what spreadsheet
+    # software expects when the regional decimal mark is a comma.
     return {
         "code": code,
         "decimal": decimal,
         "thousands": thousands,
-        "csv_sep": None,
+        "csv_sep": ";" if decimal == "," else DEFAULT_CSV_SEP,
     }
 
 

@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import type { QueryFormData } from '@superset-ui/core';
 import { exportChart } from '.';
 
 // Mock pathUtils to control app root prefix
@@ -24,7 +25,7 @@ jest.mock('src/utils/pathUtils', () => ({
 }));
 
 jest.mock('src/utils/getExportLocale', () => ({
-  getExportLocale: jest.fn(() => 'en_US'),
+  getExportLocale: jest.fn(),
 }));
 
 // Mock SupersetClient
@@ -36,7 +37,9 @@ jest.mock('@superset-ui/core', () => ({
     post: jest.fn().mockResolvedValue({ json: {} }),
   },
   getChartBuildQueryRegistry: jest.fn().mockReturnValue({
-    get: jest.fn().mockReturnValue(() => () => ({})),
+    get: jest
+      .fn()
+      .mockReturnValue((formData: QueryFormData) => ({ form_data: formData })),
   }),
   getChartMetadataRegistry: jest.fn().mockReturnValue({
     get: jest.fn().mockReturnValue({ parseMethod: 'json' }),
@@ -44,6 +47,7 @@ jest.mock('@superset-ui/core', () => ({
 }));
 
 const { ensureAppRoot } = jest.requireMock('src/utils/pathUtils');
+const { getExportLocale } = jest.requireMock('src/utils/getExportLocale');
 const { getChartMetadataRegistry } = jest.requireMock('@superset-ui/core');
 
 // Minimal formData that won't trigger legacy API (useLegacyApi = false)
@@ -54,6 +58,7 @@ const baseFormData = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  getExportLocale.mockReturnValue(undefined);
   // Default: no prefix
   ensureAppRoot.mockImplementation((path: string) => path);
   // Default: v1 API (not legacy)

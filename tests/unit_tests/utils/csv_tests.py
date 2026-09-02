@@ -27,6 +27,7 @@ from superset.utils.csv import (
     df_to_escaped_csv,
     get_chart_dataframe,
 )
+from superset.utils.export_formatting import get_csv_export_kwargs
 
 
 def test_escape_value():
@@ -35,6 +36,12 @@ def test_escape_value():
 
     result = csv.escape_value("-10")
     assert result == "-10"
+
+    result = csv.escape_value("-1,234.50")
+    assert result == "-1,234.50"
+
+    result = csv.escape_value("-1.234,50")
+    assert result == "-1.234,50"
 
     result = csv.escape_value("@value")
     assert result == "'@value"
@@ -180,6 +187,29 @@ def test_df_to_escaped_csv():
 
     df = pa.array([1, None]).to_pandas(integer_object_nulls=True).to_frame()
     assert df_to_escaped_csv(df, encoding="utf8", index=False) == '0\n1\n""\n'
+
+
+def test_df_to_escaped_csv_with_continental_locale():
+    """Comma decimals need the semicolon delimiter to stay in their own field."""
+    df = pd.DataFrame(
+        data={
+            "Publisher": ["Cremin, Terry and Satterfield"],
+            "Total Sales Value": ["247.448,68"],
+            "Total Override": ["-169,00"],
+        }
+    )
+
+    csv_str = df_to_escaped_csv(
+        df,
+        encoding="utf8",
+        index=False,
+        **get_csv_export_kwargs("es_ES"),
+    )
+
+    assert csv_str == (
+        "Publisher;Total Sales Value;Total Override\n"
+        "Cremin, Terry and Satterfield;247.448,68;-169,00\n"
+    )
 
 
 def test_get_chart_dataframe_returns_none_when_no_content(

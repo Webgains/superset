@@ -43,6 +43,8 @@ from superset.utils.core import (
 )
 from superset.utils.export_formatting import (
     apply_locale_number_formatting,
+    get_csv_export_kwargs,
+    get_csv_read_kwargs,
     get_export_locale_from_form_data,
 )
 
@@ -327,6 +329,7 @@ def apply_client_processing(  # noqa: C901
         return result
 
     post_processor = post_processors[viz_type]
+    locale_code = get_export_locale_from_form_data(form_data)
 
     for query in result["queries"]:
         if query["result_format"] not in (rf.value for rf in ChartDataResultFormat):
@@ -354,6 +357,7 @@ def apply_client_processing(  # noqa: C901
                 StringIO(data),
                 keep_default_na=na_values is None,
                 na_values=na_values,
+                **get_csv_read_kwargs(locale_code),
             )
         elif query["result_format"] == ChartDataResultFormat.XLSX:
             df = pd.read_excel(BytesIO(data))
@@ -395,7 +399,6 @@ def apply_client_processing(  # noqa: C901
         if query["result_format"] == ChartDataResultFormat.JSON:
             query["data"] = processed_df.to_dict()
         elif query["result_format"] == ChartDataResultFormat.CSV:
-            locale_code = get_export_locale_from_form_data(form_data)
             export_df = apply_locale_number_formatting(
                 processed_df,
                 query["coltypes"],
@@ -404,7 +407,7 @@ def apply_client_processing(  # noqa: C901
             query["data"] = csv.df_to_escaped_csv(
                 export_df,
                 index=show_default_index,
-                **current_app.config["CSV_EXPORT"],
+                **get_csv_export_kwargs(locale_code, current_app.config["CSV_EXPORT"]),
             )
         elif query["result_format"] == ChartDataResultFormat.XLSX:
             query["data"] = excel.df_to_excel(

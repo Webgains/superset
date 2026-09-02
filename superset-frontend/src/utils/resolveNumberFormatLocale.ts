@@ -18,6 +18,8 @@
  */
 import { FormatLocaleDefinition } from 'd3-format';
 import { DEFAULT_D3_FORMAT } from '@superset-ui/core';
+import { URL_PARAMS } from 'src/constants';
+import { getUrlParam } from 'src/utils/urlUtils';
 
 export type NumberFormatLocaleCode =
   | 'en_US'
@@ -45,6 +47,21 @@ export const NUMBER_FORMAT_LOCALES: Record<
   fr_FR: { ...DEFAULT_D3_FORMAT, ...CONTINENTAL_SEPARATORS },
   pl_PL: { ...DEFAULT_D3_FORMAT, ...CONTINENTAL_SEPARATORS },
 };
+
+/**
+ * Read the number-format locale from the page URL. Superset URLs use `locale`,
+ * the embedded SDK uses `lang`. Only full codes such as `fr_FR` are supported,
+ * since a bare language code has no unambiguous separators.
+ */
+export function getNumberFormatLocaleParam(): string | undefined {
+  const localeParams = [
+    getUrlParam(URL_PARAMS.locale),
+    getUrlParam(URL_PARAMS.language),
+  ];
+  return localeParams.find((locale): locale is NumberFormatLocaleCode =>
+    Boolean(locale && locale in NUMBER_FORMAT_LOCALES),
+  );
+}
 
 /**
  * Resolve a URL `locale` value to a d3-format locale definition.

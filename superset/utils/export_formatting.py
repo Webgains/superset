@@ -17,18 +17,25 @@
 from __future__ import annotations
 
 import numbers
+from collections.abc import Iterable
 from decimal import Decimal
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 import pandas as pd
+from flask import has_request_context, request
 
 from superset.utils.core import GenericDataType
 from superset.utils.number_format_locale import (
+    DEFAULT_CSV_SEP,
     format_number_for_locale,
     NUMBER_FORMAT_LOCALES,
     resolve_number_format_locale,
 )
+
+# ``locale`` is set by Superset URLs, ``lang`` by the embedded SDK. Only full codes
+# such as ``fr_FR`` are honoured; bare language codes have no unambiguous separators.
+LOCALE_PARAMS = ("locale", "lang")
 
 
 def _normalize_export_locale(locale: object) -> str | None:
@@ -37,37 +44,88 @@ def _normalize_export_locale(locale: object) -> str | None:
     return None
 
 
+def _first_supported_locale(values: Iterable[object]) -> str | None:
+    for value in values:
+        if locale := _normalize_export_locale(value):
+            return locale
+    return None
+
+
 def get_export_locale_from_form_data(form_data: dict[str, Any] | None) -> str | None:
     """
     Resolve export locale for CSV/XLSX downloads.
 
     Checks, in order:
-    1. ``locale`` on chart ``form_data`` (set by the export request payload)
-    2. ``locale`` query param on the export HTTP request
-    3. ``locale`` query param on the Referer URL (dashboard/explore page)
+    1. ``locale``/``lang`` on chart ``form_data`` (set by the export request payload)
+    2. ``locale``/``lang`` query param on the export HTTP request
+    3. ``locale``/``lang`` query param on the Referer URL (dashboard/explore page)
     """
     if isinstance(form_data, dict):
-        if locale := _normalize_export_locale(form_data.get("locale")):
+        if locale := _first_supported_locale(
+            form_data.get(param) for param in LOCALE_PARAMS
+        ):
             return locale
 
     try:
-        from flask import has_request_context, request
-
         if not has_request_context():
             return None
 
-        if locale := _normalize_export_locale(request.args.get("locale")):
+        if locale := _first_supported_locale(
+            request.args.get(param) for param in LOCALE_PARAMS
+        ):
             return locale
 
         referer = request.headers.get("Referer")
         if referer:
-            referer_locale = parse_qs(urlparse(referer).query).get("locale", [None])[0]
-            if locale := _normalize_export_locale(referer_locale):
-                return locale
+            referer_params = parse_qs(urlparse(referer).query)
+            return _first_supported_locale(
+                referer_params.get(param, [None])[0] for param in LOCALE_PARAMS
+            )
     except RuntimeError:
         return None
 
     return None
+
+
+def get_csv_delimiter(locale_code: str | None) -> str:
+    """Return the CSV field delimiter to use for an export locale."""
+    if not locale_code:
+        return DEFAULT_CSV_SEP
+    return resolve_number_format_locale(locale_code)["csv_sep"]
+
+
+def get_csv_export_kwargs(
+    locale_code: str | None,
+    config_kwargs: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """
+    Build ``DataFrame.to_csv`` kwargs for an export locale.
+
+    The requested locale takes precedence over a ``sep`` configured in
+    ``CSV_EXPORT``, since locale-formatted numbers are unparseable otherwise.
+    """
+    kwargs = dict(config_kwargs or {})
+    if locale_code:
+        kwargs["sep"] = get_csv_delimiter(locale_code)
+    return kwargs
+
+
+def get_csv_read_kwargs(locale_code: str | None) -> dict[str, Any]:
+    """
+    Build ``read_csv`` kwargs mirroring :func:`get_csv_export_kwargs`.
+
+    Client side post processing re-reads the CSV that Superset just produced, so it
+    has to use the same delimiter and separators to recover the numeric columns.
+    """
+    if not locale_code:
+        return {}
+
+    locale = resolve_number_format_locale(locale_code)
+    kwargs: dict[str, Any] = {"sep": locale["csv_sep"]}
+    if locale["decimal"] != ".":
+        kwargs["decimal"] = locale["decimal"]
+        kwargs["thousands"] = locale["thousands"]
+    return kwargs
 
 
 def _to_export_float(value: object) -> float:
