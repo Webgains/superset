@@ -2157,7 +2157,7 @@ def test_apply_client_processing_csv_roundtrip_locale_delimiter():
         "queries": [
             {
                 "result_format": ChartDataResultFormat.CSV,
-                "data": "amount;name\n1234.50;a\n",
+                "data": "amount;name\n1234,50;a\n",
             }
         ]
     }
@@ -2169,7 +2169,7 @@ def test_apply_client_processing_csv_roundtrip_locale_delimiter():
 
     assert body.startswith("sep=;\n")
     assert "amount;name" in csv_data
-    assert "1234.50" in csv_data
+    assert "1234,50" in csv_data
     assert processed["queries"][0]["rowcount"] == 1
 
 
