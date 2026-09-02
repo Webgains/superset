@@ -136,8 +136,7 @@ def test_get_csv_export_kwargs_keeps_config_and_overrides_sep() -> None:
 
 def test_get_csv_read_kwargs_mirrors_the_export() -> None:
     assert get_csv_read_kwargs(None) == {}
-    # en_US matches the pandas defaults, so nothing needs overriding
-    assert get_csv_read_kwargs("en_US") == {"sep": ","}
+    assert get_csv_read_kwargs("en_US") == {"sep": ",", "thousands": ","}
     assert get_csv_read_kwargs("es_ES") == {
         "sep": ";",
         "decimal": ",",

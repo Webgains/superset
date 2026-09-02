@@ -121,10 +121,12 @@ def get_csv_read_kwargs(locale_code: str | None) -> dict[str, Any]:
         return {}
 
     locale = resolve_number_format_locale(locale_code)
-    kwargs: dict[str, Any] = {"sep": locale["csv_sep"]}
+    kwargs: dict[str, Any] = {
+        "sep": locale["csv_sep"],
+        "thousands": locale["thousands"],
+    }
     if locale["decimal"] != ".":
         kwargs["decimal"] = locale["decimal"]
-        kwargs["thousands"] = locale["thousands"]
     return kwargs
 
 
