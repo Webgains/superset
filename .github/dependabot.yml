@@ -101,6 +101,14 @@ updates:
       - dependabot
     versioning-strategy: increase
 
+  - package-ecosystem: "docker"
+    directory: "/superset-websocket/"
+    schedule:
+      interval: "daily"
+    labels:
+      - docker
+      - dependabot
+
   - package-ecosystem: "npm"
     directory: "/superset-websocket/utils/client-ws-app/"
     schedule:
